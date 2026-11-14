@@ -4,21 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>بَيْت | בַּיִת — من اللقاء العابر إلى الشراكة المستدامة</title>
-  <link rel="icon" type="image/jpeg" href="/logo.jpg" />
+  <link rel="icon" type="image/jpeg" href="./logo.jpg" />
   <!-- Google Fonts: Readex Pro & Amiri for Arabic, Heebo & Rubik for Hebrew -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <!-- Decorative Ambient Background Shapes -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="ambient-orb orb-blue"></div>
+    <div class="ambient-orb orb-green"></div>
+    <div class="ambient-orb orb-gold"></div>
+  </div>
+
   <!-- Top Header -->
   <header class="site-header">
     <div class="container header-inner">
       <!-- Brand Logo -->
       <a href="#landing" class="brand-logo" onclick="navigateTo('landing'); return false;">
         <div class="logo-emblem">
-          <img src="/logo.jpg" alt="شعار مشروع بَيْت | בַּיִת" class="site-logo-img" />
+          <img src="./logo.jpg" alt="شعار مشروع بَيْت | בַּיִת" class="site-logo-img" />
         </div>
         <div class="brand-text">
           <div class="brand-title">
@@ -33,14 +40,10 @@
       <!-- Navigation Links -->
       <nav class="main-nav" aria-label="Main Navigation">
         <button class="nav-link active" data-nav="landing" onclick="navigateTo('landing', 'vision-section')" data-i18n="nav_vision">رؤيتنا</button>
-        <span class="nav-dot">•</span>
         <button class="nav-link" data-nav="goals" onclick="navigateTo('landing', 'goals-section')" data-i18n="nav_goals">أهدافنا</button>
-        <span class="nav-dot">•</span>
         <button class="nav-link" data-nav="how" onclick="navigateTo('landing', 'how-section')" data-i18n="nav_how">كيف نعمل</button>
-        <span class="nav-dot">•</span>
-        <button class="nav-link" data-nav="students" onclick="navigateTo('students')" data-i18n="nav_students">مساحة الطلاب</button>
-        <span class="nav-dot">•</span>
-        <button class="nav-link nav-cta-pill" data-nav="portal" onclick="navigateTo('portal')" data-i18n="nav_register_school">تسجيل مدرسة / المطابقة</button>
+        <button class="nav-link" data-nav="students" onclick="navigateTo('students')" data-i18n="nav_students">🧑‍🎓 مساحة الطلاب</button>
+        <button class="nav-link nav-cta-pill" data-nav="portal" onclick="navigateTo('portal')" data-i18n="nav_register_school">🏫 تسجيل مدرسة / المطابقة</button>
       </nav>
 
       <!-- Language Switcher -->
@@ -60,21 +63,26 @@
          SECTION 1: LANDING PAGE (الصفحة الرئيسية)
          ========================================== -->
     <section id="view-landing" class="view-section active">
-      <!-- Hero Section -->
+      <!-- Creative Architectural Hero Section -->
       <div class="hero-section">
         <div class="container hero-grid">
           <div class="hero-content">
             <div class="hero-badge">
-              <span class="badge-dot"></span>
+              <span class="badge-window-icon">🪟</span>
               <span data-i18n="hero_badge">جسر رقمي وتربوي ذكي بين المدارس العربية واليهودية</span>
             </div>
+
             <h1 class="hero-title">
-              <span class="hero-brand-highlight">بَيْت | בַּיִת:</span>
-              <span data-i18n="hero_headline">لكل إنسان بيت، ولكل بيت حكاية، ومن حكاياتنا نبني بيتًا مشتركًا</span>
+              <span class="hero-brand-highlight">بَيْت | בַּיִת</span>
+              <span class="hero-quote-text" data-i18n="hero_headline">
+                "لكل إنسان بيت، ولكل بيت حكاية، ومن حكاياتنا نبني بيتًا مشتركًا"
+              </span>
             </h1>
+
             <p class="hero-lead" data-i18n="hero_sublead">
-              نعيد صياغة العلاقة بين الطلاب والمدارس في المجتمعين العربي واليهودي عبر الانتقال الجذري من مفهوم "الضيف والمضيف" إلى مفهوم "أصحاب البيت الواحد" في حيز آمن ومتساوٍ يجمع بين الفضول المعرفي، الحوار الصادق، والبحث العلمي المشترك.
+              نعيد صياغة العلاقة بين الطلاب والمدارس في المجتمعين العربي واليهودي عبر الانتقال الجذري من مفهوم "الضيف والمضيف" إلى مفهوم "أصحاب البيت الواحد" — في حيز آمن ومتساوٍ يجمع بين الفضول المعرفي، الحوار الصادق، والبحث العلمي المشترك.
             </p>
+
             <div class="hero-buttons">
               <button class="btn btn-green btn-lg" onclick="navigateTo('portal')">
                 <span>🏫</span>
@@ -85,34 +93,39 @@
                 <span data-i18n="btn_enter_student_space">دخول مساحة الطلاب</span>
               </button>
             </div>
+
             <div class="hero-quick-highlights">
               <div class="mini-pill">
-                <span>🤖</span>
+                <span class="pill-icon">🤖</span>
                 <span data-i18n="pill_ai_matching">مطابقة ذكية وفلترة يدوية للمدارس</span>
               </div>
               <div class="mini-pill">
-                <span>💬</span>
+                <span class="pill-icon">⚡</span>
                 <span data-i18n="pill_instant_trans">ترجمة فورية ذكية (عربي ↔ עברית)</span>
               </div>
               <div class="mini-pill">
-                <span>🔬</span>
+                <span class="pill-icon">🔬</span>
                 <span data-i18n="pill_joint_research">مختبرات بحث علمي وتراثي مشترك</span>
               </div>
             </div>
           </div>
 
-          <!-- Visual Architectural Illustration Card -->
+          <!-- Visual Architectural Showcase Card with Official Logo -->
           <div class="hero-visual">
             <div class="house-showcase-card">
+              <div class="window-glow-bar"></div>
               <div class="hero-logo-banner">
-                <img src="/logo.jpg" alt="شعار مشروع بَيْت | בַּיִת" class="hero-main-logo" />
+                <div class="logo-halo">
+                  <img src="./logo.jpg" alt="شعار مشروع بَيْت | בַּיִת" class="hero-main-logo" />
+                </div>
+                <div class="hero-logo-caption">
+                  <span class="status-indicator online"></span>
+                  <span data-i18n="live_model_badge">نموذج حي لأصحاب البيت الواحد</span>
+                </div>
               </div>
-              <div class="house-card-header">
-                <span class="status-indicator online"></span>
-                <span data-i18n="live_model_badge">نموذج حي للشراكة المستدامة</span>
-              </div>
+
               <div class="house-pair-preview">
-                <div class="school-pill-box blue-side">
+                <div class="school-pill-box green-side">
                   <span class="pill-tag" data-i18n="arab_school_tag">مدرسة عربية</span>
                   <h4>مدرسة ابن خلدون</h4>
                   <p>أم الفحم • אום אל-פחם</p>
@@ -121,7 +134,7 @@
                   <div class="bridge-icon">🤝</div>
                   <span class="bridge-dist">14.2 كم</span>
                 </div>
-                <div class="school-pill-box green-side">
+                <div class="school-pill-box blue-side">
                   <span class="pill-tag" data-i18n="jewish_school_tag">مدرسة يهودية</span>
                   <h4>מקיף כרמים (كرميم)</h4>
                   <p>العفولة • עפולה</p>
@@ -131,20 +144,30 @@
               <!-- Live Bilingual Chat Snippet Preview -->
               <div class="hero-chat-preview">
                 <div class="chat-bubble-mini ar-bubble">
-                  <div class="bubble-meta">أمير (أم الفحم) • عربي</div>
+                  <div class="bubble-meta">
+                    <span>🧑‍🎓 أمير (أم الفحم)</span>
+                    <span class="lang-tag-mini">كتب بالعربية</span>
+                  </div>
                   <p>مرحباً! فحصنا اليوم نقاء مياه عين الشعرة ونتطلع لمقارنة النتائج معكم.</p>
-                  <div class="bubble-trans" lang="he">⚡ תרגום מיידי: שלום! בדקנו היום את צלילות המים בעין א-שערה ומחכים להשוות תוצאות איתכם.</div>
+                  <div class="bubble-trans" lang="he">
+                    <span>⚡ תרגום מיידי:</span> שלום! בדקנו היום את צלילות המים בעין א-שערה ומחכים להשוות תוצאות איתכם.
+                  </div>
                 </div>
                 <div class="chat-bubble-mini he-bubble" lang="he">
-                  <div class="bubble-meta">מאיה (עפולה) • עברית</div>
+                  <div class="bubble-meta">
+                    <span>👩‍🎓 מאיה (עפולה)</span>
+                    <span class="lang-tag-mini">כתבה בעברית</span>
+                  </div>
                   <p>היי אמיר! דגמנו את מעיין חרוד והעלנו את הנתונים למעבדת המחקר המשותפת.</p>
-                  <div class="bubble-trans" dir="rtl">⚡ ترجمة فورية: أهلاً أمير! أخذنا عينات من عين جالود ورفعنا المعطيات لمختبر البحث المشترك.</div>
+                  <div class="bubble-trans" dir="rtl">
+                    <span>⚡ ترجمة فورية:</span> أهلاً أمير! أخذنا عينات من عين جالود ورفعنا المعطيات لمختبر البحث المشترك.
+                  </div>
                 </div>
               </div>
 
               <div class="house-card-footer">
                 <button class="btn-link-arrow" onclick="quickStudentDemo('BAYT-2026')">
-                  <span data-i18n="try_live_classroom">جرّب دخول هذه الغرفة المشتركة الآن (رمز: BAYT-2026) ←</span>
+                  <span data-i18n="try_live_classroom">✨ جرّب دخول هذه الغرفة المشتركة الآن (رمز: BAYT-2026) ←</span>
                 </button>
               </div>
             </div>
@@ -176,10 +199,11 @@
               </ul>
             </div>
 
-            <!-- Transformation Arrow -->
+            <!-- Transformation Centerpiece -->
             <div class="vision-transform-center">
               <div class="transform-circle">
-                <img src="/logo.jpg" alt="شعار بَيْت | בַּיִת" class="vision-logo-badge" />
+                <img src="./logo.jpg" alt="شعار بَيْت | בַּיִת" class="vision-logo-badge" />
+                <span class="transform-caption">نقطة التحول</span>
               </div>
             </div>
 
@@ -220,7 +244,7 @@
             </div>
 
             <div class="goal-card">
-              <div class="goal-icon blue">🔬</div>
+              <div class="goal-icon gold">🔬</div>
               <h3 data-i18n="goal_3_title">فرق بحثية طلابية لقضايا واقعية</h3>
               <p data-i18n="goal_3_desc">إشراك طلاب المدرستين في فرق بحثية مشتركة لمعالجة قضايا واقعية تهم مجتمعاتهم (كالبيئة، التراث، العلوم، والمجتمع)، مما ينمي التفكير النقدي والعمل الجماعي.</p>
             </div>
@@ -255,7 +279,7 @@
               <div class="step-number">1</div>
               <h3 data-i18n="step_1_title">التسجيل وتحديد الاحتياجات</h3>
               <p data-i18n="step_1_desc">تسجل المدرسة وتعبئ استمارة الاحتياجات، المرحلة العمرية، الاهتمامات المشتركة، ونوع النشاط المفضل.</p>
-              <button class="btn-step-link" onclick="navigateTo('portal')" data-i18n="step_1_action">افتح استمارة التسجيل ←</button>
+              <button class="btn-step-link" onclick="navigateTo('portal'); switchPortalMode('register');" data-i18n="step_1_action">افتح استمارة التسجيل ←</button>
             </div>
 
             <div class="step-card featured-step">
@@ -483,10 +507,10 @@
 
         <!-- SUBVIEW 2B: SCHOOL DASHBOARD & AI MATCHING -->
         <div id="portal-dashboard-pane" class="portal-pane">
-          <!-- Active School Switcher Bar (for testing & switching between registered schools) -->
+          <!-- Active School Switcher Bar -->
           <div class="active-school-bar">
             <div class="active-school-selector">
-              <label for="dashboardSchoolSelect" data-i18n="lbl_active_school_view">المدرسة الحالية في لوحة التحكم:</label>
+              <label for="dashboardSchoolSelect" data-i18n="lbl_active_school_view">🏫 المدرسة الحالية في لوحة التحكم:</label>
               <select id="dashboardSchoolSelect" onchange="loadSchoolDashboard(this.value)"></select>
             </div>
             <div id="activeSchoolStatusBadge" class="school-match-pill"></div>
@@ -495,7 +519,7 @@
           <!-- Current School Summary Card -->
           <div id="currentSchoolProfileCard" class="current-school-card"></div>
 
-          <!-- Filter & Search Controls (AI Matching + Manual Selection by School Characteristics + Unmatched Marking) -->
+          <!-- Filter & Search Controls -->
           <div class="matching-controls-card">
             <div class="matching-controls-header">
               <div>
@@ -507,7 +531,6 @@
               <div class="unmatched-toggle-box">
                 <label class="switch-label">
                   <input type="checkbox" id="filterUnmatchedOnly" onchange="renderMatchesList()" />
-                  <span class="switch-Visual"></span>
                   <span data-i18n="filter_only_unmatched">إظهار المدارس التي لم تقترن بعد فقط (טרם שודכו בלבד)</span>
                 </label>
               </div>
@@ -569,11 +592,14 @@
          SECTION 3: STUDENTS & SHARED LEARNING SPACE (مساحة الطلاب)
          ========================================================== -->
     <section id="view-students" class="view-section">
-      <!-- Student Safe Login Gate (shown when not yet inside a classroom, or switchable anytime) -->
+      <!-- Student Safe Login Gate -->
       <div id="studentLoginGate" class="student-login-wrapper">
         <div class="container">
           <div class="student-login-card">
-            <div class="login-card-badge">🔒 دخول آمن بدون بيانات شخصية حساسة | כניסה בטוחה ללא פרטים רגישים</div>
+            <img src="./logo.jpg" alt="شعار بَيْت | בַּיִת" style="width:96px; height:96px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
+            <div>
+              <span class="login-card-badge">🔒 دخول آمن بدون بيانات شخصية حساسة | כניסה בטוחה ללא פרטים רגישים</span>
+            </div>
             <h1 data-i18n="student_login_title">مساحة الطلاب والتعلم المشترك | מרחב התלמידים והלמידה המשותפת</h1>
             <p data-i18n="student_login_desc">
               أدخل الرمز المخصص الذي وفرته لك مدرستك للدخول إلى لوحة الصف المشترك، منتدى "نتحدث معاً" المزود بالترجمة الفورية، ومختبر البحث العلمي.
@@ -587,7 +613,7 @@
                 </div>
                 <div class="form-group">
                   <label data-i18n="lbl_student_nickname">اسمك الأول (أو لقبك في الفريق) *</label>
-                  <input type="text" id="studentNameInput" value="سارة | שרה" required placeholder="مثال: أمير / מאיה" />
+                  <input type="text" id="studentNameInput" value="أمير | אמיר" required placeholder="مثال: أمير / מאיה" />
                 </div>
                 <div class="form-group">
                   <label data-i18n="lbl_student_side">اختر مدرستك في الشراكة</label>
@@ -599,12 +625,12 @@
               </div>
 
               <div class="quick-demo-codes">
-                <span data-i18n="quick_codes_label">رموز غرف نشطة للتجربة السريعة:</span>
+                <span data-i18n="quick_codes_label">🔑 رموز غرف نشطة للتجربة السريعة:</span>
                 <button type="button" class="code-chip" onclick="fillStudentCode('BAYT-2026', 'أمير جبارين', 'a')">
-                  🔑 BAYT-2026 (ابن خلدون أم الفحم 🤝 كرميم العفولة)
+                  BAYT-2026 (ابن خلدون أم الفحم 🤝 كرميم العفولة)
                 </button>
                 <button type="button" class="code-chip" onclick="fillStudentCode('GALIL-101', 'مايا ليفي | מאיה', 'b')">
-                  🔑 GALIL-101 (البشارة الناصرة 🤝 أورت ألون نوف هجليل)
+                  GALIL-101 (البشارة الناصرة 🤝 أورت ألون نوف هجليل)
                 </button>
               </div>
 
@@ -681,7 +707,7 @@
                       <span>🎸</span> <span data-i18n="cat_hobbies">هواياتنا | התחביבים שלנו</span>
                     </button>
                     <button class="cat-btn" data-cat="favorite_food" onclick="filterForumCategory('favorite_food')">
-                      <span>オリーブ</span> <span data-i18n="cat_food">أكلتنا المفضلة | המאכל האהוב</span>
+                      <span>🍲</span> <span data-i18n="cat_food">أكلتنا المفضلة | המאכל האהוב</span>
                     </button>
                     <button class="cat-btn" data-cat="holidays" onclick="filterForumCategory('holidays')">
                       <span>🌱</span> <span data-i18n="cat_holidays">أعيادنا ومناسباتنا | חגים ומועדים</span>
@@ -738,7 +764,7 @@
           <!-- TAB 2: COLLABORATIVE RESEARCH HUB (مختبر البحث والعمل المشترك) -->
           <div id="student-pane-lab" class="student-pane" style="display: none;">
             <div class="lab-grid-top">
-              <!-- Part A: Data Sharing (مشاركة المعطيات الميدانية) -->
+              <!-- Part A: Data Sharing -->
               <div class="lab-panel">
                 <div class="lab-panel-header">
                   <div>
@@ -750,7 +776,6 @@
                   </button>
                 </div>
 
-                <!-- Upload Data Collapsible Form -->
                 <form id="uploadResearchForm" class="lab-mini-form" style="display: none;" onsubmit="submitResearchData(event)">
                   <div class="form-grid-2">
                     <select id="resDataType" required>
@@ -769,7 +794,7 @@
                 <div id="researchDataList" class="research-data-list"></div>
               </div>
 
-              <!-- Part C: Smart AI Research Mentor (المرشد الذكي) -->
+              <!-- Part C: Smart AI Research Mentor -->
               <div class="lab-panel mentor-panel">
                 <div class="lab-panel-header">
                   <div>
@@ -793,7 +818,7 @@
               </div>
             </div>
 
-            <!-- Part B: Collaborative Canvas / Padlet (لوحة العمل التعاوني) -->
+            <!-- Part B: Collaborative Canvas / Padlet -->
             <div class="canvas-board-wrapper">
               <div class="canvas-header">
                 <div>
@@ -844,7 +869,7 @@
             </div>
           </div>
 
-          <!-- TAB 3: SHARED WALL OF ACHIEVEMENTS (جدار الإنجازات) -->
+          <!-- TAB 3: SHARED WALL OF ACHIEVEMENTS -->
           <div id="student-pane-wall" class="student-pane" style="display: none;">
             <div class="wall-header-card">
               <div>
@@ -865,7 +890,7 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <div class="footer-logo-wrap">
-          <img src="/logo.jpg" alt="شعار بَيْت | בַּיִת" class="footer-logo-img" />
+          <img src="./logo.jpg" alt="شعار بَيْت | בַּיִת" class="footer-logo-img" />
           <div class="brand-title">
             <span class="brand-ar">بَيْت</span>
             <span class="brand-divider">|</span>
@@ -899,6 +924,6 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="/app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
