@@ -639,10 +639,153 @@ function getLocalStore() {
   return JSON.parse(JSON.stringify(INITIAL_STORE));
 }
 
+// =========================================================================
+// FIREBASE REALTIME DATABASE & ANALYTICS INTEGRATION
+// =========================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAbgJmGLBuq8C0_l71nxffMfu3utlLPo8U",
+  authDomain: "home-35bf5.firebaseapp.com",
+  databaseURL: "https://home-35bf5-default-rtdb.firebaseio.com",
+  projectId: "home-35bf5",
+  storageBucket: "home-35bf5.firebasestorage.app",
+  messagingSenderId: "32441351423",
+  appId: "1:32441351423:web:871e1ec61ca016d8c2a0ca",
+  measurementId: "G-Z524PJ55Q2"
+};
+
+let firebaseDb = null;
+let firebaseSyncReady = false;
+let suppressNextFirebaseWrite = false;
+
+function setFirebaseBadge(text, color = '#86efac') {
+  const el = document.getElementById('firebaseSyncBadge');
+  if (el) {
+    el.textContent = text;
+    el.style.color = color;
+  }
+}
+
+function initFirebaseRealtimeSync() {
+  if (typeof firebase === 'undefined') {
+    setFirebaseBadge('💾 وضع التخزين المحلي (تعذر تحميل Firebase SDK)', '#fcd34d');
+    return;
+  }
+
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    try {
+      if (typeof firebase.analytics === 'function') {
+        firebase.analytics();
+      }
+    } catch (analyticsErr) {
+      // Analytics may be blocked by ad-blockers; safe to ignore
+    }
+
+    firebaseDb = firebase.database();
+
+    // Sync main platform database (schools, classrooms, posts, news, research, achievements)
+    firebaseDb.ref('bayt_platform_db_v2').on(
+      'value',
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const remoteData = snapshot.val();
+          // Firebase RTDB converts arrays with gaps or empty arrays; normalize required arrays
+          const normalized = {
+            schools: Array.isArray(remoteData.schools) ? remoteData.schools : Object.values(remoteData.schools || {}),
+            match_requests: Array.isArray(remoteData.match_requests) ? remoteData.match_requests : Object.values(remoteData.match_requests || {}),
+            classrooms: Array.isArray(remoteData.classrooms) ? remoteData.classrooms : Object.values(remoteData.classrooms || {}),
+            posts: Array.isArray(remoteData.posts) ? remoteData.posts : Object.values(remoteData.posts || {}),
+            research_data: Array.isArray(remoteData.research_data) ? remoteData.research_data : Object.values(remoteData.research_data || {}),
+            canvas_cards: Array.isArray(remoteData.canvas_cards) ? remoteData.canvas_cards : Object.values(remoteData.canvas_cards || {}),
+            achievements: Array.isArray(remoteData.achievements) ? remoteData.achievements : Object.values(remoteData.achievements || {}),
+            news: Array.isArray(remoteData.news)
+              ? remoteData.news
+              : remoteData.news
+                ? Object.values(remoteData.news)
+                : JSON.parse(JSON.stringify(INITIAL_STORE.news))
+          };
+
+          // Ensure nested arrays like interests and replies are always arrays
+          normalized.schools = normalized.schools.map((s) => ({
+            ...s,
+            interests: Array.isArray(s.interests) ? s.interests : Object.values(s.interests || {})
+          }));
+          normalized.posts = normalized.posts.map((p) => ({
+            ...p,
+            replies: Array.isArray(p.replies) ? p.replies : Object.values(p.replies || {})
+          }));
+
+          suppressNextFirebaseWrite = true;
+          try {
+            localStorage.setItem('bayt_platform_db_v2', JSON.stringify(normalized));
+          } catch (e) {}
+          suppressNextFirebaseWrite = false;
+
+          firebaseSyncReady = true;
+          setFirebaseBadge('🟢 متصل بقاعدة بيانات Firebase Realtime Database (مزامنة فورية)');
+
+          // Refresh active views seamlessly with live cloud data
+          loadPlatformStats();
+          loadAllSchools(activeDashboardSchool ? activeDashboardSchool.id : null);
+          loadAchievements();
+          renderHeroNewsFeed(activeHeroNewsFilter);
+          if (activeClassroomData && activeClassroomData.classroom) {
+            fetchClassroomById(activeClassroomData.classroom.id);
+          }
+          if (window.isAdminLoggedIn) {
+            renderAdminDashboard();
+          }
+        } else {
+          // First-time cloud database initialization: seed Firebase with INITIAL_STORE / local cache
+          const initialSeed = getLocalStore();
+          firebaseSyncReady = true;
+          firebaseDb
+            .ref('bayt_platform_db_v2')
+            .set(JSON.parse(JSON.stringify(initialSeed)))
+            .then(() => {
+              setFirebaseBadge('🟢 متصل بقاعدة بيانات Firebase (تمت تهيئة البيانات السحابية)');
+            })
+            .catch((err) => {
+              console.warn('Firebase initial seed error:', err);
+              setFirebaseBadge('⚠️ متصل بـ Firebase (تحقق من صلاحيات الكتابة Rules)', '#fcd34d');
+            });
+        }
+      },
+      (error) => {
+        console.warn('Firebase RTDB listener error:', error);
+        setFirebaseBadge('⚠️ تعذرت القراءة من Firebase (تأكد من Rules في لوحة Firebase)', '#fca5a5');
+      }
+    );
+
+    // Sync Admin credentials across devices
+    firebaseDb.ref('bayt_admin_creds_v1').on('value', (snap) => {
+      if (snap.exists()) {
+        try {
+          localStorage.setItem('bayt_admin_creds_v1', JSON.stringify(snap.val()));
+        } catch (e) {}
+      }
+    });
+  } catch (err) {
+    console.warn('Firebase initialization failed:', err);
+    setFirebaseBadge('💾 وضع التخزين المحلي (خطأ في تهيئة Firebase)', '#fca5a5');
+  }
+}
+
 function saveLocalStore(store) {
   try {
     localStorage.setItem('bayt_platform_db_v2', JSON.stringify(store));
   } catch (e) {}
+
+  if (firebaseDb && !suppressNextFirebaseWrite) {
+    try {
+      const cleanPayload = JSON.parse(JSON.stringify(store));
+      firebaseDb.ref('bayt_platform_db_v2').set(cleanPayload).catch((err) => {
+        console.warn('Firebase write failed:', err);
+      });
+    } catch (e) {}
+  }
 }
 
 // Complete Bilingual Dictionary
@@ -1060,6 +1203,7 @@ const CATEGORY_LABELS = {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
+  initFirebaseRealtimeSync();
   loadPlatformStats();
   loadAllSchools();
   loadAchievements();
@@ -2613,6 +2757,9 @@ function saveAdminCredentials(e) {
   const code = document.getElementById('admSettingCode').value.trim();
   if (!email || !code) return;
   localStorage.setItem('bayt_admin_creds_v1', JSON.stringify({ email, code }));
+  if (firebaseDb) {
+    firebaseDb.ref('bayt_admin_creds_v1').set({ email, code }).catch(() => {});
+  }
   document.getElementById('adminWelcomeIdentity').textContent = `מחובר כמנהל ראשי: ${email}`;
   showToast('✅ האימייל והקוד האישי שלך עודכנו ונשמרו בהצלחה!');
 }

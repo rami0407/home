@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=9" />
+  <link rel="stylesheet" href="./styles.css?v=10" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -1335,6 +1335,9 @@
         <p>📧 info@bayt-shared.org</p>
         <p>📍 حيفا • الناصرة • أم الفحم • العفولة • القدس</p>
         <p class="footer-legal" data-i18n="footer_legal">جميع الحقوق محفوظة © 2026 مشروع "بَيْت | בַּיִת" • سياسة الخصوصية وأمان الطلاب</p>
+        <p id="firebaseSyncBadge" style="margin-top:8px; font-size:0.78rem; font-weight:800; color:#86efac;">
+          🔄 جاري الاتصال بقاعدة بيانات Firebase...
+        </p>
       </div>
     </div>
   </footer>
@@ -1342,6 +1345,10 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="./app.js?v=9"></script>
+  <!-- Firebase SDK (App + Realtime Database + Analytics) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
+  <script src="./app.js?v=10"></script>
 </body>
 </html>
