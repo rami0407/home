@@ -2933,6 +2933,98 @@ textarea:focus {
   padding: 20px;
 }
 
+/* School Partnership Hub (Private Students + Shared Forum + Joint Projects) */
+.school-hub-card {
+  background: #ffffff;
+  border: 2px solid var(--navy-700);
+  border-radius: var(--radius-xl);
+  padding: 26px;
+  margin: 22px 0 28px;
+  box-shadow: var(--shadow-md);
+}
+
+.school-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid var(--border-color);
+  margin-bottom: 18px;
+}
+
+.school-hub-header h3 {
+  font-size: 1.25rem;
+  color: var(--navy-900);
+  margin-bottom: 4px;
+}
+
+.school-hub-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.school-hub-tab {
+  background: var(--bg-soft);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-main);
+  font-family: var(--font-bilingual);
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 11px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.school-hub-tab:hover,
+.school-hub-tab.active {
+  background: linear-gradient(135deg, var(--navy-800), var(--green-800));
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+
+.hub-privacy-note {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-right: 4px solid var(--navy-800);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.86rem;
+  color: var(--navy-900);
+  margin-bottom: 16px;
+}
+
+.hub-student-form {
+  background: var(--bg-soft);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.hub-code-chip {
+  background: var(--gold-100);
+  border: 1px solid var(--gold-500);
+  color: #92400e;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.hub-empty-match-box {
+  background: #fffbeb;
+  border: 2px dashed var(--gold-500);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  color: #92400e;
+}
+
 /* Toast */
 .toast-notification {
   position: fixed;

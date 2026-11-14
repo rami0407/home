@@ -1750,6 +1750,7 @@ function loadSchoolDashboard(schoolId) {
 
   updateTopWelcomeBanner(activeDashboardSchool);
   renderCurrentSchoolProfile();
+  renderSchoolPartnershipHub();
   renderMatchesList();
 }
 
@@ -2014,11 +2015,16 @@ function triggerMatchAction(targetSchoolId, actionType) {
 
     showToast(
       currentLang === 'ar'
-        ? `🎉 تم إنشاء الغرفة المشتركة بنجاح! رمز دخول الطلاب: ${room.code}`
-        : `🎉 החדר המשותף נוצר בהצלחה! קוד כניסה לתלמידים: ${room.code}`
+        ? `🎉 تم إنشاء الغرفة المشتركة بنجاح! يمكنك الآن إدارة طلابك والمنتدى والمشاريع المشتركة أدناه.`
+        : `🎉 נוצר השידוך והחדר המשותף (${room.code})! כעת באפשרותך להזין נתוני תלמידים, לצפות בפורום ולנהל פרויקטים משותפים.`
     );
     loadPlatformStats();
     loadAllSchools(sA);
+    switchSchoolHubTab('forum');
+    setTimeout(() => {
+      const hubEl = document.getElementById('schoolPartnershipHub');
+      if (hubEl) hubEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
   }
 }
 
@@ -3363,5 +3369,397 @@ function renderAdminNewsList() {
     })
     .join('');
 }
+
+// =========================================================================
+// SCHOOL PARTNERSHIP HUB (PRIVATE STUDENTS + SHARED FORUM + JOINT PROJECTS)
+// =========================================================================
+let activeSchoolHubTab = 'students';
+
+function switchSchoolHubTab(tabKey) {
+  activeSchoolHubTab = tabKey;
+  ['students', 'forum', 'projects'].forEach((k) => {
+    const pane = document.getElementById(`hubPane-${k}`);
+    const btn = document.getElementById(`hubTabBtn-${k}`);
+    if (pane) pane.style.display = k === tabKey ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', k === tabKey);
+  });
+  renderSchoolPartnershipHub();
+}
+
+function getMatchedContextForSchool(schoolId) {
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === Number(schoolId));
+  if (!school) return null;
+
+  const room = store.classrooms.find(
+    (c) => Number(c.school_a_id) === school.id || Number(c.school_b_id) === school.id
+  );
+  const partnerId = room
+    ? Number(room.school_a_id) === school.id
+      ? Number(room.school_b_id)
+      : Number(room.school_a_id)
+    : school.matched_school_id;
+  const partner = partnerId ? store.schools.find((s) => s.id === Number(partnerId)) : null;
+
+  return { store, school, room, partner };
+}
+
+function renderSchoolPartnershipHub() {
+  if (!activeDashboardSchool) return;
+  const ctx = getMatchedContextForSchool(activeDashboardSchool.id);
+  if (!ctx) return;
+
+  const { store, school, room, partner } = ctx;
+  const subtitleEl = document.getElementById('schoolHubSubtitle');
+  const partnerBadgeEl = document.getElementById('schoolHubPartnerBadge');
+  const codeInfoEl = document.getElementById('hubStudentAccessCodeInfo');
+
+  const schoolSide = room && Number(room.school_b_id) === school.id ? 'b' : 'a';
+  const studentRoomCode = room ? room.code : `BAYT-${school.id}0${school.id}`;
+
+  if (subtitleEl) {
+    subtitleEl.textContent = partner
+      ? `שותפות פעילה עם: ${partner.name_he} (${partner.city_he}) | شراكة نشطة مع: ${partner.name_ar} (${partner.city_ar})`
+      : 'הזן את נתוני התלמידים של בית ספרך, ולאחר בחירת בית ספר לשידוך תיפתח כאן גישה מלאה לפורום ולפרויקטים המשותפים.';
+  }
+
+  if (partnerBadgeEl) {
+    partnerBadgeEl.innerHTML = partner && room
+      ? `<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+           <span class="badge-tag badge-matched">🤝 שותף: ${partner.name_he} | ${partner.name_ar}</span>
+           <span class="badge-tag badge-distance">🔑 קוד כיתה: ${room.code}</span>
+           <button type="button" class="btn btn-blue btn-sm" onclick="enterMatchedStudentWorkspace(${room.id}, '${schoolSide}')">
+             🚀 כניסה למרחב התלמידים המלא
+           </button>
+         </div>`
+      : `<span class="badge-tag badge-unmatched">🟡 טרם נבחר בית ספר לשידוך — בחר שותף למטה</span>`;
+  }
+
+  if (codeInfoEl) {
+    codeInfoEl.textContent = `🔑 קוד כניסה לתלמידי בית ספרך: ${studentRoomCode}`;
+  }
+
+  // 1. Render Private Student Roster (ONLY this school's students)
+  const studentsContainer = document.getElementById('hubStudentsListContainer');
+  if (studentsContainer) {
+    const myStudents = Array.isArray(school.students) ? school.students : [];
+    if (myStudents.length === 0) {
+      studentsContainer.innerHTML = `
+        <div style="text-align:center; padding:18px; color:var(--text-muted); border:1.5px dashed var(--border-color); border-radius:12px;">
+          עדיין לא הוזנו תלמידים לבית ספר זה (${school.name_he}). השתמש בטופס למעלה להוספת תלמידי בית ספרך.
+        </div>
+      `;
+    } else {
+      studentsContainer.innerHTML = `
+        <div style="font-weight:800; color:var(--navy-900); margin-bottom:8px;">
+          📋 רשימת תלמידי ${school.name_he} (${myStudents.length} תלמידים רשומים):
+        </div>
+        <div class="admin-table-wrapper">
+          <table class="admin-schools-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>שם התלמיד/ה | اسم الطالب/ة</th>
+                <th>כיתה | الصف</th>
+                <th>צוות / תחום | الفريق</th>
+                <th>פעולה</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${myStudents
+                .map(
+                  (st, idx) => `
+                <tr>
+                  <td>${idx + 1}</td>
+                  <td><strong>${st.name}</strong></td>
+                  <td>${st.grade}</td>
+                  <td>${st.team || 'כללי | عام'}</td>
+                  <td>
+                    <button type="button" class="btn-delete-danger" onclick="deleteSchoolStudent(${st.id})">
+                      🗑️ הסר
+                    </button>
+                  </td>
+                </tr>
+              `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  }
+
+  // 2. Render Shared Forum of the Two Matched Schools
+  const forumContainer = document.getElementById('hubForumContent');
+  if (forumContainer) {
+    if (!room || !partner) {
+      forumContainer.innerHTML = `
+        <div class="hub-empty-match-box">
+          <h4>💬 הפורום המשותף ייפתח מיד לאחר בחירת בית ספר לשידוך</h4>
+          <p>גלול למטה, בחר בית ספר מתאים מהרשימה ולחץ על <strong>"إنشاء الغرفة المشتركة | פתיחת חדר משותף"</strong>.</p>
+        </div>
+      `;
+    } else {
+      const roomPosts = store.posts.filter((p) => Number(p.classroom_id) === Number(room.id));
+      forumContainer.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+          <div>
+            <h4 style="color:var(--navy-900); margin:0;">💬 הפורום המשותף: ${school.name_he} 🤝 ${partner.name_he}</h4>
+            <span style="font-size:0.84rem; color:var(--text-muted);">${roomPosts.length} הודעות משותפות מתורגמות בזמן אמת</span>
+          </div>
+          <button type="button" class="btn btn-blue btn-sm" onclick="enterMatchedStudentWorkspace(${room.id}, '${schoolSide}')">
+            🚀 פתח את הפורום המלא במרחב התלמידים
+          </button>
+        </div>
+
+        <form onsubmit="submitHubForumPost(event, ${room.id}, '${schoolSide}')" style="background:var(--bg-soft); padding:14px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:16px;">
+          <label style="font-weight:800; color:var(--navy-900); display:block; margin-bottom:6px;">
+            ✍️ פרסם הודעה חדשה בשם הנהלת/רכזי ${school.name_he} בפורום המשותף:
+          </label>
+          <textarea id="hubForumPostInput" rows="3" required placeholder="כתבו הודעה בעברית או בערבית לשותפים מ-${partner.name_he}... המערכת תתרגם אוטומטית לשתי השפות!"></textarea>
+          <div style="margin-top:10px;">
+            <button type="submit" class="btn btn-green btn-sm">📨 פרסם בפורום המשותף | نشر في المنتدى المشترك</button>
+          </div>
+        </form>
+
+        <div style="display:flex; flex-direction:column; gap:10px; max-height:360px; overflow-y:auto;">
+          ${
+            roomPosts.length === 0
+              ? '<p style="color:var(--text-muted);">אין עדיין הודעות בפורום המשותף. היו הראשונים לכתוב!</p>'
+              : roomPosts
+                  .map(
+                    (p) => `
+                <div class="admin-mod-item" style="background:#fff; margin-bottom:0;">
+                  <div style="display:flex; justify-content:space-between; gap:8px; margin-bottom:6px;">
+                    <strong>👤 ${p.author_name} (${p.school_side === 'a' ? p.school_name_ar : p.school_name_he})</strong>
+                    <span class="news-item-badge">${CATEGORY_LABELS[p.category]?.he || '💬 דיון'}</span>
+                  </div>
+                  <div style="color:var(--navy-900); font-weight:600; margin-bottom:4px;">${p.content_he}</div>
+                  <div style="color:var(--green-800); font-size:0.86rem;">${p.content_ar}</div>
+                </div>
+              `
+                  )
+                  .join('')
+          }
+        </div>
+      `;
+    }
+  }
+
+  // 3. Render Joint Projects, Research Topic & Collaborative Canvas
+  const projectsContainer = document.getElementById('hubProjectsContent');
+  if (projectsContainer) {
+    if (!room || !partner) {
+      projectsContainer.innerHTML = `
+        <div class="hub-empty-match-box">
+          <h4>🔬 מעבדת הפרויקטים המשותפים תיפתח לאחר השידוך</h4>
+          <p>בחר בית ספר שותף למטה כדי לנהל יחד נושא מחקר, נתוני שדה וכרטיסי עבודה משותפים.</p>
+        </div>
+      `;
+    } else {
+      const roomResearch = store.research_data.filter((r) => Number(r.classroom_id) === Number(room.id));
+      const roomCards = store.canvas_cards.filter((c) => Number(c.classroom_id) === Number(room.id));
+
+      projectsContainer.innerHTML = `
+        <form onsubmit="saveHubResearchTopic(event, ${room.id})" style="background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:12px; padding:16px; margin-bottom:18px;">
+          <h4 style="color:var(--navy-900); margin-bottom:10px;">🔬 נושא המחקר והפרויקט המשותף של שני בתי הספר:</h4>
+          <div class="form-grid-2" style="margin-bottom:10px;">
+            <div class="form-group">
+              <label>נושא המחקר בעברית *</label>
+              <input type="text" id="hubTopicHe" required value="${room.research_topic_he}" />
+            </div>
+            <div class="form-group">
+              <label>موضوع البحث بالعربية *</label>
+              <input type="text" id="hubTopicAr" required value="${room.research_topic_ar}" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-blue btn-sm">💾 עדכן נושא מחקר משותף | حفظ الموضوع المشترك</button>
+        </form>
+
+        <div class="form-grid-2">
+          <div style="background:var(--bg-soft); border:1px solid var(--border-color); border-radius:12px; padding:16px;">
+            <h4 style="color:var(--navy-900); margin-bottom:10px;">📂 נתוני שדה שהועלו בפרויקט (${roomResearch.length})</h4>
+            ${
+              roomResearch.length === 0
+                ? '<p style="color:var(--text-muted); font-size:0.88rem;">טרם הועלו נתוני שדה משותפים.</p>'
+                : roomResearch
+                    .map(
+                      (r) => `
+                  <div style="background:#fff; padding:10px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:8px;">
+                    <strong>${r.title_he} | ${r.title_ar}</strong>
+                    <div style="font-size:0.82rem; color:var(--text-muted);">${r.author_name}</div>
+                    <div style="font-size:0.84rem; margin-top:4px;">${r.notes_he}</div>
+                  </div>
+                `
+                    )
+                    .join('')
+            }
+          </div>
+
+          <div style="background:var(--bg-soft); border:1px solid var(--border-color); border-radius:12px; padding:16px;">
+            <h4 style="color:var(--navy-900); margin-bottom:10px;">📌 לוח משימות ורעיונות משותף (${roomCards.length})</h4>
+            <form onsubmit="addHubCanvasCard(event, ${room.id})" style="display:flex; gap:8px; margin-bottom:12px;">
+              <input type="text" id="hubNewCardInput" required placeholder="הוסף משימה או רעיון לפרויקט המשותף..." />
+              <button type="submit" class="btn btn-green btn-sm">➕ הוסף</button>
+            </form>
+            ${
+              roomCards.length === 0
+                ? '<p style="color:var(--text-muted); font-size:0.88rem;">אין עדיין כרטיסים בלוח המשותף.</p>'
+                : roomCards
+                    .map(
+                      (c) => `
+                  <div style="background:#fff; padding:10px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:8px;">
+                    <div style="font-size:0.86rem; font-weight:700; color:var(--navy-900);">${c.content_he}</div>
+                    <div style="font-size:0.82rem; color:var(--green-800);">${c.content_ar}</div>
+                  </div>
+                `
+                    )
+                    .join('')
+            }
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+function addSchoolStudent(e) {
+  e.preventDefault();
+  if (!activeDashboardSchool) return;
+  const name = (document.getElementById('hubStudentName')?.value || '').trim();
+  const grade = (document.getElementById('hubStudentGrade')?.value || '').trim();
+  const team = (document.getElementById('hubStudentTeam')?.value || '').trim();
+  if (!name || !grade) return;
+
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+  if (!school) return;
+
+  if (!Array.isArray(school.students)) school.students = [];
+  school.students.push({
+    id: Date.now(),
+    name,
+    grade,
+    team
+  });
+  school.students_count = Math.max(school.students.length, school.students_count || 0);
+  saveLocalStore(store);
+
+  e.target.reset();
+  loadPlatformStats();
+  renderSchoolPartnershipHub();
+  showToast(`✅ התלמיד/ה "${name}" נוסף/ה בהצלחה לרשימת התלמידים הפרטית של ${school.name_he}!`);
+}
+
+function deleteSchoolStudent(studentId) {
+  if (!activeDashboardSchool) return;
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+  if (!school || !Array.isArray(school.students)) return;
+
+  school.students = school.students.filter((st) => st.id !== Number(studentId));
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast('🗑️ התלמיד/ה הוסר/ה מרשימת בית הספר.');
+}
+
+async function submitHubForumPost(e, roomId, schoolSide) {
+  e.preventDefault();
+  if (!activeDashboardSchool) return;
+  const inp = document.getElementById('hubForumPostInput');
+  const text = (inp?.value || '').trim();
+  if (!text) return;
+
+  const srcLang = detectLang(text);
+  const targetLang = srcLang === 'ar' ? 'he' : 'ar';
+  const translated = await translateTextWithNeuralAI(text, srcLang, targetLang);
+
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+  if (!room || !school) return;
+
+  store.posts.unshift({
+    id: Date.now(),
+    classroom_id: room.id,
+    category: 'self_intro',
+    author_name: `${school.contact_name} (צוות ${school.name_he})`,
+    school_side: schoolSide,
+    school_name_ar: school.name_ar,
+    school_name_he: school.name_he,
+    original_lang: srcLang,
+    content_ar: srcLang === 'ar' ? text : translated,
+    content_he: srcLang === 'he' ? text : translated,
+    likes: 1,
+    replies: []
+  });
+  saveLocalStore(store);
+
+  if (inp) inp.value = '';
+  renderSchoolPartnershipHub();
+  showToast('💬 ההודעה פורסמה בפורום המשותף של שני בתי הספר!');
+}
+
+function saveHubResearchTopic(e, roomId) {
+  e.preventDefault();
+  const topicHe = (document.getElementById('hubTopicHe')?.value || '').trim();
+  const topicAr = (document.getElementById('hubTopicAr')?.value || '').trim();
+  if (!topicHe || !topicAr) return;
+
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room) return;
+
+  room.research_topic_he = topicHe;
+  room.research_topic_ar = topicAr;
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast('💾 נושא המחקר המשותף עודכן בהצלחה!');
+}
+
+async function addHubCanvasCard(e, roomId) {
+  e.preventDefault();
+  if (!activeDashboardSchool) return;
+  const inp = document.getElementById('hubNewCardInput');
+  const text = (inp?.value || '').trim();
+  if (!text) return;
+
+  const srcLang = detectLang(text);
+  const targetLang = srcLang === 'ar' ? 'he' : 'ar';
+  const translated = await translateTextWithNeuralAI(text, srcLang, targetLang);
+
+  const store = getLocalStore();
+  store.canvas_cards.push({
+    id: Date.now(),
+    classroom_id: Number(roomId),
+    column_key: 'ideas',
+    author_name: `${activeDashboardSchool.contact_name} (${activeDashboardSchool.name_he})`,
+    content_ar: srcLang === 'ar' ? text : translated,
+    content_he: srcLang === 'he' ? text : translated
+  });
+  saveLocalStore(store);
+  if (inp) inp.value = '';
+  renderSchoolPartnershipHub();
+  showToast('📌 המשימה/רעיון נוספו ללוח הפרויקט המשותף!');
+}
+
+function enterMatchedStudentWorkspace(roomId, schoolSide) {
+  if (!activeDashboardSchool) return;
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room) return;
+
+  activeStudentSession = {
+    name: `${activeDashboardSchool.contact_name} (معلّم/مدير)`,
+    school_side: schoolSide || 'a',
+    school_name_ar: activeDashboardSchool.name_ar,
+    school_name_he: activeDashboardSchool.name_he
+  };
+
+  navigateTo('students');
+  fetchClassroomById(room.id);
+}
+
 
 

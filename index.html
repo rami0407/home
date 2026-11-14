@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=13" />
+  <link rel="stylesheet" href="./styles.css?v=14" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -627,6 +627,75 @@
 
             <!-- Current School Summary Card -->
             <div id="currentSchoolProfileCard" class="current-school-card"></div>
+
+            <!-- SCHOOL WORKSPACE & PARTNERSHIP HUB (My Students + Shared Forum + Joint Projects) -->
+            <div id="schoolPartnershipHub" class="school-hub-card">
+              <div class="school-hub-header">
+                <div>
+                  <span class="portal-badge" style="margin-bottom:6px; display:inline-block;">
+                    🏫 דאשבורד בית הספר והשותפות | لوحة تحكم المدرسة والشراكة
+                  </span>
+                  <h3 id="schoolHubTitle">ניהול התלמידים, הפורום והפרויקטים המשותפים | إدارة الطلاب، المنتدى والمشاريع المشتركة</h3>
+                  <p id="schoolHubSubtitle" style="color:var(--text-muted); font-size:0.9rem; margin:0;"></p>
+                </div>
+                <div id="schoolHubPartnerBadge"></div>
+              </div>
+
+              <div class="school-hub-tabs">
+                <button type="button" class="school-hub-tab active" id="hubTabBtn-students" onclick="switchSchoolHubTab('students')">
+                  🧑‍🎓 נתוני התלמידים שלי (פרטי) | طلاب مدرستي
+                </button>
+                <button type="button" class="school-hub-tab" id="hubTabBtn-forum" onclick="switchSchoolHubTab('forum')">
+                  💬 הפורום המשותף של שני בתי הספר | المنتدى المشترك
+                </button>
+                <button type="button" class="school-hub-tab" id="hubTabBtn-projects" onclick="switchSchoolHubTab('projects')">
+                  🔬 פרויקטים משותפים ومختبر البحث | المشاريع المشتركة
+                </button>
+              </div>
+
+              <!-- HUB TAB 1: PRIVATE SCHOOL STUDENTS ROSTER -->
+              <div id="hubPane-students" class="school-hub-pane">
+                <div class="hub-privacy-note">
+                  🔒 <strong>פרטיות בית הספר | خصوصية المدرسة:</strong> רשימת התלמידים שתזין כאן שייכת אך ורק לבית ספרך ואינה חשופה לבית הספר השותף. | هذه القائمة خاصة بمدرستك فقط ولا تظهر للمدرسة الشريكة.
+                </div>
+
+                <form onsubmit="addSchoolStudent(event)" class="hub-student-form">
+                  <div class="form-grid-3" style="margin-bottom: 12px;">
+                    <div class="form-group">
+                      <label>🧑‍🎓 שם התלמיד/ה | اسم الطالب/ة *</label>
+                      <input type="text" id="hubStudentName" required placeholder="לדוגמה: נועה כהן / أمير جبارين" />
+                    </div>
+                    <div class="form-group">
+                      <label>🏫 כיתה / שכבה | الصف *</label>
+                      <input type="text" id="hubStudentGrade" required placeholder="לדוגמה: ח׳2 / الثامن ب" />
+                    </div>
+                    <div class="form-group">
+                      <label>🔬 צוות / תחום עניין | الفريق البحثي</label>
+                      <input type="text" id="hubStudentTeam" placeholder="לדוגמה: צוות מים וסביבה / فريق البيئة" />
+                    </div>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <button type="submit" class="btn btn-green">
+                      <span>➕</span>
+                      <span>הוסף תלמיד/ה לבית הספר | إضافة طالب/ة لقائمة المدرسة</span>
+                    </button>
+                    <div id="hubStudentAccessCodeInfo" class="hub-code-chip"></div>
+                  </div>
+                </form>
+
+                <div id="hubStudentsListContainer" style="margin-top: 18px;"></div>
+              </div>
+
+              <!-- HUB TAB 2: SHARED FORUM OF THE TWO MATCHED SCHOOLS -->
+              <div id="hubPane-forum" class="school-hub-pane" style="display: none;">
+                <div id="hubForumContent"></div>
+              </div>
+
+              <!-- HUB TAB 3: JOINT PROJECTS, RESEARCH TOPIC & COLLABORATION -->
+              <div id="hubPane-projects" class="school-hub-pane" style="display: none;">
+                <div id="hubProjectsContent"></div>
+              </div>
+            </div>
 
             <!-- Filter & Search Controls -->
             <div class="matching-controls-card">
@@ -1340,6 +1409,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-  <script src="./app.js?v=13"></script>
+  <script src="./app.js?v=14"></script>
 </body>
 </html>
