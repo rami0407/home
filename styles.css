@@ -1372,41 +1372,67 @@ body {
 .form-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+  gap: 20px;
+  align-items: end;
 }
 
 .form-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 18px;
+  align-items: end;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .form-group label {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text-main);
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--navy-900);
+  line-height: 1.4;
 }
 
 input[type="text"],
 input[type="email"],
+input[type="password"],
 input[type="tel"],
+input[type="number"],
+input[type="search"],
 select,
 textarea {
   width: 100%;
   font-family: var(--font-bilingual);
-  font-size: 1rem;
-  padding: 13px 16px;
+  font-size: 0.98rem;
+  padding: 12px 16px;
   border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: #fff;
+  border-radius: 12px;
+  background: #f9fbfd;
   color: var(--text-main);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+select {
+  height: 50px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--navy-800);
+  box-shadow: 0 0 0 4px rgba(11, 79, 108, 0.12);
 }
 
 textarea {
@@ -1749,40 +1775,143 @@ textarea:focus {
 }
 
 .student-login-card {
-  max-width: 840px;
+  max-width: 780px;
   margin: 0 auto;
-  background: #fff;
-  border-radius: var(--radius-xl);
-  border: 2px solid var(--border-color);
-  padding: 40px;
-  box-shadow: var(--shadow-lg);
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1.5px solid rgba(11, 79, 108, 0.14);
+  padding: 42px 44px;
+  box-shadow: 0 20px 50px rgba(8, 40, 59, 0.09);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.student-login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--green-800), var(--gold-500), var(--navy-800));
 }
 
 .login-card-badge {
-  display: inline-block;
-  background: var(--green-100);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-50);
+  border: 1px solid #c5e3a8;
   color: var(--green-900);
   font-weight: 800;
-  font-size: 0.85rem;
-  padding: 5px 14px;
+  font-size: 0.84rem;
+  padding: 6px 16px;
   border-radius: 99px;
   margin-bottom: 14px;
 }
 
-.student-login-card h1 {
-  font-size: 1.9rem;
+.student-login-card h1,
+.student-login-card h2 {
+  font-size: 1.75rem;
   color: var(--navy-900);
-  margin-bottom: 10px;
+  font-weight: 900;
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+
+.auth-subtitle-he {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--green-800);
+  margin-bottom: 14px;
 }
 
 .student-login-card p {
   color: var(--text-muted);
-  margin-bottom: 24px;
+  font-size: 0.96rem;
+  max-width: 620px;
+  margin: 0 auto 28px;
+  line-height: 1.65;
 }
 
 .student-login-form {
   text-align: start;
+}
+
+.demo-accounts-box {
+  margin: 22px 0 26px;
+  padding: 16px 18px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+}
+
+.demo-box-title {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.demo-accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.demo-accounts-grid.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.demo-account-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+  font-family: var(--font-bilingual);
+}
+
+.demo-account-btn:hover {
+  border-color: var(--navy-800);
+  background: var(--navy-50);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.demo-account-btn strong {
+  font-size: 0.86rem;
+  color: var(--navy-900);
+  font-weight: 800;
+}
+
+.demo-account-btn span {
+  font-size: 0.76rem;
+  color: var(--green-800);
+  font-weight: 700;
+  direction: ltr;
+}
+
+.auth-actions-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 14px;
+}
+
+.auth-actions-grid .btn {
+  height: 54px;
+  font-size: 0.98rem;
+  border-radius: 14px;
 }
 
 .code-input {
@@ -2523,6 +2652,113 @@ textarea:focus {
   color: #94a3b8;
 }
 
+/* School Login Pill in Header, Access Code Setup & Password Recovery */
+.nav-link.nav-login-school-pill {
+  background: var(--navy-800);
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(27, 86, 121, 0.25);
+}
+
+.nav-link.nav-login-school-pill:hover {
+  background: var(--navy-900);
+  color: #ffffff;
+}
+
+.access-code-setup-box {
+  background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);
+  border: 2px solid var(--navy-600);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.access-code-setup-hint {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--navy-900);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+.forgot-password-row {
+  display: flex;
+  justify-content: flex-start;
+  margin: 4px 0 6px;
+}
+
+.btn-forgot-password {
+  background: var(--gold-100);
+  border: 1.5px dashed var(--gold-500);
+  color: #92400e;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-forgot-password:hover {
+  background: #fde68a;
+  color: var(--navy-900);
+  transform: translateY(-1px);
+}
+
+.forgot-password-panel {
+  margin-top: 20px;
+  padding: 20px 22px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid var(--gold-500);
+  border-radius: var(--radius-md);
+  text-align: start;
+  box-shadow: var(--shadow-sm);
+}
+
+.forgot-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.forgot-panel-header h4 {
+  font-size: 1.05rem;
+  color: var(--navy-900);
+  margin-bottom: 2px;
+}
+
+.forgot-panel-header p {
+  font-size: 0.85rem;
+  color: #92400e;
+  font-weight: 700;
+  margin: 0;
+}
+
+.btn-close-recovery {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.recovery-success-card {
+  background: #ffffff;
+  border: 2px solid var(--green-700);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+}
+
 /* Toast */
 .toast-notification {
   position: fixed;
@@ -2553,6 +2789,10 @@ textarea:focus {
   .manual-filters-grid,
   .form-grid-2,
   .form-grid-3,
+  .demo-accounts-grid,
+  .demo-accounts-grid.cols-2,
+  .auth-actions-grid,
+  .admin-kpi-grid,
   .footer-grid {
     grid-template-columns: 1fr;
   }

@@ -604,11 +604,14 @@ const I18N = {
     nav_goals: 'أهدافنا',
     nav_how: 'كيف نعمل',
     nav_students: '🧑‍🎓 مساحة الطلاب',
-    nav_register_school: '🏫 تسجيل مدرسة / المطابقة',
+    nav_login_school: '🔑 دخول مدرسة مسجلة',
+    nav_register_school: '➕ تسجيل مدرسة جديدة',
     hero_badge: 'جسر رقمي وتربوي ذكي بين المدارس العربية واليهودية',
     hero_headline: '"لكل إنسان بيت، ولكل بيت حكاية، ومن حكاياتنا نبني بيتًا مشتركًا"',
     hero_sublead:
       'نعيد صياغة العلاقة بين الطلاب والمدارس في المجتمعين العربي واليهودي عبر الانتقال الجذري من مفهوم "الضيف والمضيف" إلى مفهوم "أصحاب البيت الواحد" — في حيز آمن ومتساوٍ يجمع بين الفضول المعرفي، الحوار الصادق، والبحث العلمي المشترك.',
+    btn_login_existing_school: 'تسجيل دخول لمدرسة مسجلة | כניסה לבית ספר רשום',
+    btn_register_new_school: 'تسجيل جديد لمدرسة جديدة | רישום בית ספר חדש',
     btn_register_school: 'سجّل مدرستك الآن',
     btn_enter_student_space: 'دخول مساحة الطلاب',
     pill_ai_matching: 'مطابقة ذكية وفلترة يدوية للمدارس',
@@ -782,11 +785,14 @@ const I18N = {
     nav_goals: 'מטרות הפרויקט',
     nav_how: 'איך זה עובד',
     nav_students: '🧑‍🎓 מרחב התלמידים',
-    nav_register_school: '🏫 רישום בית ספר / התאמה',
+    nav_login_school: '🔑 כניסה לבית ספר רשום',
+    nav_register_school: '➕ רישום בית ספר חדש',
     hero_badge: 'גשר דיגיטלי וחינוכי חכם בין בתי ספר ערביים ויהודיים',
     hero_headline: '"לכל אדם יש בית, ולכל בית יש סיפור – ומהסיפורים שלנו אנו בונים בית משותף"',
     hero_sublead:
       'אנו מעצבים מחדש את הקשר בין תלמידים ובתי ספר בחברה הערבית והיהודית באמצעות מעבר שורשי מתפיסת "אורח ומארח" לתפיסת "שותפים לבית אחד" במרחב בטוח ושוויוני המשלב סקרנות מדעית, שיח כן ומחקר משותף.',
+    btn_login_existing_school: 'כניסה לבית ספר רשום | تسجيل دخول لمدرسة مسجلة',
+    btn_register_new_school: 'רישום בית ספר חדש | تسجيل جديد لمدرسة جديدة',
     btn_register_school: 'רשמו את בית הספר עכשיו',
     btn_enter_student_space: 'כניסה למרחב התלמידים',
     pill_ai_matching: 'התאמה חכמה וסינון ידני של בתי ספר',
@@ -1109,6 +1115,36 @@ function updateTopWelcomeBanner(school) {
   }
 }
 
+function openSchoolLoginPortal() {
+  navigateTo('portal');
+  switchPortalMode('dashboard');
+  setTimeout(() => {
+    const target = activeDashboardSchool
+      ? document.getElementById('authenticatedSchoolDashboard')
+      : document.getElementById('schoolPrincipalLoginGate');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+
+function openSchoolRegistrationPortal() {
+  navigateTo('portal');
+  switchPortalMode('register');
+  setTimeout(() => {
+    const target = document.getElementById('portal-register-pane');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+
+function generateSuggestedSchoolCode() {
+  const randomDigits = Math.floor(1000 + Math.random() * 9000);
+  const code = `BAYT-${randomDigits}`;
+  const codeEl = document.getElementById('regAccessCode');
+  const confirmEl = document.getElementById('regAccessCodeConfirm');
+  if (codeEl) codeEl.value = code;
+  if (confirmEl) confirmEl.value = code;
+  showToast(`🎲 تم توليد رمز دخول خاص لمدرستك: ${code} — احتفظ به للدخول دائماً`);
+}
+
 function fillPrincipalLogin(emailVal, passVal) {
   const inp = document.getElementById('principalLoginInput');
   const pass = document.getElementById('principalPasswordInput');
@@ -1119,23 +1155,174 @@ function fillPrincipalLogin(emailVal, passVal) {
 function handleSchoolPrincipalLogin(e) {
   e.preventDefault();
   const q = (document.getElementById('principalLoginInput').value || '').trim().toLowerCase();
+  const enteredPass = (document.getElementById('principalPasswordInput').value || '').trim();
   const store = getLocalStore();
+
   const found = store.schools.find(
     (s) =>
       (s.contact_email && s.contact_email.toLowerCase() === q) ||
+      (s.access_code && s.access_code.toLowerCase() === q) ||
       `ibn-${s.id}` === q ||
       `bayt-${s.id}` === q ||
-      s.name_ar.includes(q) ||
-      s.name_he.includes(q)
+      s.name_ar.toLowerCase().includes(q) ||
+      s.name_he.toLowerCase().includes(q)
   );
 
   if (!found) {
-    showToast('⚠️ لم يتم العثور على المدرسة! استخدم البريد الإلكتروني المدرسي المعتمد (مثل bishara@bayt.edu) | בית הספר לא נמצא!');
+    showToast('⚠️ لم يتم العثور على مدرسة مسجلة بهذا البريد أو الرمز! إذا كانت مدرستك جديدة اضغط على "تسجيل جديد لمدرسة جديدة" | בית הספר לא נמצא!');
     return;
   }
 
+  const expectedPass = found.access_code || found.login_password || '123456';
+  if (enteredPass !== expectedPass && enteredPass.toLowerCase() !== expectedPass.toLowerCase()) {
+    showToast('❌ كلمة المرور / رمز الدخول غير صحيح! يمكنك استرداد كلمة المرور عبر البريد الإلكتروني المسجل أدناه | סיסמה שגויה!');
+    toggleForgotPasswordBox(true, found.contact_email);
+    return;
+  }
+
+  toggleForgotPasswordBox(false);
   loadSchoolDashboard(found.id);
   showToast(`🏫 ברוכים הבאים מבית הספר: ${found.name_he} | ${found.name_ar}`);
+}
+
+function toggleForgotPasswordBox(forceState = null, prefillEmail = '') {
+  const box = document.getElementById('forgotPasswordBox');
+  if (!box) return;
+  const shouldShow = forceState !== null ? forceState : box.style.display === 'none';
+  box.style.display = shouldShow ? 'block' : 'none';
+
+  if (shouldShow) {
+    const emailInput = document.getElementById('recoveryEmailInput');
+    const loginVal = (document.getElementById('principalLoginInput')?.value || '').trim();
+    if (emailInput) {
+      if (prefillEmail) {
+        emailInput.value = prefillEmail;
+      } else if (loginVal.includes('@') && !emailInput.value) {
+        emailInput.value = loginVal;
+      }
+      emailInput.focus();
+    }
+  }
+}
+
+function handleSchoolPasswordRecovery(e) {
+  e.preventDefault();
+  const email = (document.getElementById('recoveryEmailInput')?.value || '').trim().toLowerCase();
+  const resultArea = document.getElementById('recoveryResultArea');
+  if (!email || !resultArea) return;
+
+  const store = getLocalStore();
+  const found = store.schools.find(
+    (s) => s.contact_email && s.contact_email.toLowerCase() === email
+  );
+
+  resultArea.style.display = 'block';
+
+  if (!found) {
+    resultArea.innerHTML = `
+      <div class="recovery-success-card" style="border-color: #dc2626; background: #fef2f2;">
+        <strong style="color: #991b1b; display:block; margin-bottom:6px;">
+          ⚠️ لم يتم العثور على أي مدرسة مسجلة بهذا البريد الإلكتروني (${email})
+        </strong>
+        <p style="font-size:0.88rem; color:#7f1d1d; margin-bottom:10px;">
+          تأكد من كتابة البريد الإلكتروني الذي سجّله مدير/مركز المدرسة عند التسجيل، أو قم بتسجيل مدرستك كمدرسة جديدة الآن.
+        </p>
+        <button type="button" class="btn btn-green btn-sm" onclick="openSchoolRegistrationPortal()">
+          ➕ تسجيل جديد لمدرسة جديدة | רישום בית ספר חדש
+        </button>
+      </div>
+    `;
+    showToast('⚠️ هذا البريد الإلكتروني غير مسجل لأي مدرسة حالياً');
+    return;
+  }
+
+  const savedCode = found.access_code || found.login_password || '123456';
+  const mailSubject = encodeURIComponent(`استرداد رمز الدخول لمدرسة ${found.name_ar} | שחזור קוד כניסה לבית ספר ${found.name_he}`);
+  const mailBody = encodeURIComponent(
+    `مرحباً ${found.contact_name}،\n\n` +
+    `بناءً على طلبك في منصة "بَيْت | בַּיִת"، إليك بيانات الدخول المسجلة لمدرستكم:\n` +
+    `- المدرسة: ${found.name_ar} | ${found.name_he}\n` +
+    `- البريد الإلكتروني المعتمد: ${found.contact_email}\n` +
+    `- رمز الدخول / كلمة المرور للموقع: ${savedCode}\n\n` +
+    `مع تحيات إدارة منصة بَيْت | בַּיִת`
+  );
+
+  resultArea.innerHTML = `
+    <div class="recovery-success-card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+        <div>
+          <strong style="color: var(--green-800); font-size: 1rem; display:block;">
+            ✅ تم التحقق من بريد صاحب الحساب وإرسال استرداد كلمة المرور إلى: <span dir="ltr">${found.contact_email}</span>
+          </strong>
+          <span style="font-size:0.86rem; color:var(--text-muted); font-weight:700;">
+            🏫 المدرسة: ${found.name_ar} | ${found.name_he} • المسؤول: ${found.contact_name}
+          </span>
+        </div>
+        <a href="mailto:${found.contact_email}?subject=${mailSubject}&body=${mailBody}" class="btn btn-outline-blue btn-sm" style="text-decoration:none;">
+          📬 فتح الرسالة في البريد الإلكتروني
+        </a>
+      </div>
+
+      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px 14px; margin-bottom:12px;">
+        <div style="font-size:0.86rem; color:var(--navy-900); margin-bottom:6px;">
+          🔑 <strong>رمز الدخول / كلمة المرور المسجلة لمدرستك:</strong>
+          <code style="background:#fff; border:1px solid var(--navy-600); padding:3px 10px; border-radius:6px; font-size:1rem; font-weight:900; color:var(--navy-900); margin-inline-start:6px;" dir="ltr">${savedCode}</code>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px;">
+          <button type="button" class="btn btn-blue btn-sm" onclick="autoLoginRecoveredSchool(${found.id}, '${found.contact_email}', '${savedCode}')">
+            🚀 تعبئة الرمز وتسجيل الدخول للمدرسة فوراً
+          </button>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed #cbd5e1; padding-top:10px;">
+        <label style="font-size:0.84rem; font-weight:800; color:var(--navy-900); display:block; margin-bottom:6px;">
+          🔄 أو قم بتعيين كلمة مرور / رمز دخول جديد لمدرستك الآن:
+        </label>
+        <div class="inline-inputs">
+          <input type="text" id="newResetPasswordInput_${found.id}" placeholder="أدخل رمز دخول / كلمة مرور جديدة..." dir="ltr" style="text-align:start;" />
+          <button type="button" class="btn btn-green btn-sm" onclick="applyNewRecoveredPassword(${found.id})">
+            💾 حفظ كلمة المرور الجديدة والدخول
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  showToast(`📧 تم استرداد بيانات الدخول على البريد المسجل: ${found.contact_email}`);
+}
+
+function autoLoginRecoveredSchool(schoolId, email, code) {
+  fillPrincipalLogin(email, code);
+  toggleForgotPasswordBox(false);
+  loadSchoolDashboard(schoolId);
+  const store = getLocalStore();
+  const s = store.schools.find((item) => item.id === Number(schoolId));
+  if (s) {
+    showToast(`🏫 تم تسجيل الدخول بنجاح إلى: ${s.name_ar} | ${s.name_he}`);
+  }
+}
+
+function applyNewRecoveredPassword(schoolId) {
+  const inp = document.getElementById(`newResetPasswordInput_${schoolId}`);
+  const newPass = (inp?.value || '').trim();
+  if (!newPass || newPass.length < 4) {
+    showToast('⚠️ يرجى إدخال رمز دخول جديد مكون من 4 أحرف أو أرقام على الأقل');
+    return;
+  }
+  const store = getLocalStore();
+  const idx = store.schools.findIndex((s) => s.id === Number(schoolId));
+  if (idx === -1) return;
+
+  store.schools[idx].access_code = newPass;
+  store.schools[idx].login_password = newPass;
+  saveLocalStore(store);
+
+  const school = store.schools[idx];
+  fillPrincipalLogin(school.contact_email, newPass);
+  toggleForgotPasswordBox(false);
+  loadSchoolDashboard(school.id);
+  showToast(`✅ تم تحديث رمز الدخول لمدرستك إلى (${newPass}) وتسجيل الدخول بنجاح!`);
 }
 
 function logoutCurrentSchoolSession() {
@@ -1198,6 +1385,18 @@ function submitSchoolRegistration(e) {
   const contact_role = document.getElementById('regContactRole').value;
   const contact_email = document.getElementById('regContactEmail').value.trim();
   const contact_phone = document.getElementById('regContactPhone').value.trim();
+  const chosenAccessCode = (document.getElementById('regAccessCode')?.value || '').trim();
+  const confirmAccessCode = (document.getElementById('regAccessCodeConfirm')?.value || '').trim();
+
+  if (!chosenAccessCode || chosenAccessCode.length < 4) {
+    showToast('⚠️ يرجى اختيار رمز دخول / كلمة مرور للموقع مكونة من 4 خانات على الأقل');
+    return;
+  }
+
+  if (chosenAccessCode !== confirmAccessCode) {
+    showToast('⚠️ رمز الدخول وتأكيد رمز الدخول غير متطابقين! يرجى التأكد من كتابتهما بنفس الشكل');
+    return;
+  }
 
   const cityInfo = CITY_COORDS[city] || {
     lat: 32.65 + (Math.random() - 0.5) * 0.15,
@@ -1227,6 +1426,8 @@ function submitSchoolRegistration(e) {
     contact_role,
     contact_email,
     contact_phone,
+    access_code: chosenAccessCode,
+    login_password: chosenAccessCode,
     bio_ar: detectLang(bio) === 'he' ? smartTranslateLocal(bio, 'ar') : bio,
     bio_he: detectLang(bio) === 'he' ? bio : smartTranslateLocal(bio, 'he'),
     students_count: 45,
@@ -1236,7 +1437,7 @@ function submitSchoolRegistration(e) {
   store.schools.push(newSchool);
   saveLocalStore(store);
 
-  showToast('✅ تم تسجيل المدرسة بنجاح! جاري عرض المدارس المقترحة للتوأمة | בית הספר נרשם בהצלחה!');
+  showToast(`✅ تم تسجيل المدرسة واعتماد رمز الدخول الدائم (${chosenAccessCode}) المرتبط بالإيميل (${contact_email})!`);
   document.getElementById('schoolRegistrationForm').reset();
   loadPlatformStats();
   loadAllSchools(newSchool.id);

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=5" />
+  <link rel="stylesheet" href="./styles.css?v=6" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -62,7 +62,8 @@
         <button class="nav-link" data-nav="goals" onclick="navigateTo('landing', 'goals-section')" data-i18n="nav_goals">أهدافنا</button>
         <button class="nav-link" data-nav="how" onclick="navigateTo('landing', 'how-section')" data-i18n="nav_how">كيف نعمل</button>
         <button class="nav-link" data-nav="students" onclick="navigateTo('students')" data-i18n="nav_students">🧑‍🎓 مساحة الطلاب</button>
-        <button class="nav-link nav-cta-pill" data-nav="portal" onclick="navigateTo('portal')" data-i18n="nav_register_school">🏫 تسجيل مدرسة / المطابقة</button>
+        <button class="nav-link nav-login-school-pill" data-nav="portal-login" onclick="openSchoolLoginPortal()" data-i18n="nav_login_school">🔑 دخول مدرسة مسجلة</button>
+        <button class="nav-link nav-cta-pill" data-nav="portal-register" onclick="openSchoolRegistrationPortal()" data-i18n="nav_register_school">➕ تسجيل مدرسة جديدة</button>
         <button class="nav-link nav-admin-pill" data-nav="admin" onclick="navigateTo('admin')" data-i18n="nav_admin">🛡️ ניהול האתר | لوحة المدير</button>
       </nav>
 
@@ -104,11 +105,15 @@
             </p>
 
             <div class="hero-buttons">
-              <button class="btn btn-green btn-lg" onclick="navigateTo('portal')">
-                <span>🏫</span>
-                <span data-i18n="btn_register_school">سجّل مدرستك الآن</span>
+              <button class="btn btn-blue btn-lg" onclick="openSchoolLoginPortal()">
+                <span>🔑</span>
+                <span data-i18n="btn_login_existing_school">تسجيل دخول لمدرسة مسجلة | כניסה לבית ספר רשום</span>
               </button>
-              <button class="btn btn-blue btn-lg" onclick="navigateTo('students')">
+              <button class="btn btn-green btn-lg" onclick="openSchoolRegistrationPortal()">
+                <span>➕</span>
+                <span data-i18n="btn_register_new_school">تسجيل جديد لمدرسة جديدة | רישום בית ספר חדש</span>
+              </button>
+              <button class="btn btn-outline-blue btn-lg" onclick="navigateTo('students')">
                 <span>🧑‍🎓</span>
                 <span data-i18n="btn_enter_student_space">دخول مساحة الطلاب</span>
               </button>
@@ -375,12 +380,12 @@
           </div>
           <div class="portal-mode-tabs">
             <button id="tabBtnDashboard" class="portal-tab-btn active" onclick="switchPortalMode('dashboard')">
-              <span>🧭</span>
-              <span data-i18n="tab_school_dashboard">لوحة تحكم المدرسة والمطابقة</span>
+              <span>🔑</span>
+              <span data-i18n="tab_school_dashboard">دخول مدرسة مسجلة سابقاً | כניסה לבית ספר רשום</span>
             </button>
             <button id="tabBtnRegister" class="portal-tab-btn" onclick="switchPortalMode('register')">
               <span>➕</span>
-              <span data-i18n="tab_new_registration">تسجيل مدرسة جديدة</span>
+              <span data-i18n="tab_new_registration">تسجيل جديد لمدرسة جديدة | רישום בית ספר חדש</span>
             </button>
           </div>
         </div>
@@ -391,8 +396,13 @@
         <div id="portal-register-pane" class="portal-pane" style="display: none;">
           <div class="form-card">
             <div class="form-card-header">
-              <h2 data-i18n="reg_form_title">استمارة تسجيل مدرسة في شبكة "بَيْت | בַּיִת" | טופס רישום בית ספר לרשת "בַּיִת"</h2>
-              <p data-i18n="reg_form_desc">عبئ معلومات المدرسة والاهتمامات التربوية ليقوم النظام باقتراح أفضل المدارس الشريكة جغرافياً وفكرياً | מלאו את פרטי בית הספר ותחומי העניין כדי שהמערכת תציע את השותפים המתאימים ביותר.</p>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <h2 data-i18n="reg_form_title">استمارة تسجيل مدرسة جديدة في شبكة "بَيْت | בַּיִת" | טופס רישום בית ספר חדש</h2>
+                <button type="button" class="btn btn-outline-blue btn-sm" onclick="switchPortalMode('dashboard')">
+                  🔑 مدرستك مسجلة مسبقاً؟ سجّل الدخول هنا | בית ספר רשום? היכנסו כאן
+                </button>
+              </div>
+              <p data-i18n="reg_form_desc">أجب على أسئلة المدرسة والاهتمامات التربوية واختر رمز الدخول الدائم لموقعك ليقوم النظام باقتراح أفضل المدارس الشريكة جغرافياً وفكرياً | מלאו את שאלון בית הספר ובחרו קוד כניסה אישי קבוע לאתר.</p>
             </div>
 
             <form id="schoolRegistrationForm" onsubmit="submitSchoolRegistration(event)">
@@ -491,7 +501,7 @@
                 </div>
               </div>
 
-              <div class="form-section-title" data-i18n="reg_sec_contact">4. شخص التواصل المسؤول | פרטי איש קשר</div>
+              <div class="form-section-title" data-i18n="reg_sec_contact">4. شخص التواصل المسؤول (صاحب الحساب والإيميل المعتمد للاسترداد) | פרטי איש קשר ואימייל לשחזור</div>
               <div class="form-grid-2">
                 <div class="form-group">
                   <label data-i18n="lbl_contact_name">الاسم الكامل | שם מלא *</label>
@@ -506,19 +516,41 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_contact_email">البريد الإلكتروني المدرسي | דוא"ל בית ספרי *</label>
-                  <input type="email" id="regContactEmail" required placeholder="principal@school.edu" />
+                  <label data-i18n="lbl_contact_email">البريد الإلكتروني المعتمد (لاسترداد كلمة المرور دائماً) | דוא"ל בית ספרי (לשחזור סיסמה) *</label>
+                  <input type="email" id="regContactEmail" required placeholder="principal@school.edu" dir="ltr" style="text-align: start;" />
                 </div>
                 <div class="form-group">
                   <label data-i18n="lbl_contact_phone">رقم الهاتف | מספר טלפון *</label>
-                  <input type="tel" id="regContactPhone" required placeholder="050-0000000" />
+                  <input type="tel" id="regContactPhone" required placeholder="050-0000000" dir="ltr" style="text-align: start;" />
+                </div>
+              </div>
+
+              <div class="form-section-title" data-i18n="reg_sec_access_code">5. اختيار رمز دخول للموقع (لتستطيع المدرسة دائماً الرجوع إلى حسابها) | בחירת קוד כניסה וסיסמה קבועים לאתר</div>
+              <div class="access-code-setup-box">
+                <p class="access-code-setup-hint" data-i18n="reg_access_code_hint">
+                  🔐 اختر رمز دخول خاصاً أو كلمة مرور لمدرستك. ستستخدم هذا الرمز مع بريدك الإلكتروني لتسجيل الدخول دائماً إلى لوحة تحكم المدرسة، وفي حال نسيانه يمكنك استرداده في أي وقت عبر البريد الإلكتروني المسجل أعلاه.
+                </p>
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label data-i18n="lbl_choose_access_code">🔑 اختر رمز الدخول / كلمة المرور للموقع | בחרו קוד כניסה / סיסמה לאתר *</label>
+                    <div class="inline-inputs">
+                      <input type="text" id="regAccessCode" required minlength="4" placeholder="مثال: HIKMA-2026 أو كلمة مرور خاصة" dir="ltr" style="text-align: start; font-weight: 700;" />
+                      <button type="button" class="btn btn-outline-blue btn-sm" onclick="generateSuggestedSchoolCode()" title="توليد رمز دخول مقترح">
+                        🎲 توليد رمز | יצירת קוד
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label data-i18n="lbl_confirm_access_code">🔒 تأكيد رمز الدخول / كلمة المرور | אימות קוד כניסה / סיסמה *</label>
+                    <input type="text" id="regAccessCodeConfirm" required minlength="4" placeholder="أعد كتابة رمز الدخول للتأكيد | הקלידו שוב לאימות" dir="ltr" style="text-align: start; font-weight: 700;" />
+                  </div>
                 </div>
               </div>
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-green btn-lg">
                   <span>✨</span>
-                  <span data-i18n="btn_submit_registration">حفظ التسجيل والانتقال لاقتراحات المطابقة الذكية | שמירת הרשמה ומעבר להצעות התאמה</span>
+                  <span data-i18n="btn_submit_registration">حفظ تسجيل المدرسة واعتماد رمز الدخول والانتقال للمطابقة | שמירת הרשמה וקוד כניסה</span>
                 </button>
               </div>
             </form>
@@ -528,46 +560,92 @@
         <!-- SUBVIEW 2B: SCHOOL DASHBOARD & AI MATCHING (Protected by School Login - No Public Switcher) -->
         <div id="portal-dashboard-pane" class="portal-pane">
           <!-- School Principal Login Gate (Shown when no school is logged in) -->
-          <div id="schoolPrincipalLoginGate" class="student-login-card" style="margin-bottom: 28px;">
-            <div class="login-card-badge">🔒 כניסה מאובטחת להנהלת בית הספר | دخول آمن لإدارة المدرسة فقط</div>
-            <h2 data-i18n="school_login_title">כניסה ללוח הבקרה של בית הספר שלך | تسجيل الدخول للوحة تحكم مدرستك</h2>
-            <p data-i18n="school_login_desc" style="color:var(--text-muted); margin-bottom:20px;">
-              כדי למנוע התחזות, כל בית ספר נכנס אך ורק באמצעות האימייל הבית-ספרי או הקוד האישי של בית הספר (או נרשם כבית ספר חדש).
-              <br/>
-              لمنع التزييف أو دخول مدارس أخرى، تدخل كل مدرسة فقط عبر بريدها الإلكتروني المعتمد أو رمزها الخاص.
+          <div id="schoolPrincipalLoginGate" class="student-login-card" style="margin-bottom: 32px;">
+            <img src="./logo.jpg" alt="شعار بَيْت | בַּיִת" style="width:84px; height:84px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
+            <div>
+              <span class="login-card-badge">🔒 دخول آمن لمدرسة مسجلة سابقاً | כניסה מאובטחת לבית ספר רשום</span>
+            </div>
+            <h2 data-i18n="school_login_title">تسجيل الدخول لمدرسة مسجلة سابقاً</h2>
+            <div class="auth-subtitle-he" lang="he">כניסה ללוח הבקרה של בית ספר רשום</div>
+            <p data-i18n="school_login_desc">
+              أدخل البريد الإلكتروني للمدرسة (أو اسم/رمز المدرسة) مع رمز الدخول الخاص الذي اخترته عند التسجيل.
             </p>
+
             <form class="student-login-form" onsubmit="handleSchoolPrincipalLogin(event)">
-              <div class="form-grid-2" style="margin-bottom: 18px;">
+              <div class="form-grid-2" style="margin-bottom: 6px;">
                 <div class="form-group">
-                  <label>📧 אימייל בית הספר או קוד בית ספר | البريد الإلكتروني للمدرسة أو رمزها *</label>
-                  <input type="text" id="principalLoginInput" required placeholder="לדוגמה: bishara@bayt.edu או IBN-101" />
+                  <label>📧 البريد الإلكتروني المسجل أو رمز المدرسة | אימייל רשום או קוד בית ספר *</label>
+                  <input type="text" id="principalLoginInput" required placeholder="bishara@bayt.edu / BISHARA-2026" dir="ltr" style="text-align: start;" />
                 </div>
                 <div class="form-group">
-                  <label>🔑 סיסמה / קוד אימות | كلمة المرور / رمز التحقق *</label>
-                  <input type="password" id="principalPasswordInput" value="123456" required placeholder="123456" />
+                  <label>🔑 رمز الدخول / كلمة المرور للموقع | קוד כניסה / סיסמה *</label>
+                  <input type="password" id="principalPasswordInput" value="123456" required placeholder="أدخل رمز الدخول الخاص بالمدرسة" dir="ltr" style="text-align: start;" />
                 </div>
               </div>
-              <div class="quick-demo-codes">
-                <span>💡 דוגמה לכניסת מנהל בית ספר (לצורך הדגמה):</span>
-                <button type="button" class="code-chip" onclick="fillPrincipalLogin('bishara@bayt.edu', '123456')">
-                  תיכון אל-בישארה נצרת (bishara@bayt.edu)
-                </button>
-                <button type="button" class="code-chip" onclick="fillPrincipalLogin('ortalon@bayt.edu', '123456')">
-                  אורט אלון נוף הגליל (ortalon@bayt.edu)
-                </button>
-                <button type="button" class="code-chip" onclick="fillPrincipalLogin('ibnkhaldoun@bayt.edu', '123456')">
-                  אבן ח׳לדון אום אל-פחם (ibnkhaldoun@bayt.edu)
+
+              <!-- Forgot Password / Recover via Registered Email Link -->
+              <div class="forgot-password-row">
+                <button type="button" class="btn-forgot-password" onclick="toggleForgotPasswordBox()">
+                  <span>📧</span>
+                  <span data-i18n="btn_forgot_password">نسيت كلمة المرور / رمز الدخول؟ استرداد عبر الإيميل المسجل | שכחת סיסמה / קוד כניסה? שחזור לאימייל</span>
                 </button>
               </div>
-              <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                <button type="submit" class="btn btn-blue btn-lg" style="flex:1;">
-                  🔑 כניסה ללוח הבקרה של בית הספר | دخول لوحة تحكم المدرسة
+
+              <div class="demo-accounts-box">
+                <span class="demo-box-title">💡 حسابات مدارس مسجلة للتجربة السريعة (اضغط للتعبئة التلقائية — الرمز: 123456) | חשבונות להדגמה:</span>
+                <div class="demo-accounts-grid">
+                  <button type="button" class="demo-account-btn" onclick="fillPrincipalLogin('bishara@bayt.edu', '123456')">
+                    <strong>🏫 مدرسة البشارة — الناصرة</strong>
+                    <span>bishara@bayt.edu</span>
+                  </button>
+                  <button type="button" class="demo-account-btn" onclick="fillPrincipalLogin('ortalon@bayt.edu', '123456')">
+                    <strong>🏫 אורט אלון — נוף הגליל</strong>
+                    <span>ortalon@bayt.edu</span>
+                  </button>
+                  <button type="button" class="demo-account-btn" onclick="fillPrincipalLogin('ibnkhaldoun@bayt.edu', '123456')">
+                    <strong>🏫 ابن خلدون — أم الفحم</strong>
+                    <span>ibnkhaldoun@bayt.edu</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="auth-actions-grid">
+                <button type="submit" class="btn btn-blue">
+                  <span>🔑</span>
+                  <span>تسجيل الدخول للمدرسة | כניסה ללוח הבקרה</span>
                 </button>
-                <button type="button" class="btn btn-green btn-lg" onclick="switchPortalMode('register')">
-                  ➕ רישום בית ספר חדש | تسجيل مدرسة جديدة
+                <button type="button" class="btn btn-green" onclick="switchPortalMode('register')">
+                  <span>➕</span>
+                  <span>تسجيل جديد لمدرسة جديدة | רישום בית ספר חדש</span>
                 </button>
               </div>
             </form>
+
+            <!-- Forgot Password Recovery Panel (Restores / Sends Access Code to Registered Email) -->
+            <div id="forgotPasswordBox" class="forgot-password-panel" style="display: none;">
+              <div class="forgot-panel-header">
+                <div>
+                  <h4>📩 استرداد كلمة المرور / رمز الدخول عبر البريد الإلكتروني المسجل</h4>
+                  <p>שחזור קוד כניסה וסיסמה באמצעות האימייל הרשום של מנהל/ת או רכז/ת בית הספר</p>
+                </div>
+                <button type="button" class="btn-close-recovery" onclick="toggleForgotPasswordBox(false)">✕</button>
+              </div>
+
+              <form onsubmit="handleSchoolPasswordRecovery(event)" class="recovery-form">
+                <div class="form-group">
+                  <label>📧 أدخل البريد الإلكتروني الذي سجّلت به المدرسة في الموقع | הזינו את האימייל שאיתו נרשם בית הספר *</label>
+                  <div class="inline-inputs">
+                    <input type="email" id="recoveryEmailInput" required placeholder="مثال: bishara@bayt.edu أو بريدك الذي سجلت به" dir="ltr" style="text-align: start;" />
+                    <button type="submit" class="btn btn-gold">
+                      <span>📨</span>
+                      <span>إرسال واسترداد الرمز على الإيميل | שחזור לאימייל</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+
+              <div id="recoveryResultArea" style="display: none; margin-top: 14px;"></div>
+            </div>
           </div>
 
           <!-- Authenticated School Dashboard Content (Hidden until school logs in or registers) -->
@@ -666,50 +744,53 @@
       <div id="studentLoginGate" class="student-login-wrapper">
         <div class="container">
           <div class="student-login-card">
-            <img src="./logo.jpg" alt="شعار بَيْت | בַּיִת" style="width:96px; height:96px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
+            <img src="./logo.jpg" alt="شعار بَيْت | בַּיִת" style="width:84px; height:84px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
             <div>
-              <span class="login-card-badge">🔒 دخول آمن بدون بيانات شخصية حساسة | כניסה בטוחה ללא פרטים רגישים</span>
+              <span class="login-card-badge">🔒 دخول آمن بدون بيانات حساسة | כניסה בטוחה ללא פרטים רגישים</span>
             </div>
-            <h1 data-i18n="student_login_title">مساحة الطلاب والتعلم المشترك | מרחב התלמידים והלמידה המשותפת</h1>
+            <h1 data-i18n="student_login_title">مساحة الطلاب والتعلم المشترك</h1>
+            <div class="auth-subtitle-he" lang="he">מרחב התלמידים והלמידה המשותפת</div>
             <p data-i18n="student_login_desc">
-              أدخل الرمز المخصص الذي وفرته لك مدرستك للدخول إلى لوحة الصف المشترك، منتدى "نتحدث معاً" المزود بالترجمة الفورية، ومختبر البحث العلمي.
+              أدخل الرمز السري المخصص لمدرستك للدخول مباشرة إلى ساحة مدرستك، منتدى "نتحدث معاً" المترجم، ومختبر البحث العلمي.
             </p>
 
             <form class="student-login-form" onsubmit="handleStudentLogin(event)">
-              <div class="form-grid-2" style="margin-bottom: 16px;">
+              <div class="form-grid-2" style="margin-bottom: 14px;">
                 <div class="form-group">
-                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة المخصص للطالب | קוד התלמיד הייעודי של בית הספר *</label>
-                  <input type="text" id="studentCodeInput" value="FAHM-2026" required class="code-input" placeholder="مثال: FAHM-2026 أو AFULA-2026" />
+                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة المخصص للطالب | קוד התלמיד *</label>
+                  <input type="text" id="studentCodeInput" value="FAHM-2026" required class="code-input" placeholder="FAHM-2026" dir="ltr" style="text-align: center;" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_student_nickname">🧑‍🎓 اسمك الأول واللقب | שמך הפרטי ושם משפחה *</label>
+                  <label data-i18n="lbl_student_nickname">🧑‍🎓 اسمك الأول واللقب | שמך הפרטי *</label>
                   <input type="text" id="studentNameInput" value="أمير جبارين" required placeholder="مثال: أمير جبارين / מאיה לוי" />
                 </div>
               </div>
 
-              <div style="background:var(--green-50); border:1.5px solid var(--green-700); padding:10px 14px; border-radius:10px; font-size:0.86rem; margin-bottom:16px; color:var(--navy-900);">
-                🛡️ <strong>حماية الهوية ومنع التزييف | מניעת התחזות:</strong> يتم تحديد اسم مدرستك وساحتك تلقائياً بناءً على الرمز السري الذي استلمته من مدرستك، ولا يمكن لأي طالب التبديل إلى مدرسة أخرى.
+              <div class="demo-accounts-box">
+                <span class="demo-box-title">🔑 رموز المدارس المخصصة للتجربة (كل رمز يدخل الطالب لمدرسته فقط لمنع التزييف):</span>
+                <div class="demo-accounts-grid cols-2">
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('FAHM-2026', 'أمير جبارين')">
+                    <strong>🏫 مدرسة ابن خلدون — أم الفحم</strong>
+                    <span>Code: FAHM-2026</span>
+                  </button>
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('AFULA-2026', 'מאיה לוי | مايا ليفي')">
+                    <strong>🏫 מקיף כרמים — עפולה</strong>
+                    <span>Code: AFULA-2026</span>
+                  </button>
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('NAZ-101', 'سامر زعبي')">
+                    <strong>🏫 مدرسة البشارة — الناصرة</strong>
+                    <span>Code: NAZ-101</span>
+                  </button>
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('NOF-101', 'עומר כהן | عومر')">
+                    <strong>🏫 אורט אלון — נוף הגליל</strong>
+                    <span>Code: NOF-101</span>
+                  </button>
+                </div>
               </div>
 
-              <div class="quick-demo-codes">
-                <span data-i18n="quick_codes_label">🔑 رموز المدارس المخصصة للتجربة (كل رمز يدخل الطالب لمدرسته فقط):</span>
-                <button type="button" class="code-chip" onclick="fillStudentCode('FAHM-2026', 'أمير جبارين')">
-                  🏫 FAHM-2026 (طالب من: ابن خلدون - أم الفحم)
-                </button>
-                <button type="button" class="code-chip" onclick="fillStudentCode('AFULA-2026', 'מאיה לוי | مايا ليفي')">
-                  🏫 AFULA-2026 (תלמיד/ה מ: מקיף כרמים - עפולה)
-                </button>
-                <button type="button" class="code-chip" onclick="fillStudentCode('NAZ-101', 'سامر زعبي')">
-                  🏫 NAZ-101 (طالب من: البشارة - الناصرة)
-                </button>
-                <button type="button" class="code-chip" onclick="fillStudentCode('NOF-101', 'עומר כהן | عومر')">
-                  🏫 NOF-101 (תלמיד/ה מ: אורט אלון - נוף הגליל)
-                </button>
-              </div>
-
-              <button type="submit" class="btn btn-blue btn-lg btn-full">
+              <button type="submit" class="btn btn-blue btn-lg btn-full" style="height: 54px;">
                 <span>🚀</span>
-                <span data-i18n="btn_enter_classroom_now">دخول ساحة مدرستي والصف المشترك الآن | כניסה למרחב בית הספר שלי</span>
+                <span data-i18n="btn_enter_classroom_now">دخول ساحة مدرستي والصف المشترك الآن | כניסה למרחב בית הספר</span>
               </button>
             </form>
           </div>
@@ -1020,35 +1101,41 @@
       <div id="adminLoginGate" class="student-login-wrapper">
         <div class="container">
           <div class="student-login-card admin-login-card">
-            <img src="./logo.jpg" alt="Bayt Logo" style="width:92px; height:92px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
+            <img src="./logo.jpg" alt="Bayt Logo" style="width:84px; height:84px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
             <div>
               <span class="login-card-badge" style="background:var(--gold-100); color:#92400e; border:1px solid var(--gold-500);">
                 🛡️ כניסת מנהל האתר הראשי | دخول مدير الموقع العام
               </span>
             </div>
             <h1>דאשבורד ניהול ובקרה — "בַּיִת | بَيْت"</h1>
+            <div class="auth-subtitle-he">لوحة الإدارة والتحكم الكامل بالموقع</div>
             <p>
               הזן את האימייל האישי והקוד הסודי שלך כמנהל האתר כדי לצפות בכל בתי הספר הרשומים, לנטר את התוכן באתר, ולמחוק הודעות לא רלוונטיות או גזעניות.
             </p>
 
             <form class="student-login-form" onsubmit="handleAdminLogin(event)">
-              <div class="form-grid-2" style="margin-bottom: 18px;">
+              <div class="form-grid-2" style="margin-bottom: 14px;">
                 <div class="form-group">
-                  <label>📧 האימייל האישי של מנהל האתר | البريد الإلكتروني للمدير *</label>
-                  <input type="email" id="adminEmailInput" value="rami0407@gmail.com" required placeholder="rami0407@gmail.com" />
+                  <label>📧 אימייל מנהל האתר | البريد الإلكتروني للمدير *</label>
+                  <input type="email" id="adminEmailInput" value="rami0407@gmail.com" required placeholder="rami0407@gmail.com" dir="ltr" style="text-align: start;" />
                 </div>
                 <div class="form-group">
                   <label>🔑 קוד אישי סודי | الرمز الشخصي السري *</label>
-                  <input type="password" id="adminCodeInput" value="0407" required class="code-input" placeholder="0407" />
+                  <input type="password" id="adminCodeInput" value="0407" required class="code-input" placeholder="••••" dir="ltr" style="text-align: center;" />
                 </div>
               </div>
 
-              <div class="quick-demo-codes" style="justify-content: space-between;">
-                <span>💡 פרטי ברירת מחדל (ניתן לשנותם מתוך הדאשבורד): <strong>rami0407@gmail.com</strong> | קוד אישי: <strong>0407</strong></span>
-                <button type="button" class="code-chip" onclick="fillAdminDefault()">מילוי מהיר | تعبئة سريعة</button>
+              <div class="demo-accounts-box">
+                <span class="demo-box-title">💡 פרטי ברירת מחדל של מנהל האתר (ניתן לשנותם מתוך הדאשבורד):</span>
+                <div style="display:flex; justify-content:center;">
+                  <button type="button" class="demo-account-btn" style="min-width: 280px;" onclick="fillAdminDefault()">
+                    <strong>🛡️ מנהל ראשי: rami0407@gmail.com</strong>
+                    <span>קוד אישי: 0407 (לחץ למילוי מהיר)</span>
+                  </button>
+                </div>
               </div>
 
-              <button type="submit" class="btn btn-blue btn-lg btn-full">
+              <button type="submit" class="btn btn-blue btn-lg btn-full" style="height: 54px;">
                 <span>🛡️</span>
                 <span>כניסה לדאשבורד מנהל האתר | دخول لوحة تحكم المدير</span>
               </button>
@@ -1222,6 +1309,6 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="./app.js?v=5"></script>
+  <script src="./app.js?v=6"></script>
 </body>
 </html>
