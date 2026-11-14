@@ -371,126 +371,126 @@
         <div id="portal-register-pane" class="portal-pane" style="display: none;">
           <div class="form-card">
             <div class="form-card-header">
-              <h2 data-i18n="reg_form_title">استمارة تسجيل مدرسة في شبكة "بَيْت | בַּיִת"</h2>
-              <p data-i18n="reg_form_desc">عبئ معلومات المدرسة والاهتمامات التربوية ليقوم النظام باقتراح أفضل المدارس الشريكة جغرافياً وفكرياً.</p>
+              <h2 data-i18n="reg_form_title">استمارة تسجيل مدرسة في شبكة "بَيْت | בַּיִת" | טופס רישום בית ספר לרשת "בַּיִת"</h2>
+              <p data-i18n="reg_form_desc">عبئ معلومات المدرسة والاهتمامات التربوية ليقوم النظام باقتراح أفضل المدارس الشريكة جغرافياً وفكرياً | מלאו את פרטי בית הספר ותחומי העניין כדי שהמערכת תציע את השותפים המתאימים ביותר.</p>
             </div>
 
             <form id="schoolRegistrationForm" onsubmit="submitSchoolRegistration(event)">
-              <div class="form-section-title" data-i18n="reg_sec_basic">1. معلومات المدرسة الأساسية | פרטי בית הספר</div>
+              <div class="form-section-title" data-i18n="reg_sec_basic">1. معلومات المدرسة الأساسية | פרטי בית הספר הבסיסיים</div>
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label data-i18n="lbl_school_name">اسم المدرسة (بالعربية أو العبرية) *</label>
-                  <input type="text" id="regName" required placeholder="مثال: مدرسة الحكمة الثانوية / תיכון אל-חכמה" />
+                  <label data-i18n="lbl_school_name">اسم المدرسة | שם בית הספר *</label>
+                  <input type="text" id="regName" data-i18n-placeholder="ph_school_name" required placeholder="مثال: مدرسة الحكمة الثانوية / תיכון אל-חכמה" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_school_city">الموقع الجغرافي (البلدة / المدينة) *</label>
-                  <input type="text" id="regCity" list="citiesList" required placeholder="مثال: الناصرة، حيفا، العفولة، الطيرة..." />
+                  <label data-i18n="lbl_school_city">الموقع الجغرافي (البلدة / المدينة) | יישוב / עיר *</label>
+                  <input type="text" id="regCity" list="citiesList" data-i18n-placeholder="ph_school_city" required placeholder="مثال: الناصرة، حيفا، العفولة... / נצרת, חיפה, עפולה..." />
                   <datalist id="citiesList">
-                    <option value="أم الفحم"></option>
-                    <option value="العفولة"></option>
-                    <option value="الناصرة"></option>
-                    <option value="نوف هجليل"></option>
-                    <option value="حيفا"></option>
-                    <option value="الطيرة"></option>
-                    <option value="كفار سابا"></option>
-                    <option value="رهط"></option>
-                    <option value="بئر السبع"></option>
-                    <option value="طمرة"></option>
-                    <option value="كرميئيل"></option>
-                    <option value="سخنين"></option>
-                    <option value="عكا"></option>
-                    <option value="باقة الغربية"></option>
-                    <option value="الخضيرة"></option>
-                    <option value="القدس"></option>
+                    <option value="أم الفحم | אום אל-פחם"></option>
+                    <option value="العفولة | עפולה"></option>
+                    <option value="الناصرة | נצרת"></option>
+                    <option value="نوف هجليل | נוף הגליל"></option>
+                    <option value="حيفا | חיפה"></option>
+                    <option value="الطيرة | טירה"></option>
+                    <option value="كفار سابا | כפר סבא"></option>
+                    <option value="رهط | רהט"></option>
+                    <option value="بئر السبع | באר שבע"></option>
+                    <option value="طمرة | טמרה"></option>
+                    <option value="كرميئيل | כרמיאל"></option>
+                    <option value="سخنين | סח׳נין"></option>
+                    <option value="عكا | עכו"></option>
+                    <option value="باقة الغربية | באקה אל-גרבייה"></option>
+                    <option value="الخضيرة | חדרה"></option>
+                    <option value="القدس | ירושלים"></option>
                   </datalist>
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_sector">القطاع التعليمي | מגזר *</label>
+                  <label data-i18n="lbl_sector">القطاع التعليمي | מגזר חינוכי *</label>
                   <select id="regSector" required>
                     <option value="arab" data-i18n="sector_arab">عربي | ערבי</option>
-                    <option value="jewish_state" data-i18n="sector_jewish_state">يهودي حكومي (ממלכתי)</option>
-                    <option value="jewish_religious" data-i18n="sector_jewish_rel">يهودي ديني (ממלכתי-דתי)</option>
-                    <option value="bilingual" data-i18n="sector_bilingual">ثنائي اللغة / مشترك (דו-לשוני)</option>
+                    <option value="jewish_state" data-i18n="sector_jewish_state">يهودي حكومي | יהודי ממלכתי</option>
+                    <option value="jewish_religious" data-i18n="sector_jewish_rel">يهودي ديني | יהודי ממלכתי-דתי</option>
+                    <option value="bilingual" data-i18n="sector_bilingual">ثنائي اللغة / مشترك | דו-לשוני</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_age_stage">المرحلة العمرية والصفوف المستهدفة *</label>
+                  <label data-i18n="lbl_age_stage">المرحلة العمرية والصفوف المستهدفة | שכבת גיל וכיתות יעד *</label>
                   <div class="inline-inputs">
                     <select id="regAgeStage" required>
-                      <option value="elementary" data-i18n="stage_elementary">ابتدائي (יסודי)</option>
-                      <option value="middle" selected data-i18n="stage_middle">إعدادي (חטיבת ביניים)</option>
-                      <option value="high" data-i18n="stage_high">ثانوي (תיכון)</option>
+                      <option value="elementary" data-i18n="stage_elementary">ابتدائي | יסודי</option>
+                      <option value="middle" selected data-i18n="stage_middle">إعدادي | חטיבת ביניים</option>
+                      <option value="high" data-i18n="stage_high">ثانوي | תיכון</option>
                     </select>
-                    <input type="text" id="regGrades" value="8-9" placeholder="الصفوف: 8-9" style="max-width: 140px;" />
+                    <input type="text" id="regGrades" value="8-9" data-i18n-placeholder="ph_grades" placeholder="الصفوف / כיתות: 8-9" style="max-width: 155px;" />
                   </div>
                 </div>
               </div>
 
-              <div class="form-section-title" data-i18n="reg_sec_interests">2. الاهتمامات والمجالات التربوية المشتركة | תחומי עניין</div>
+              <div class="form-section-title" data-i18n="reg_sec_interests">2. الاهتمامات والمجالات التربوية المشتركة | תחומי עניין משותפים</div>
               <div class="checkbox-cards-grid" id="regInterestsGroup">
                 <label class="checkbox-card">
                   <input type="checkbox" name="interests" value="science_env" checked />
                   <span class="cb-icon">🌿</span>
-                  <span class="cb-label" data-i18n="int_science_env">علوم وبيئة (מדעים וסביבה)</span>
+                  <span class="cb-label" data-i18n="int_science_env">علوم وبيئة | מדעים וסביבה</span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="interests" value="lit_lang" />
                   <span class="cb-icon">📚</span>
-                  <span class="cb-label" data-i18n="int_lit_lang">آداب ولغات (ספרות ושפות)</span>
+                  <span class="cb-label" data-i18n="int_lit_lang">آداب ولغات | ספרות ושפות</span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="interests" value="history_heritage" checked />
                   <span class="cb-icon">🏺</span>
-                  <span class="cb-label" data-i18n="int_history_heritage">تاريخ وتراث (היסטוריה ומורשת)</span>
+                  <span class="cb-label" data-i18n="int_history_heritage">تاريخ وتراث | היסטוריה ומורשת</span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="interests" value="arts_music" />
                   <span class="cb-icon">🎨</span>
-                  <span class="cb-label" data-i18n="int_arts_music">فنون وموسيقى (אמנות ומוזיקה)</span>
+                  <span class="cb-label" data-i18n="int_arts_music">فنون وموسيقى | אמנות ומוזיקה</span>
                 </label>
                 <label class="checkbox-card">
                   <input type="checkbox" name="interests" value="social_entrepreneurship" />
                   <span class="cb-icon">🚀</span>
-                  <span class="cb-label" data-i18n="int_social_ent">ريادة أعمال مجتمعية (יזמות חברתית)</span>
+                  <span class="cb-label" data-i18n="int_social_ent">ريادة أعمال مجتمعية | יזמות חברתית</span>
                 </label>
               </div>
 
-              <div class="form-section-title" data-i18n="reg_sec_activity">3. نوع النشاط المفضل ونبذة عن المدرسة | אופי הפעילות</div>
+              <div class="form-section-title" data-i18n="reg_sec_activity">3. نوع النشاط المفضل ونبذة عن المدرسة | אופי הפעילות המועדף ותיאור בית הספר</div>
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label data-i18n="lbl_activity_type">نوع النشاط المفضل *</label>
+                  <label data-i18n="lbl_activity_type">نوع النشاط المفضل | אופי הפעילות המועדף *</label>
                   <select id="regActivityType">
-                    <option value="hybrid" data-i18n="act_hybrid">هجين: لقاءات رقمية + جولات ميدانية (היברידי)</option>
-                    <option value="research" data-i18n="act_research">مشاريع بحثية مشتركة (פרויקטי מחקר)</option>
-                    <option value="online" data-i18n="act_online">عبر الإنترنت فقط (מקוון בלבד)</option>
+                    <option value="hybrid" data-i18n="act_hybrid">هجين: لقاءات رقمية + جولات ميدانية | היברידי: מפגשים דיגיטליים + סיורי שטח</option>
+                    <option value="research" data-i18n="act_research">مشاريع بحثية مشتركة | פרויקטי מחקר משותפים</option>
+                    <option value="online" data-i18n="act_online">عبر الإنترنت فقط | מקוון בלבד</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_school_bio">نبذة قصيرة عن رؤية المدرسة للشراكة</label>
-                  <input type="text" id="regBio" placeholder="نطمح لبناء شراكة بحثية وإنسانية مستدامة مع مدرسة جارة..." />
+                  <label data-i18n="lbl_school_bio">نبذة قصيرة عن رؤية المدرسة للشراكة | תיאור קצר של חזון בית הספר לשותפות</label>
+                  <input type="text" id="regBio" data-i18n-placeholder="ph_school_bio" placeholder="نطمح لبناء شراكة بحثية وإنسانية مستدامة... | שואפים לבנות שותפות מחקרית וערכית..." />
                 </div>
               </div>
 
-              <div class="form-section-title" data-i18n="reg_sec_contact">4. شخص التواصل المسؤول | איש קשר</div>
+              <div class="form-section-title" data-i18n="reg_sec_contact">4. شخص التواصل المسؤول | פרטי איש קשר</div>
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label data-i18n="lbl_contact_name">الاسم الكامل *</label>
-                  <input type="text" id="regContactName" required placeholder="مثال: أ. ريم جبارين / יעל לוי" />
+                  <label data-i18n="lbl_contact_name">الاسم الكامل | שם מלא *</label>
+                  <input type="text" id="regContactName" data-i18n-placeholder="ph_contact_name" required placeholder="مثال: د. ريم جبارين / יעל לוי" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_contact_role">الوظيفة *</label>
+                  <label data-i18n="lbl_contact_role">الوظيفة | תפקיד *</label>
                   <select id="regContactRole">
-                    <option value="مدير/ة المدرسة | מנהל/ת בית הספר">مدير/ة المدرسة | מנהל/ת בית הספר</option>
-                    <option value="مركز/ة تربية اجتماعية | רכז/ת חינוך חברתי">مركز/ة تربية اجتماعية | רכז/ת חינוך חברתי</option>
-                    <option value="مركز/ة مشاريع مشتركة | רכז/ת פרויקטים">مركز/ة مشاريع مشتركة | רכז/ת פרויקטים</option>
+                    <option value="مدير/ة المدرسة | מנהל/ת בית הספר" data-i18n="role_principal">مدير/ة المدرسة | מנהל/ת בית הספר</option>
+                    <option value="مركز/ة تربية اجتماعية | רכז/ת חינוך חברתי" data-i18n="role_social_coord">مركز/ة تربية اجتماعية | רכז/ת חינוך חברתי</option>
+                    <option value="مركز/ة مشاريع مشتركة | רכז/ת פרויקטים משותפים" data-i18n="role_proj_coord">مركز/ة مشاريع مشتركة | רכז/ת פרויקטים משותפים</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_contact_email">البريد الإلكتروني المدرسي *</label>
+                  <label data-i18n="lbl_contact_email">البريد الإلكتروني المدرسي | דוא"ל בית ספרי *</label>
                   <input type="email" id="regContactEmail" required placeholder="principal@school.edu" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_contact_phone">رقم الهاتف *</label>
+                  <label data-i18n="lbl_contact_phone">رقم الهاتف | מספר טלפון *</label>
                   <input type="tel" id="regContactPhone" required placeholder="050-0000000" />
                 </div>
               </div>
@@ -498,7 +498,7 @@
               <div class="form-actions">
                 <button type="submit" class="btn btn-green btn-lg">
                   <span>✨</span>
-                  <span data-i18n="btn_submit_registration">حفظ التسجيل والانتقال لاقتراحات المطابقة الذكية</span>
+                  <span data-i18n="btn_submit_registration">حفظ التسجيل والانتقال لاقتراحات المطابقة الذكية | שמירת הרשמה ומעבר להצעות התאמה</span>
                 </button>
               </div>
             </form>
@@ -608,25 +608,25 @@
             <form class="student-login-form" onsubmit="handleStudentLogin(event)">
               <div class="form-grid-3">
                 <div class="form-group">
-                  <label data-i18n="lbl_access_code">رمز الغرفة المشتركة (Access Code) *</label>
+                  <label data-i18n="lbl_access_code">رمز الغرفة المشتركة | קוד החדר המשותף *</label>
                   <input type="text" id="studentCodeInput" value="BAYT-2026" required class="code-input" placeholder="BAYT-2026" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_student_nickname">اسمك الأول (أو لقبك في الفريق) *</label>
+                  <label data-i18n="lbl_student_nickname">اسمك الأول | שמך הפרטי *</label>
                   <input type="text" id="studentNameInput" value="أمير | אמיר" required placeholder="مثال: أمير / מאיה" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_student_side">اختر مدرستك في الشراكة</label>
+                  <label data-i18n="lbl_student_side">اختر مدرستك في الشراكة | בחרו את בית הספר שלכם</label>
                   <select id="studentSideSelect">
-                    <option value="a">المدرسة الشريكة (أ) - العربية</option>
-                    <option value="b">المدرسة الشريكة (ب) - اليهودية</option>
+                    <option value="a" data-i18n="opt_side_a">المدرسة الشريكة (أ) - العربية | בית ספר שותף (א׳) - ערבי</option>
+                    <option value="b" data-i18n="opt_side_b">المدرسة الشريكة (ب) - اليهودية | בית ספר שותף (ב׳) - יהודי</option>
                   </select>
                 </div>
               </div>
 
               <div class="quick-demo-codes">
-                <span data-i18n="quick_codes_label">🔑 رموز غرف نشطة للتجربة السريعة:</span>
-                <button type="button" class="code-chip" onclick="fillStudentCode('BAYT-2026', 'أمير جبارين', 'a')">
+                <span data-i18n="quick_codes_label">🔑 رموز غرف نشطة للتجربة السريعة | קודי חדרים פעילים להתנסות:</span>
+                <button type="button" class="code-chip" onclick="fillStudentCode('BAYT-2026', 'أمير جبارين | אמיר', 'a')">
                   BAYT-2026 (ابن خلدون أم الفحم 🤝 كرميم العفولة)
                 </button>
                 <button type="button" class="code-chip" onclick="fillStudentCode('GALIL-101', 'مايا ليفي | מאיה', 'b')">
@@ -636,7 +636,7 @@
 
               <button type="submit" class="btn btn-blue btn-lg btn-full">
                 <span>🚀</span>
-                <span data-i18n="btn_enter_classroom_now">دخول لوحة الصف المشترك الآن</span>
+                <span data-i18n="btn_enter_classroom_now">دخول لوحة الصف المشترك الآن | כניסה לכיתה המשותפת כעת</span>
               </button>
             </form>
           </div>
