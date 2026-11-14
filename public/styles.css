@@ -84,6 +84,59 @@ body {
   color: inherit;
 }
 
+.site-logo-img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+.hero-logo-banner {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.hero-main-logo {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.vision-logo-badge {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  padding: 6px;
+  box-shadow: var(--shadow-md);
+  border: 3px solid var(--green-800);
+}
+
+.footer-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.footer-logo-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 3px;
+}
+
 .brand-title {
   display: flex;
   align-items: center;
@@ -639,17 +692,9 @@ body {
 }
 
 .transform-circle {
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--navy-800), var(--green-800));
-  color: #fff;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  box-shadow: var(--shadow-md);
 }
 
 /* Goals Grid */
