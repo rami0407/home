@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=12" />
+  <link rel="stylesheet" href="./styles.css?v=13" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -1076,24 +1076,14 @@
             </p>
 
             <form class="student-login-form" onsubmit="handleAdminLogin(event)">
-              <div class="form-grid-2" style="margin-bottom: 14px;">
+              <div class="form-grid-2" style="margin-bottom: 18px;">
                 <div class="form-group">
                   <label>📧 אימייל מנהל האתר | البريد الإلكتروني للمدير *</label>
-                  <input type="email" id="adminEmailInput" value="rami0407@gmail.com" required placeholder="rami0407@gmail.com" dir="ltr" style="text-align: start;" />
+                  <input type="email" id="adminEmailInput" required placeholder="أدخل البريد الإلكتروني للمدير | הזן אימייל מנהל" autocomplete="off" dir="ltr" style="text-align: start;" />
                 </div>
                 <div class="form-group">
                   <label>🔑 קוד אישי סודי | الرمز الشخصي السري *</label>
-                  <input type="password" id="adminCodeInput" value="0407" required class="code-input" placeholder="••••" dir="ltr" style="text-align: center;" />
-                </div>
-              </div>
-
-              <div class="demo-accounts-box">
-                <span class="demo-box-title">💡 פרטי ברירת מחדל של מנהל האתר (ניתן לשנותם מתוך הדאשבורד):</span>
-                <div style="display:flex; justify-content:center;">
-                  <button type="button" class="demo-account-btn" style="min-width: 280px;" onclick="fillAdminDefault()">
-                    <strong>🛡️ מנהל ראשי: rami0407@gmail.com</strong>
-                    <span>קוד אישי: 0407 (לחץ למילוי מהיר)</span>
-                  </button>
+                  <input type="password" id="adminCodeInput" required class="code-input" placeholder="••••" autocomplete="new-password" dir="ltr" style="text-align: center;" />
                 </div>
               </div>
 
@@ -1113,7 +1103,7 @@
             <div>
               <span class="portal-badge">🛡️ מצב מנהל ראשי פעיל | وضع المدير العام نشط</span>
               <h1>דאשבורד מנהל האתר הראשי — שליטה מלאה וניטור תוכן</h1>
-              <p id="adminWelcomeIdentity">מחובר כמנהל: rami0407@gmail.com</p>
+              <p id="adminWelcomeIdentity">מחובר כמנהל האתר</p>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn btn-outline-green btn-sm" style="background:#fff;" onclick="switchAdminSubTab('settings')">
@@ -1350,6 +1340,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-  <script src="./app.js?v=12"></script>
+  <script src="./app.js?v=13"></script>
 </body>
 </html>

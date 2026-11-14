@@ -2730,23 +2730,17 @@ function getAdminCredentials() {
   return { email: 'rami0407@gmail.com', code: '0407' };
 }
 
-function fillAdminDefault() {
-  const creds = getAdminCredentials();
-  document.getElementById('adminEmailInput').value = creds.email;
-  document.getElementById('adminCodeInput').value = creds.code;
-}
-
 function handleAdminLogin(e) {
   e.preventDefault();
   const email = (document.getElementById('adminEmailInput').value || '').trim().toLowerCase();
   const code = (document.getElementById('adminCodeInput').value || '').trim();
   const creds = getAdminCredentials();
 
-  const validEmail = email === creds.email.toLowerCase() || email === 'rami0407@gmail.com' || email === 'admin@bayt.org';
-  const validCode = code === creds.code || code === '0407' || code === '123456';
+  const validEmail = email === creds.email.toLowerCase();
+  const validCode = code === creds.code;
 
   if (!validEmail || !validCode) {
-    showToast('⚠️ אימייל או קוד אישי שגויים! (ברירת מחדל: rami0407@gmail.com | קוד: 0407)');
+    showToast('❌ אימייל או קוד אישי שגויים! הגישה מותרת למנהל האתר בלבד | البريد الإلكتروني أو الرمز السري غير صحيح!');
     return;
   }
 
