@@ -770,11 +770,11 @@ function initFirebaseRealtimeSync() {
         });
     }
 
-    // 2. Secondary mirror: Firebase Realtime Database (if enabled in project)
-    if (typeof firebase.database === 'function') {
+    // 2. Secondary mirror: only use Realtime Database when Firestore is unavailable
+    if (!firestoreDb && typeof firebase.database === 'function') {
       firebaseDb = firebase.database();
       firebaseDb.ref('bayt_platform_db_v2').on('value', (snapshot) => {
-        if (snapshot.exists() && !firestoreDb) {
+        if (snapshot.exists()) {
           applyRemotePlatformStore(snapshot.val(), 'Realtime Database');
         }
       });
@@ -799,8 +799,7 @@ function saveLocalStore(store) {
           .doc('main_store')
           .set(cleanPayload)
           .catch((err) => console.warn('Firestore write failed:', err));
-      }
-      if (firebaseDb) {
+      } else if (firebaseDb) {
         firebaseDb
           .ref('bayt_platform_db_v2')
           .set(cleanPayload)
@@ -2040,7 +2039,96 @@ function quickStudentDemo(code) {
   loginToClassroomCode(code, 'أمير جبارين | אמיר');
 }
 
+function populateStudentReqSchools() {
+  const sel = document.getElementById('studentReqSchoolSelect');
+  if (!sel) return;
+  const store = getLocalStore();
+  sel.innerHTML = (store.schools || [])
+    .map((s) => `<option value="${s.id}">${s.name_ar} | ${s.name_he} (${s.city})</option>`)
+    .join('');
+}
+
+function openStudentJoinOrLogin(mode) {
+  if (typeof switchView === 'function') switchView('students');
+  showStudentLoginGate();
+  switchStudentAuthMode(mode || 'login');
+}
+
+function switchStudentAuthMode(mode) {
+  const loginForm = document.getElementById('studentLoginForm');
+  const reqForm = document.getElementById('studentRequestForm');
+  const btnLogin = document.getElementById('stuTabBtnLogin');
+  const btnReq = document.getElementById('stuTabBtnRequest');
+  if (!loginForm || !reqForm) return;
+  if (mode === 'request') {
+    populateStudentReqSchools();
+    loginForm.style.display = 'none';
+    reqForm.style.display = 'block';
+    if (btnReq) { btnReq.className = 'btn btn-blue'; btnReq.style.cssText = ''; }
+    if (btnLogin) { btnLogin.className = 'btn'; btnLogin.style.cssText = 'background:#f1f5f9; color:#0f172a; border:1.5px solid #cbd5e1;'; }
+  } else {
+    loginForm.style.display = 'block';
+    reqForm.style.display = 'none';
+    if (btnLogin) { btnLogin.className = 'btn btn-blue'; btnLogin.style.cssText = ''; }
+    if (btnReq) { btnReq.className = 'btn'; btnReq.style.cssText = 'background:#f1f5f9; color:#0f172a; border:1.5px solid #cbd5e1;'; }
+  }
+}
+
+function handleStudentJoinRequest(e) {
+  e.preventDefault();
+  const schoolId = Number(document.getElementById('studentReqSchoolSelect')?.value);
+  const name = (document.getElementById('studentReqName')?.value || '').trim();
+  const studentIdNumber = (document.getElementById('studentReqId')?.value || '').trim().replace(/\D/g, '');
+  const grade = (document.getElementById('studentReqGrade')?.value || '').trim();
+  const team = (document.getElementById('studentReqTeam')?.value || '').trim();
+  if (!schoolId || !name || !studentIdNumber || !grade) {
+    showToast('⚠️ يرجى تعبئة جميع الحقول المطلوبة.');
+    return;
+  }
+
+  const store = getLocalStore();
+  const school = store.schools.find((s) => Number(s.id) === schoolId);
+  if (!school) return;
+
+  if (!Array.isArray(school.students)) school.students = [];
+  if (!Array.isArray(school.pending_students)) school.pending_students = [];
+
+  const alreadyApproved = school.students.find((st) => st.studentIdNumber === studentIdNumber || st.name === name);
+  if (alreadyApproved) {
+    showToast(`✅ أنت مسجّل ومُعتمد بالفعل في ${school.name_ar}! يمكنك الدخول مباشرة برمز المدرسة.`);
+    switchStudentAuthMode('login');
+    return;
+  }
+
+  const alreadyPending = school.pending_students.find((st) => st.studentIdNumber === studentIdNumber);
+  if (!alreadyPending) {
+    school.pending_students.push({
+      id: Date.now(),
+      name,
+      studentIdNumber,
+      grade,
+      team,
+      status: 'pending',
+      createdAt: new Date().toISOString().slice(0, 10)
+    });
+    saveLocalStore(store);
+  }
+
+  const statusBox = document.getElementById('studentReqStatusBox');
+  if (statusBox) {
+    statusBox.innerHTML = `
+      <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:12px; color:#166534; font-weight:700;">
+        ⏳ تم إرسال استمارتك بنجاح إلى إدارة <strong>${school.name_ar}</strong>!<br>
+        ستتمكن من الدخول فور موافقة مدرستك ومنحك إذن الدخول.
+      </div>
+    `;
+  }
+  e.target.reset();
+  showToast('📨 تم إرسال طلب الانضمام بنجاح — بانتظار إذن مدرستك!');
+}
+
 function showStudentLoginGate() {
+  populateStudentReqSchools();
   document.getElementById('studentLoginGate').style.display = 'block';
   document.getElementById('classroomWorkspace').style.display = 'none';
 }
@@ -2054,6 +2142,7 @@ function handleStudentLogin(e) {
 
 function loginToClassroomCode(code, studentName) {
   const cleanCode = (code || '').trim().toUpperCase();
+  const cleanInput = (studentName || '').trim();
   const store = getLocalStore();
 
   // Map school-specific codes to exact classroom + exact school side (no dropdown spoofing possible!)
@@ -2086,7 +2175,7 @@ function loginToClassroomCode(code, studentName) {
   }
 
   if (!room) {
-    showToast('⚠️ رمز المدرسة غير صحيح! استخدم الرمز المخصص لمدرستك (مثل FAHM-2026 أو AFULA-2026 أو NAZ-101 أو NOF-101)');
+    showToast('⚠️ رمز المدرسة غير صحيح! استخدم الرمز المخصص لمدرستك أو قدّم استمارة انضمام.');
     return;
   }
 
@@ -2094,10 +2183,34 @@ function loginToClassroomCode(code, studentName) {
   const schoolB = store.schools.find((s) => s.id === room.school_b_id) || store.schools[1];
 
   const chosenSchool = lockedSide === 'b' ? schoolB : schoolA;
+  const cleanDigits = cleanInput.replace(/\D/g, '');
+  const pendingList = Array.isArray(chosenSchool.pending_students) ? chosenSchool.pending_students : [];
+  const pendingMatch = pendingList.find(
+    (st) => (cleanDigits && st.studentIdNumber === cleanDigits) || (st.name && st.name.toLowerCase() === cleanInput.toLowerCase())
+  );
+  if (pendingMatch) {
+    showToast(`⏳ طلبك قيد الانتظار يا ${pendingMatch.name} — يرجى انتظار موافقة وإذن إدارة ${chosenSchool.name_ar}!`);
+    return;
+  }
+
+  const approvedList = Array.isArray(chosenSchool.students) ? chosenSchool.students : [];
+  const demoNames = ['أمير جبارين', 'מאיה לוי | مايا ليفي', 'سامر زعبي', 'עומר כהן | عومر', 'أمير جبارين | אמיר'];
+  const isDemoUser = demoNames.includes(cleanInput);
+  let matchedStudent = approvedList.find(
+    (st) => (cleanDigits && st.studentIdNumber === cleanDigits) || (st.name && st.name.toLowerCase() === cleanInput.toLowerCase())
+  );
+
+  if (approvedList.length > 0 && !matchedStudent && !isDemoUser) {
+    showToast(`🔒 لم يتم تسجيلك بعد في قائمة ${chosenSchool.name_ar}. يرجى تعبئة استمارة الانضمام وانتظار إذن مدرستك!`);
+    switchStudentAuthMode('request');
+    return;
+  }
+
   updateTopWelcomeBanner(chosenSchool);
 
   activeStudentSession = {
-    name: studentName || 'طالب/ة مشترك',
+    name: (matchedStudent && matchedStudent.name) || cleanInput || 'طالب/ة مشترك',
+    studentIdNumber: (matchedStudent && matchedStudent.studentIdNumber) || cleanDigits || '',
     school_side: lockedSide,
     school_name_ar: chosenSchool.name_ar,
     school_name_he: chosenSchool.name_he
@@ -3439,6 +3552,56 @@ function renderSchoolPartnershipHub() {
     codeInfoEl.textContent = `🔑 קוד כניסה לתלמידי בית ספרך: ${studentRoomCode}`;
   }
 
+  // 0. Render Pending Student Join Requests (waiting for school approval)
+  const pendingContainer = document.getElementById('hubPendingStudentsContainer');
+  if (pendingContainer) {
+    const pendingList = Array.isArray(school.pending_students) ? school.pending_students : [];
+    if (pendingList.length === 0) {
+      pendingContainer.innerHTML = '';
+    } else {
+      pendingContainer.innerHTML = `
+        <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:14px; padding:14px; margin-bottom:14px;">
+          <div style="font-weight:900; color:#92400e; margin-bottom:8px;">
+            ⏳ طلبات انضمام طلاب بانتظار إذن المدرسة (${pendingList.length} طلبات):
+          </div>
+          <div class="admin-table-wrapper">
+            <table class="admin-schools-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>الاسم | שם</th>
+                  <th>رقم الهوية | ת.ז</th>
+                  <th>الصف | כיתה</th>
+                  <th>الفريق | צוות</th>
+                  <th>إذن الدخول | אישור</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pendingList
+                  .map(
+                    (st, idx) => `
+                  <tr>
+                    <td>${idx + 1}</td>
+                    <td><strong>${st.name}</strong></td>
+                    <td dir="ltr">${st.studentIdNumber || '—'}</td>
+                    <td>${st.grade}</td>
+                    <td>${st.team || 'عام'}</td>
+                    <td style="display:flex; gap:6px; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-green btn-sm" onclick="approvePendingStudent(${st.id})">✅ منح إذن الدخول</button>
+                      <button type="button" class="btn-delete-danger" onclick="rejectPendingStudent(${st.id})">❌ رفض</button>
+                    </td>
+                  </tr>
+                `
+                  )
+                  .join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+  }
+
   // 1. Render Private Student Roster (ONLY this school's students)
   const studentsContainer = document.getElementById('hubStudentsListContainer');
   if (studentsContainer) {
@@ -3446,23 +3609,24 @@ function renderSchoolPartnershipHub() {
     if (myStudents.length === 0) {
       studentsContainer.innerHTML = `
         <div style="text-align:center; padding:18px; color:var(--text-muted); border:1.5px dashed var(--border-color); border-radius:12px;">
-          עדיין לא הוזנו תלמידים לבית ספר זה (${school.name_he}). השתמש בטופס למעלה להוספת תלמידי בית ספרך.
+          עדיין לא הוזנו תלמידים לבית ספר זה (${school.name_he}). השתמש בטופס למעלה או העלה קובץ אקסל להוספת תלמידי בית ספרך.
         </div>
       `;
     } else {
       studentsContainer.innerHTML = `
         <div style="font-weight:800; color:var(--navy-900); margin-bottom:8px;">
-          📋 רשימת תלמידי ${school.name_he} (${myStudents.length} תלמידים רשומים):
+          📋 قائمة طلاب ${school.name_ar} | רשימת תלמידי ${school.name_he} (${myStudents.length} طالب/ة):
         </div>
         <div class="admin-table-wrapper">
           <table class="admin-schools-table">
             <thead>
               <tr>
                 <th>#</th>
-                <th>שם התלמיד/ה | اسم الطالب/ة</th>
-                <th>כיתה | الصف</th>
-                <th>צוות / תחום | الفريق</th>
-                <th>פעולה</th>
+                <th>اسم الطالب/ة | שם התלמיד/ה</th>
+                <th>رقم الهوية | ת.ז / קוד</th>
+                <th>الصف | כיתה</th>
+                <th>الفريق | צוות</th>
+                <th>إدارة وتعديل | פעולות</th>
               </tr>
             </thead>
             <tbody>
@@ -3472,12 +3636,12 @@ function renderSchoolPartnershipHub() {
                 <tr>
                   <td>${idx + 1}</td>
                   <td><strong>${st.name}</strong></td>
+                  <td dir="ltr">${st.studentIdNumber || '—'}</td>
                   <td>${st.grade}</td>
                   <td>${st.team || 'כללי | عام'}</td>
-                  <td>
-                    <button type="button" class="btn-delete-danger" onclick="deleteSchoolStudent(${st.id})">
-                      🗑️ הסר
-                    </button>
+                  <td style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-blue btn-sm" onclick="editSchoolStudent(${st.id})">✏️ تعديل</button>
+                    <button type="button" class="btn-delete-danger" onclick="deleteSchoolStudent(${st.id})">🗑️ حذف</button>
                   </td>
                 </tr>
               `
@@ -3628,6 +3792,7 @@ function addSchoolStudent(e) {
   e.preventDefault();
   if (!activeDashboardSchool) return;
   const name = (document.getElementById('hubStudentName')?.value || '').trim();
+  const studentIdNumber = (document.getElementById('hubStudentId')?.value || '').trim().replace(/\D/g, '');
   const grade = (document.getElementById('hubStudentGrade')?.value || '').trim();
   const team = (document.getElementById('hubStudentTeam')?.value || '').trim();
   if (!name || !grade) return;
@@ -3640,8 +3805,10 @@ function addSchoolStudent(e) {
   school.students.push({
     id: Date.now(),
     name,
+    studentIdNumber,
     grade,
-    team
+    team,
+    status: 'approved'
   });
   school.students_count = Math.max(school.students.length, school.students_count || 0);
   saveLocalStore(store);
@@ -3649,7 +3816,198 @@ function addSchoolStudent(e) {
   e.target.reset();
   loadPlatformStats();
   renderSchoolPartnershipHub();
-  showToast(`✅ התלמיד/ה "${name}" נוסף/ה בהצלחה לרשימת התלמידים הפרטית של ${school.name_he}!`);
+  showToast(`✅ تمت إضافة الطالب/ة "${name}" بنجاح إلى قائمة ${school.name_ar}!`);
+}
+
+function editSchoolStudent(studentId) {
+  if (!activeDashboardSchool) return;
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+  if (!school || !Array.isArray(school.students)) return;
+  const st = school.students.find((x) => Number(x.id) === Number(studentId));
+  if (!st) return;
+
+  const newName = prompt('تعديل اسم الطالب/ة:', st.name || '');
+  if (newName === null) return;
+  const newIdNum = prompt('تعديل رقم الهوية / الكود الشخصي:', st.studentIdNumber || '');
+  if (newIdNum === null) return;
+  const newGrade = prompt('تعديل الصف:', st.grade || '');
+  if (newGrade === null) return;
+  const newTeam = prompt('تعديل الفريق / المجال:', st.team || '');
+  if (newTeam === null) return;
+
+  st.name = newName.trim() || st.name;
+  st.studentIdNumber = newIdNum.trim().replace(/\D/g, '');
+  st.grade = newGrade.trim() || st.grade;
+  st.team = newTeam.trim();
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast(`✅ تم تحديث بيانات الطالب/ة "${st.name}".`);
+}
+
+function approvePendingStudent(reqId) {
+  if (!activeDashboardSchool) return;
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+  if (!school || !Array.isArray(school.pending_students)) return;
+  const idx = school.pending_students.findIndex((x) => Number(x.id) === Number(reqId));
+  if (idx < 0) return;
+
+  const req = school.pending_students.splice(idx, 1)[0];
+  if (!Array.isArray(school.students)) school.students = [];
+  school.students.push({
+    id: req.id || Date.now(),
+    name: req.name,
+    studentIdNumber: req.studentIdNumber || '',
+    grade: req.grade || '',
+    team: req.team || '',
+    status: 'approved'
+  });
+  school.students_count = Math.max(school.students.length, school.students_count || 0);
+  saveLocalStore(store);
+  loadPlatformStats();
+  renderSchoolPartnershipHub();
+  showToast(`✅ تم منح إذن الدخول للطالب/ة "${req.name}" بنجاح!`);
+}
+
+function rejectPendingStudent(reqId) {
+  if (!activeDashboardSchool) return;
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+  if (!school || !Array.isArray(school.pending_students)) return;
+  school.pending_students = school.pending_students.filter((x) => Number(x.id) !== Number(reqId));
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast('❌ تم رفض وحذف طلب الانضمام.');
+}
+
+function handleSchoolBulkStudentsUpload(e) {
+  if (!activeDashboardSchool) return;
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  const processGrid = (grid) => {
+    if (!grid || !grid.length) {
+      showToast('⚠️ الملف فارغ أو غير مقروء.');
+      return;
+    }
+    let headerIdx = -1;
+    let colId = -1, colName = -1, colFirst = -1, colLast = -1, colGrade = -1, colTeam = -1;
+    for (let r = 0; r < Math.min(15, grid.length); r++) {
+      const row = grid[r].map((c) => String(c || '').trim());
+      for (let c = 0; c < row.length; c++) {
+        const h = row[c];
+        if (/זהות|ת"ז|ת\.ז|הوية|هويّة|id/i.test(h)) colId = c;
+        else if (/שם משפחה|العائلة/i.test(h)) colLast = c;
+        else if (/שם פרטי|الاسم الشخصي/i.test(h)) colFirst = c;
+        else if (/שם תלמיד|שם מלא|اسم الطالب|الاسم|^שם$/i.test(h)) colName = c;
+        else if (/כיתה|صف|الصف|grade|class/i.test(h)) colGrade = c;
+        else if (/צוות|فريق|الفريق|team/i.test(h)) colTeam = c;
+      }
+      if (colName >= 0 || colFirst >= 0 || colId >= 0) { headerIdx = r; break; }
+    }
+
+    const store = getLocalStore();
+    const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+    if (!school) return;
+    if (!Array.isArray(school.students)) school.students = [];
+
+    let added = 0;
+    const start = headerIdx >= 0 ? headerIdx + 1 : 0;
+    for (let i = start; i < grid.length; i++) {
+      const rw = grid[i];
+      if (!rw || !rw.length) continue;
+      let fullName = '';
+      if (colName >= 0 && rw[colName]) fullName = String(rw[colName]).trim();
+      else if (colLast >= 0 || colFirst >= 0) fullName = [colLast >= 0 ? rw[colLast] : '', colFirst >= 0 ? rw[colFirst] : ''].filter(Boolean).join(' ').trim();
+      else {
+        for (let k = 0; k < rw.length; k++) {
+          const txt = String(rw[k] || '').trim();
+          if (txt && !/^\d+$/.test(txt) && txt.length >= 2) { fullName = txt; break; }
+        }
+      }
+      if (!fullName) continue;
+      const rawId = colId >= 0 ? String(rw[colId] || '').replace(/\D/g, '') : '';
+      const grade = colGrade >= 0 ? String(rw[colGrade] || '').trim() : 'عام';
+      const team = colTeam >= 0 ? String(rw[colTeam] || '').trim() : '';
+
+      const exists = school.students.find((s) => (rawId && s.studentIdNumber === rawId) || s.name === fullName);
+      if (!exists) {
+        school.students.push({
+          id: Date.now() + added,
+          name: fullName,
+          studentIdNumber: rawId,
+          grade: grade || 'عام',
+          team,
+          status: 'approved'
+        });
+        added++;
+      }
+    }
+
+    school.students_count = Math.max(school.students.length, school.students_count || 0);
+    saveLocalStore(store);
+    loadPlatformStats();
+    renderSchoolPartnershipHub();
+    e.target.value = '';
+    showToast(`✅ تم استيراد وإضافة ${added} طالباً إلى قائمة ${school.name_ar}!`);
+  };
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const bytes = new Uint8Array(ev.target.result);
+    const isBinary = (bytes[0] === 0x50 && bytes[1] === 0x4B) || (bytes[0] === 0xD0 && bytes[1] === 0xCF);
+    if (!isBinary) {
+      const text = new TextDecoder('utf-8').decode(bytes);
+      if (/<table|<tr|<td/i.test(text)) {
+        const doc = new DOMParser().parseFromString(text, 'text/html');
+        const grid = Array.from(doc.querySelectorAll('tr')).map((tr) =>
+          Array.from(tr.querySelectorAll('th,td')).map((td) => td.textContent.trim())
+        );
+        processGrid(grid);
+        return;
+      }
+      const sep = text.indexOf('\t') >= 0 ? '\t' : ',';
+      const grid = text.split(/\r?\n/).filter(Boolean).map((ln) => ln.split(sep).map((v) => v.replace(/^"|"$/g, '').trim()));
+      processGrid(grid);
+      return;
+    }
+    const parseXlsx = () => {
+      const wb = window.XLSX.read(bytes, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const grid = window.XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      processGrid(grid);
+    };
+    if (window.XLSX) { parseXlsx(); }
+    else {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';
+      sc.onload = parseXlsx;
+      document.head.appendChild(sc);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function exportSchoolStudentsCSV() {
+  if (!activeDashboardSchool) return;
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === Number(activeDashboardSchool.id));
+  if (!school) return;
+  const approved = Array.isArray(school.students) ? school.students : [];
+  const pending = Array.isArray(school.pending_students) ? school.pending_students : [];
+
+  const rows = [['الاسم', 'رقم الهوية / الكود', 'الصف', 'الفريق', 'الحالة']];
+  approved.forEach((st) => rows.push([st.name, st.studentIdNumber || '', st.grade || '', st.team || '', 'معتمد (مسجّل)']));
+  pending.forEach((st) => rows.push([st.name, st.studentIdNumber || '', st.grade || '', st.team || '', 'بانتظار إذن المدرسة']));
+
+  const csv = '\uFEFF' + rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bayt_students_${school.id}.csv`;
+  a.click();
+  showToast('📥 تم استرجاع وتصدير قائمة ومعطيات الطلاب بنجاح!');
 }
 
 function deleteSchoolStudent(studentId) {
