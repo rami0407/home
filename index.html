@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=7" />
+  <link rel="stylesheet" href="./styles.css?v=8" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -391,6 +391,32 @@
             </div>
 
             <form id="schoolRegistrationForm" onsubmit="submitSchoolRegistration(event)">
+              <div class="form-section-title" data-i18n="reg_sec_account">🔐 أولاً: إعداد حساب دخول المدرسة (الإيميل كاسم مستخدم + رمز الدخول الدائم للموقع) | הגדרת חשבון הכניסה של בית הספר (אימייל כשם משתמש + קוד כניסה)</div>
+              <div class="access-code-setup-box">
+                <p class="access-code-setup-hint" data-i18n="reg_access_code_hint">
+                  أدخل البريد الإلكتروني الذي ترغب أن يكون <strong>اسم المستخدم الدائم للمدرسة</strong>، واختر رمز دخول / كلمة مرور خاصة بك لتستطيع المدرسة دائماً الرجوع إلى حسابها، أو استرداد كلمة المرور عبر هذا الإيميل في حال نسيانها.
+                </p>
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label data-i18n="lbl_username_email">📧 البريد الإلكتروني المعتمد كاسم مستخدم للمدرسة (Username Email) | האימייל שישמש כשם המשתמש של בית הספר *</label>
+                  <input type="email" id="regContactEmail" required placeholder="مثال: my-school@education.gov.il أو بريد مدير/مركز المدرسة" dir="ltr" style="text-align: start; font-weight: 700; border-color: var(--navy-700); background: #ffffff;" />
+                </div>
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label data-i18n="lbl_choose_access_code">🔑 اختر رمز الدخول / كلمة المرور للموقع | בחרו קוד כניסה / סיסמה לאתר *</label>
+                    <div class="inline-inputs">
+                      <input type="text" id="regAccessCode" required minlength="4" placeholder="مثال: HIKMA-2026 أو كلمة مرور خاصة" dir="ltr" style="text-align: start; font-weight: 700; background: #ffffff;" />
+                      <button type="button" class="btn btn-outline-blue btn-sm" onclick="generateSuggestedSchoolCode()" title="توليد رمز دخول مقترح">
+                        🎲 توليد رمز | יצירת קוד
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label data-i18n="lbl_confirm_access_code">🔒 تأكيد رمز الدخول / كلمة المرور | אימות קוד כניסה / סיסמה *</label>
+                    <input type="text" id="regAccessCodeConfirm" required minlength="4" placeholder="أعد كتابة رمز الدخول للتأكيد | הקלידו שוב לאימות" dir="ltr" style="text-align: start; font-weight: 700; background: #ffffff;" />
+                  </div>
+                </div>
+              </div>
+
               <div class="form-section-title" data-i18n="reg_sec_basic">1. معلومات المدرسة الأساسية | פרטי בית הספר הבסיסיים</div>
               <div class="form-grid-2">
                 <div class="form-group">
@@ -486,8 +512,8 @@
                 </div>
               </div>
 
-              <div class="form-section-title" data-i18n="reg_sec_contact">4. شخص التواصل المسؤول (صاحب الحساب والإيميل المعتمد للاسترداد) | פרטי איש קשר ואימייל לשחזור</div>
-              <div class="form-grid-2">
+              <div class="form-section-title" data-i18n="reg_sec_contact">4. شخص التواصل المسؤول في المدرسة | פרטי איש קשר בבית הספר</div>
+              <div class="form-grid-3">
                 <div class="form-group">
                   <label data-i18n="lbl_contact_name">الاسم الكامل | שם מלא *</label>
                   <input type="text" id="regContactName" data-i18n-placeholder="ph_contact_name" required placeholder="مثال: د. ريم جبارين / יעל לוי" />
@@ -501,41 +527,15 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_contact_email">البريد الإلكتروني المعتمد (لاسترداد كلمة المرور دائماً) | דוא"ל בית ספרי (לשחזור סיסמה) *</label>
-                  <input type="email" id="regContactEmail" required placeholder="principal@school.edu" dir="ltr" style="text-align: start;" />
-                </div>
-                <div class="form-group">
                   <label data-i18n="lbl_contact_phone">رقم الهاتف | מספר טלפון *</label>
                   <input type="tel" id="regContactPhone" required placeholder="050-0000000" dir="ltr" style="text-align: start;" />
-                </div>
-              </div>
-
-              <div class="form-section-title" data-i18n="reg_sec_access_code">5. اختيار رمز دخول للموقع (لتستطيع المدرسة دائماً الرجوع إلى حسابها) | בחירת קוד כניסה וסיסמה קבועים לאתר</div>
-              <div class="access-code-setup-box">
-                <p class="access-code-setup-hint" data-i18n="reg_access_code_hint">
-                  🔐 اختر رمز دخول خاصاً أو كلمة مرور لمدرستك. ستستخدم هذا الرمز مع بريدك الإلكتروني لتسجيل الدخول دائماً إلى لوحة تحكم المدرسة، وفي حال نسيانه يمكنك استرداده في أي وقت عبر البريد الإلكتروني المسجل أعلاه.
-                </p>
-                <div class="form-grid-2">
-                  <div class="form-group">
-                    <label data-i18n="lbl_choose_access_code">🔑 اختر رمز الدخول / كلمة المرور للموقع | בחרו קוד כניסה / סיסמה לאתר *</label>
-                    <div class="inline-inputs">
-                      <input type="text" id="regAccessCode" required minlength="4" placeholder="مثال: HIKMA-2026 أو كلمة مرور خاصة" dir="ltr" style="text-align: start; font-weight: 700;" />
-                      <button type="button" class="btn btn-outline-blue btn-sm" onclick="generateSuggestedSchoolCode()" title="توليد رمز دخول مقترح">
-                        🎲 توليد رمز | יצירת קוד
-                      </button>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label data-i18n="lbl_confirm_access_code">🔒 تأكيد رمز الدخول / كلمة المرور | אימות קוד כניסה / סיסמה *</label>
-                    <input type="text" id="regAccessCodeConfirm" required minlength="4" placeholder="أعد كتابة رمز الدخول للتأكيد | הקלידו שוב לאימות" dir="ltr" style="text-align: start; font-weight: 700;" />
-                  </div>
                 </div>
               </div>
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-green btn-lg">
                   <span>✨</span>
-                  <span data-i18n="btn_submit_registration">حفظ تسجيل المدرسة واعتماد رمز الدخول والانتقال للمطابقة | שמירת הרשמה וקוד כניסה</span>
+                  <span data-i18n="btn_submit_registration">حفظ تسجيل المدرسة واعتماد الإيميل ورمز الدخول والانتقال للمطابقة | שמירת הרשמה וקוד כניסה</span>
                 </button>
               </div>
             </form>
@@ -559,7 +559,7 @@
             <form class="student-login-form" onsubmit="handleSchoolPrincipalLogin(event)">
               <div class="form-grid-2" style="margin-bottom: 6px;">
                 <div class="form-group">
-                  <label>📧 البريد الإلكتروني المسجل أو رمز المدرسة | אימייל רשום או קוד בית ספר *</label>
+                  <label>📧 اسم المستخدم للمدرسة (الإيميل المسجل) | שם משתמש (אימייל רשום) *</label>
                   <input type="text" id="principalLoginInput" required placeholder="bishara@bayt.edu / BISHARA-2026" dir="ltr" style="text-align: start;" />
                 </div>
                 <div class="form-group">
@@ -1294,6 +1294,6 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="./app.js?v=7"></script>
+  <script src="./app.js?v=8"></script>
 </body>
 </html>
