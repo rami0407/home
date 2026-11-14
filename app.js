@@ -2049,7 +2049,7 @@ function populateStudentReqSchools() {
 }
 
 function openStudentJoinOrLogin(mode) {
-  if (typeof switchView === 'function') switchView('students');
+  if (typeof navigateTo === 'function') navigateTo('students');
   showStudentLoginGate();
   switchStudentAuthMode(mode || 'login');
 }
