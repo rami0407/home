@@ -1733,28 +1733,127 @@ function togglePostTranslation(postId) {
   visiblePostTranslations[postId] = !currentlyOpen;
 }
 
-function previewComposerTranslation() {
-  const text = document.getElementById('postContentInput').value;
-  const previewBox = document.getElementById('composerTranslationPreview');
-  if (!text.trim()) {
-    showToast('اكتب نصاً أولاً لمعاينة ترجمته الفورية');
-    return;
-  }
-  const sourceLang = detectLang(text);
-  const targetLang = sourceLang === 'ar' ? 'he' : 'ar';
-  const translated = smartTranslateLocal(text, targetLang);
-  previewBox.style.display = 'block';
-  previewBox.innerHTML = `<strong>⚡ المعاينة الفورية (${targetLang === 'he' ? 'בעברית' : 'بالعربية'}):</strong><br/>${translated}`;
+function autoResizeTextarea(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.max(170, el.scrollHeight) + 'px';
 }
 
-function submitForumPost(e) {
+async function aiTranslateText(text, targetLang) {
+  if (!text || !text.trim()) return '';
+  const clean = text.trim();
+  const sourceLang = detectLang(clean);
+  if (sourceLang === targetLang) return clean;
+
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(clean)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && Array.isArray(data[0])) {
+        const joined = data[0].map((part) => part[0]).join('');
+        if (joined && joined.trim()) return joined.trim();
+      }
+    }
+  } catch (e) {
+    // Fallback to local smart dictionary if offline
+  }
+  return smartTranslateLocal(clean, targetLang);
+}
+
+async function translateComposerWithAI(targetLang = 'he') {
+  const input = document.getElementById('postContentInput');
+  const previewBox = document.getElementById('composerTranslationPreview');
+  const transTextarea = document.getElementById('composerTranslatedTextarea');
+  const titleEl = document.getElementById('composerTransTitle');
+
+  if (!input || !input.value.trim()) {
+    showToast('✍️ اكتب نص الرسالة أو المشروع أولاً ليقوم الذكاء الاصطناعي بترجمته فوراً!');
+    return;
+  }
+
+  showToast('🤖 جاري الترجمة بالذكاء الاصطناعي...');
+  const translated = await aiTranslateText(input.value, targetLang);
+  previewBox.style.display = 'block';
+  if (titleEl) {
+    titleEl.textContent =
+      targetLang === 'he'
+        ? '🤖 الترجمة الذكية إلى العبرية (תרגום AI לעברית — يمكنك تعديلها أو اعتمادها):'
+        : '🤖 الترجمة الذكية إلى العربية (תרגום AI לערבית — يمكنك تعديلها أو اعتمادها):';
+  }
+  if (transTextarea) {
+    transTextarea.value = translated;
+    transTextarea.lang = targetLang;
+    autoResizeTextarea(transTextarea);
+  }
+}
+
+function applyAITranslationToMainField(mainId, transId) {
+  const mainEl = document.getElementById(mainId);
+  const transEl = document.getElementById(transId);
+  if (mainEl && transEl && transEl.value.trim()) {
+    mainEl.value = transEl.value;
+    autoResizeTextarea(mainEl);
+    showToast('✅ تم وضع النص المترجم في حقل الكتابة الرئيسي!');
+  }
+}
+
+async function translateResearchProjectWithAI(targetLang = 'he') {
+  const titleEl = document.getElementById('resTitle');
+  const summaryEl = document.getElementById('resSummary');
+  const box = document.getElementById('researchAiPreviewBox');
+  const titleTrans = document.getElementById('resTitleTranslated');
+  const summaryTrans = document.getElementById('resSummaryTranslated');
+
+  if ((!titleEl || !titleEl.value.trim()) && (!summaryEl || !summaryEl.value.trim())) {
+    showToast('✍️ اكتب عنوان أو تفاصيل المشروع أولاً لترجمته بالذكاء الاصطناعي!');
+    return;
+  }
+
+  showToast('🤖 جاري ترجمة المشروع بالذكاء الاصطناعي...');
+  const [tOut, sOut] = await Promise.all([
+    aiTranslateText(titleEl.value || '', targetLang),
+    aiTranslateText(summaryEl.value || '', targetLang)
+  ]);
+
+  if (box) box.style.display = 'block';
+  if (titleTrans) titleTrans.value = tOut;
+  if (summaryTrans) {
+    summaryTrans.value = sOut;
+    autoResizeTextarea(summaryTrans);
+  }
+}
+
+function applyProjectAITranslation() {
+  const titleEl = document.getElementById('resTitle');
+  const summaryEl = document.getElementById('resSummary');
+  const titleTrans = document.getElementById('resTitleTranslated');
+  const summaryTrans = document.getElementById('resSummaryTranslated');
+
+  if (titleTrans && titleTrans.value.trim()) titleEl.value = titleTrans.value;
+  if (summaryTrans && summaryTrans.value.trim()) {
+    summaryEl.value = summaryTrans.value;
+    autoResizeTextarea(summaryEl);
+  }
+  showToast('✅ تم اعتماد الترجمة في حقول المشروع!');
+}
+
+async function previewComposerTranslation() {
+  await translateComposerWithAI('he');
+}
+
+async function submitForumPost(e) {
   e.preventDefault();
   if (!activeClassroomData) return;
   const content = document.getElementById('postContentInput').value.trim();
   const category = document.getElementById('postCategorySelect').value;
+  const customTransEl = document.getElementById('composerTranslatedTextarea');
   if (!content) return;
 
   const origLang = detectLang(content);
+  const otherLang = origLang === 'ar' ? 'he' : 'ar';
+  const customTrans = customTransEl && customTransEl.value.trim() ? customTransEl.value.trim() : await aiTranslateText(content, otherLang);
+
   const store = getLocalStore();
   store.posts.unshift({
     id: Date.now(),
@@ -1765,17 +1864,18 @@ function submitForumPost(e) {
     school_name_ar: activeStudentSession.school_name_ar,
     school_name_he: activeStudentSession.school_name_he,
     original_lang: origLang,
-    content_ar: origLang === 'ar' ? content : smartTranslateLocal(content, 'ar'),
-    content_he: origLang === 'he' ? content : smartTranslateLocal(content, 'he'),
+    content_ar: origLang === 'ar' ? content : customTrans,
+    content_he: origLang === 'he' ? content : customTrans,
     likes: 1,
     replies: []
   });
   saveLocalStore(store);
 
   document.getElementById('postContentInput').value = '';
+  if (customTransEl) customTransEl.value = '';
   document.getElementById('composerTranslationPreview').style.display = 'none';
   fetchClassroomById(activeClassroomData.classroom.id);
-  showToast('✨ تم نشر مشاركتك مع الترجمة الفورية باللغتين!');
+  showToast('✨ تم نشر مشاركتك مع الترجمة الذكية باللغتين!');
 }
 
 function submitForumReply(e, postId) {
@@ -1849,7 +1949,7 @@ function renderResearchDataList() {
     .join('');
 }
 
-function submitResearchData(e) {
+async function submitResearchData(e) {
   e.preventDefault();
   if (!activeClassroomData) return;
   const data_type = document.getElementById('resDataType').value;
@@ -1858,27 +1958,42 @@ function submitResearchData(e) {
   const summary = document.getElementById('resSummary').value.trim();
   const metric_badge = document.getElementById('resBadge').value.trim() || 'بيانات ميدانية موثقة | נתוני שדה';
 
+  const titleTransEl = document.getElementById('resTitleTranslated');
+  const summaryTransEl = document.getElementById('resSummaryTranslated');
+
   const lang = detectLang(title + ' ' + summary);
+  const otherLang = lang === 'ar' ? 'he' : 'ar';
+
+  const transTitle =
+    titleTransEl && titleTransEl.value.trim()
+      ? titleTransEl.value.trim()
+      : await aiTranslateText(title, otherLang);
+  const transSummary =
+    summaryTransEl && summaryTransEl.value.trim()
+      ? summaryTransEl.value.trim()
+      : await aiTranslateText(summary, otherLang);
+
   const store = getLocalStore();
   store.research_data.unshift({
     id: Date.now(),
     classroom_id: activeClassroomData.classroom.id,
     data_type,
-    title_ar: lang === 'ar' ? title : smartTranslateLocal(title, 'ar'),
-    title_he: lang === 'he' ? title : smartTranslateLocal(title, 'he'),
+    title_ar: lang === 'ar' ? title : transTitle,
+    title_he: lang === 'he' ? title : transTitle,
     town_ar: town,
     town_he: town,
     author_name: activeStudentSession.name,
-    summary_ar: lang === 'ar' ? summary : smartTranslateLocal(summary, 'ar'),
-    summary_he: lang === 'he' ? summary : smartTranslateLocal(summary, 'he'),
+    summary_ar: lang === 'ar' ? summary : transSummary,
+    summary_he: lang === 'he' ? summary : transSummary,
     metric_badge
   });
   saveLocalStore(store);
 
   document.getElementById('uploadResearchForm').reset();
-  document.getElementById('uploadResearchForm').style.display = 'none';
+  const aiBox = document.getElementById('researchAiPreviewBox');
+  if (aiBox) aiBox.style.display = 'none';
   fetchClassroomById(activeClassroomData.classroom.id);
-  showToast('📂 تم رفع المعطيات الميدانية وترجمتها للفريق المشترك!');
+  showToast('📂 تم حفظ ومشاركة المشروع المبحوث مع الترجمة الذكية باللغتين!');
 }
 
 function renderCanvasBoard() {

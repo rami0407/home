@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=3" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -729,7 +729,7 @@
                 <div class="composer-card">
                   <div class="composer-header">
                     <h3 data-i18n="composer_title">✍️ شارك في حوار "نتحدث معاً | מדברים יחד"</h3>
-                    <span class="supervised-pill" data-i18n="supervised_badge">🛡️ بإشراف المعلمين</span>
+                    <span class="supervised-pill" data-i18n="supervised_badge">🛡️ بإشراف المعلمين | בפיקוח מורים</span>
                   </div>
                   <form onsubmit="submitForumPost(event)">
                     <div class="composer-controls">
@@ -739,17 +739,44 @@
                         <option value="favorite_food" data-i18n="cat_food">🍲 أكلتنا المفضلة | המאכל האהוב</option>
                         <option value="holidays" data-i18n="cat_holidays">🌱 أعيادنا ومناسباتنا | חגים ומועדים</option>
                       </select>
-                      <button type="button" class="btn-instant-preview" onclick="previewComposerTranslation()">
-                        <span>⚡</span>
-                        <span data-i18n="btn_preview_translation">معاينة الترجمة الفورية قبل النشر</span>
-                      </button>
+                      <div class="ai-actions-group">
+                        <button type="button" class="btn-instant-preview" onclick="translateComposerWithAI('he')">
+                          <span>🤖</span>
+                          <span data-i18n="btn_ai_trans_he">ترجمة بالذكاء الاصطناعي للعبرية (AI לעברית)</span>
+                        </button>
+                        <button type="button" class="btn-ai-replace" onclick="translateComposerWithAI('ar')">
+                          <span>🔄</span>
+                          <span data-i18n="btn_ai_trans_ar">ترجمة للعربية (לערבית)</span>
+                        </button>
+                      </div>
                     </div>
-                    <textarea id="postContentInput" rows="3" required placeholder="اكتب رسالتك هنا بالعربية أو العبرية... | כתבו כאן את ההודעה שלכם בערבית או בעברית..."></textarea>
-                    <div id="composerTranslationPreview" class="composer-trans-preview" style="display: none;"></div>
+
+                    <textarea
+                      id="postContentInput"
+                      rows="6"
+                      style="width: 100%; min-height: 175px; display: block; font-size: 1.06rem; padding: 16px;"
+                      oninput="autoResizeTextarea(this)"
+                      required
+                      placeholder="اكتب رسالتك أو تفاصيل مشروعك هنا بحرية وبمساحة واسعة (بالعربية أو العبرية)...&#10;כתבו כאן את ההודעה או תוכן הפרויקט שלכם בחופשיות (בערבית או בעברית)..."
+                    ></textarea>
+
+                    <div id="composerTranslationPreview" class="composer-trans-preview" style="display: none;">
+                      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                        <strong id="composerTransTitle" style="color:var(--green-900);">🤖 الترجمة الذكية المقترحة (يمكنك تعديلها أو اعتمادها):</strong>
+                        <div style="display:flex; gap:8px;">
+                          <button type="button" class="btn-ai-replace" onclick="applyAITranslationToMainField('postContentInput', 'composerTranslatedTextarea')">
+                            ✍️ وضع الترجمة العبرية في حقل الكتابة الرئيسي
+                          </button>
+                        </div>
+                      </div>
+                      <textarea id="composerTranslatedTextarea" rows="5" style="width: 100%; min-height: 135px; display: block;" dir="rtl" lang="he"></textarea>
+                    </div>
+
                     <div class="composer-footer">
-                      <span class="composer-tip" data-i18n="composer_tip">تُحفظ الرسالة باللغتين تلقائياً ليتمكن زملاؤك من قراءتها بلغتهم.</span>
-                      <button type="submit" class="btn btn-green">
-                        <span data-i18n="btn_publish_post">نشر المشاركة في المنتدى</span>
+                      <span class="composer-tip" data-i18n="composer_tip">💡 تُحفظ المشاركة باللغتين (العربية والعبرية) ليتمكن جميع الطلاب من قراءتها وفهمها فوراً.</span>
+                      <button type="submit" class="btn btn-green btn-lg">
+                        <span>🚀</span>
+                        <span data-i18n="btn_publish_post">نشر المشاركة في المنتدى | פרסום בפורום</span>
                       </button>
                     </div>
                   </form>
@@ -776,19 +803,48 @@
                   </button>
                 </div>
 
-                <form id="uploadResearchForm" class="lab-mini-form" style="display: none;" onsubmit="submitResearchData(event)">
+                <form id="uploadResearchForm" class="lab-mini-form" style="display: flex;" onsubmit="submitResearchData(event)">
                   <div class="form-grid-2">
                     <select id="resDataType" required>
                       <option value="measurement">🧪 قياس علمي / مخبري (מדידה מדעית)</option>
                       <option value="interview">🎙️ مقابلة مع كبار السن (ראיון ותיקים)</option>
-                      <option value="photo">📷 توثيق مصور (תיעוד מצולם)</option>
+                      <option value="photo">📷 توثيق مصور / مشروع (תיעוד מצולם)</option>
                     </select>
-                    <input type="text" id="resTown" required placeholder="البلدة (مثال: أم الفحم / العفولة)" />
+                    <input type="text" id="resTown" required placeholder="البلدة (مثال: أم الفحم / العفولة) | היישוב" />
                   </div>
-                  <input type="text" id="resTitle" required placeholder="عنوان المعطى أو العينة..." />
-                  <textarea id="resSummary" rows="2" required placeholder="ملخص النتائج أو القصة التي تم توثيقها..."></textarea>
-                  <input type="text" id="resBadge" placeholder="مؤشر رقمي مختصر (مثال: pH 7.5 | 12 صورة)" />
-                  <button type="submit" class="btn btn-green btn-sm" data-i18n="btn_save_data">حفظ ومشاركة مع الفريق</button>
+                  <input type="text" id="resTitle" required placeholder="عنوان المشروع أو المعطى البحثي... | כותרת הפרויקט או הנתון..." />
+                  <textarea
+                    id="resSummary"
+                    rows="5"
+                    oninput="autoResizeTextarea(this)"
+                    required
+                    placeholder="اكتب هنا تفاصيل المشروع البحثي، نتائج الفحص، أو القصة الموثقة بالكامل (حقل واسع يتمدد تلقائياً)...&#10;כתבו כאן את פירוט הפרויקט המחקרי, תוצאות הבדיקה או הסיפור המתועד..."
+                  ></textarea>
+
+                  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <button type="button" class="btn-instant-preview" onclick="translateResearchProjectWithAI('he')">
+                      <span>🤖</span>
+                      <span>ترجمة المشروع للعبرية بالذكاء الاصطناعي (תרגם פרויקט לעברית)</span>
+                    </button>
+                    <button type="button" class="btn-ai-replace" onclick="translateResearchProjectWithAI('ar')">
+                      <span>🔄</span>
+                      <span>ترجمة للعربية (תרגם לערבית)</span>
+                    </button>
+                  </div>
+
+                  <div id="researchAiPreviewBox" class="composer-trans-preview" style="display:none;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                      <strong style="color:var(--green-900);">🤖 ترجمة المشروع بالذكاء الاصطناعي (قابلة للتعديل):</strong>
+                      <button type="button" class="btn-ai-replace" onclick="applyProjectAITranslation()">
+                        ✍️ استبدال النص بالترجمة العبرية
+                      </button>
+                    </div>
+                    <input type="text" id="resTitleTranslated" style="margin-bottom:8px;" placeholder="عنوان المشروع المترجم..." />
+                    <textarea id="resSummaryTranslated" rows="4" oninput="autoResizeTextarea(this)" placeholder="تفاصيل المشروع المترجمة..."></textarea>
+                  </div>
+
+                  <input type="text" id="resBadge" placeholder="مؤشر رقمي مختصر (مثال: pH 7.5 | 12 صورة | بحث ميداني)" />
+                  <button type="submit" class="btn btn-green btn-lg" data-i18n="btn_save_data">💾 حفظ ومشاركة المشروع مع الفريق باللغتين | שמירה ושיתוף</button>
                 </form>
 
                 <div id="researchDataList" class="research-data-list"></div>
@@ -924,6 +980,6 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="./app.js"></script>
+  <script src="./app.js?v=3"></script>
 </body>
 </html>
