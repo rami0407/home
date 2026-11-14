@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=4" />
+  <link rel="stylesheet" href="./styles.css?v=5" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -19,21 +19,21 @@
     <div class="ambient-orb orb-gold"></div>
   </div>
 
-  <!-- Top School Welcome Banner (ברוכים הבאים מבית הספר...) -->
-  <div class="top-school-welcome-bar" id="topSchoolWelcomeBar">
+  <!-- Top School Welcome Banner (ברוכים הבאים מבית הספר... - Shown ONLY for the authenticated school, NO switcher dropdown) -->
+  <div class="top-school-welcome-bar" id="topSchoolWelcomeBar" style="display: none;">
     <div class="container top-welcome-inner">
       <div class="welcome-school-greeting">
         <span class="welcome-house-icon">🏫</span>
-        <span id="topWelcomeSchoolText" class="welcome-text-main">
-          ברוכים הבאים מבית הספר: <strong>חטיבת ביניים אבן ח׳לדון (אום אל-פחם)</strong> | أهلاً وسهلاً بكم من: <strong>مدرسة ابن خلدون الإعدادية (أم الفحم)</strong>
-        </span>
+        <span id="topWelcomeSchoolText" class="welcome-text-main"></span>
+        <span class="verified-school-badge">🔒 כניסה מאומתת | دخول موثّق للمدرسة فقط</span>
       </div>
       <div class="welcome-school-actions">
-        <label for="quickHeaderSchoolSwitch" class="welcome-switch-lbl">החלף בית ספר מחובר | تبديل المدرسة:</label>
-        <select id="quickHeaderSchoolSwitch" class="welcome-school-select" onchange="switchLoggedInSchool(this.value)"></select>
         <span id="adminActiveBadge" class="admin-active-pill" style="display: none;" onclick="navigateTo('admin')">
           🛡️ מחובר כמנהל האתר (Admin)
         </span>
+        <button type="button" class="btn-logout-school" onclick="logoutCurrentSchoolSession()">
+          🚪 התנתק מבית הספר | تسجيل خروج
+        </button>
       </div>
     </div>
   </div>
@@ -525,85 +525,135 @@
           </div>
         </div>
 
-        <!-- SUBVIEW 2B: SCHOOL DASHBOARD & AI MATCHING -->
+        <!-- SUBVIEW 2B: SCHOOL DASHBOARD & AI MATCHING (Protected by School Login - No Public Switcher) -->
         <div id="portal-dashboard-pane" class="portal-pane">
-          <!-- Active School Switcher Bar -->
-          <div class="active-school-bar">
-            <div class="active-school-selector">
-              <label for="dashboardSchoolSelect" data-i18n="lbl_active_school_view">🏫 المدرسة الحالية في لوحة التحكم:</label>
-              <select id="dashboardSchoolSelect" onchange="loadSchoolDashboard(this.value)"></select>
-            </div>
-            <div id="activeSchoolStatusBadge" class="school-match-pill"></div>
+          <!-- School Principal Login Gate (Shown when no school is logged in) -->
+          <div id="schoolPrincipalLoginGate" class="student-login-card" style="margin-bottom: 28px;">
+            <div class="login-card-badge">🔒 כניסה מאובטחת להנהלת בית הספר | دخول آمن لإدارة المدرسة فقط</div>
+            <h2 data-i18n="school_login_title">כניסה ללוח הבקרה של בית הספר שלך | تسجيل الدخول للوحة تحكم مدرستك</h2>
+            <p data-i18n="school_login_desc" style="color:var(--text-muted); margin-bottom:20px;">
+              כדי למנוע התחזות, כל בית ספר נכנס אך ורק באמצעות האימייל הבית-ספרי או הקוד האישי של בית הספר (או נרשם כבית ספר חדש).
+              <br/>
+              لمنع التزييف أو دخول مدارس أخرى، تدخل كل مدرسة فقط عبر بريدها الإلكتروني المعتمد أو رمزها الخاص.
+            </p>
+            <form class="student-login-form" onsubmit="handleSchoolPrincipalLogin(event)">
+              <div class="form-grid-2" style="margin-bottom: 18px;">
+                <div class="form-group">
+                  <label>📧 אימייל בית הספר או קוד בית ספר | البريد الإلكتروني للمدرسة أو رمزها *</label>
+                  <input type="text" id="principalLoginInput" required placeholder="לדוגמה: bishara@bayt.edu או IBN-101" />
+                </div>
+                <div class="form-group">
+                  <label>🔑 סיסמה / קוד אימות | كلمة المرور / رمز التحقق *</label>
+                  <input type="password" id="principalPasswordInput" value="123456" required placeholder="123456" />
+                </div>
+              </div>
+              <div class="quick-demo-codes">
+                <span>💡 דוגמה לכניסת מנהל בית ספר (לצורך הדגמה):</span>
+                <button type="button" class="code-chip" onclick="fillPrincipalLogin('bishara@bayt.edu', '123456')">
+                  תיכון אל-בישארה נצרת (bishara@bayt.edu)
+                </button>
+                <button type="button" class="code-chip" onclick="fillPrincipalLogin('ortalon@bayt.edu', '123456')">
+                  אורט אלון נוף הגליל (ortalon@bayt.edu)
+                </button>
+                <button type="button" class="code-chip" onclick="fillPrincipalLogin('ibnkhaldoun@bayt.edu', '123456')">
+                  אבן ח׳לדון אום אל-פחם (ibnkhaldoun@bayt.edu)
+                </button>
+              </div>
+              <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <button type="submit" class="btn btn-blue btn-lg" style="flex:1;">
+                  🔑 כניסה ללוח הבקרה של בית הספר | دخول لوحة تحكم المدرسة
+                </button>
+                <button type="button" class="btn btn-green btn-lg" onclick="switchPortalMode('register')">
+                  ➕ רישום בית ספר חדש | تسجيل مدرسة جديدة
+                </button>
+              </div>
+            </form>
           </div>
 
-          <!-- Current School Summary Card -->
-          <div id="currentSchoolProfileCard" class="current-school-card"></div>
-
-          <!-- Filter & Search Controls -->
-          <div class="matching-controls-card">
-            <div class="matching-controls-header">
-              <div>
-                <h3 data-i18n="matches_heading">🤖 اقتراحات الشراكة الذكية والاختيار اليدوي (AI Matches & Manual Filter)</h3>
-                <p data-i18n="matches_subheading">
-                  يرتب النظام المدارس تلقائياً حسب درجة الملاءمة (المسافة الجغرافية، المرحلة العمرية، الاهتمامات المشتركة)، ويمكنك الفلترة يدوياً حسب خصائص المدرسة أو إظهار المدارس التي لم تقترن بعد فقط (בתי ספר שטרם שודכו).
-                </p>
+          <!-- Authenticated School Dashboard Content (Hidden until school logs in or registers) -->
+          <div id="authenticatedSchoolDashboard" style="display: none;">
+            <div class="active-school-bar">
+              <div class="active-school-selector">
+                <span style="font-size:1.2rem;">🔒</span>
+                <strong id="lockedSchoolHeaderName" style="color:var(--navy-900); font-size:1.05rem;"></strong>
               </div>
-              <div class="unmatched-toggle-box">
-                <label class="switch-label">
-                  <input type="checkbox" id="filterUnmatchedOnly" onchange="renderMatchesList()" />
-                  <span data-i18n="filter_only_unmatched">إظهار المدارس التي لم تقترن بعد فقط (טרם שודכו בלבד)</span>
-                </label>
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div id="activeSchoolStatusBadge" class="school-match-pill"></div>
+                <button type="button" class="btn-delete-danger" onclick="logoutCurrentSchoolSession()">
+                  🚪 התנתק מבית הספר | تسجيل خروج المدرسة
+                </button>
               </div>
             </div>
 
-            <div class="manual-filters-grid">
-              <div class="filter-item">
-                <label data-i18n="filter_sector_lbl">القطاع | מגזר</label>
-                <select id="filterSector" onchange="renderMatchesList()">
-                  <option value="all" data-i18n="opt_all_sectors">جميع القطاعات (موصى به: شريك من المجتمع الآخر)</option>
-                  <option value="cross" data-i18n="opt_cross_sector">شراكة عربية-يهودية (דו-לאומי)</option>
-                  <option value="arab" data-i18n="sector_arab">عربي | ערבי</option>
-                  <option value="jewish_state" data-i18n="sector_jewish_state">يهودي حكومي | ממלכתי</option>
-                  <option value="jewish_religious" data-i18n="sector_jewish_rel">يهودي ديني | ממלכתי-דתי</option>
-                </select>
+            <!-- Current School Summary Card -->
+            <div id="currentSchoolProfileCard" class="current-school-card"></div>
+
+            <!-- Filter & Search Controls -->
+            <div class="matching-controls-card">
+              <div class="matching-controls-header">
+                <div>
+                  <h3 data-i18n="matches_heading">🤖 اقتراحات الشراكة الذكية والاختيار اليدوي (AI Matches & Manual Filter)</h3>
+                  <p data-i18n="matches_subheading">
+                    يرتب النظام المدارس تلقائياً حسب درجة الملاءمة (المسافة الجغرافية، المرحلة العمرية، الاهتمامات المشتركة)، ويمكنك الفلترة يدوياً حسب خصائص المدرسة أو إظهار المدارس التي لم تقترن بعد فقط (בתי ספר שטרם שודכו).
+                  </p>
+                </div>
+                <div class="unmatched-toggle-box">
+                  <label class="switch-label">
+                    <input type="checkbox" id="filterUnmatchedOnly" onchange="renderMatchesList()" />
+                    <span data-i18n="filter_only_unmatched">إظهار المدارس التي لم تقترن بعد فقط (טרם שודכו בלבד)</span>
+                  </label>
+                </div>
               </div>
 
-              <div class="filter-item">
-                <label data-i18n="filter_stage_lbl">المرحلة العمرية | שכבת גיל</label>
-                <select id="filterStage" onchange="renderMatchesList()">
-                  <option value="all" data-i18n="opt_all_stages">جميع المراحل</option>
-                  <option value="elementary" data-i18n="stage_elementary">ابتدائي (יסודי)</option>
-                  <option value="middle" data-i18n="stage_middle">إعدادي (חטיבת ביניים)</option>
-                  <option value="high" data-i18n="stage_high">ثانوي (תיכון)</option>
-                </select>
-              </div>
+              <div class="manual-filters-grid">
+                <div class="filter-item">
+                  <label data-i18n="filter_sector_lbl">القطاع | מגזר</label>
+                  <select id="filterSector" onchange="renderMatchesList()">
+                    <option value="all" data-i18n="opt_all_sectors">جميع القطاعات (موصى به: شريك من المجتمع الآخر)</option>
+                    <option value="cross" data-i18n="opt_cross_sector">شراكة عربية-يهودية (דו-לאומי)</option>
+                    <option value="arab" data-i18n="sector_arab">عربي | ערבי</option>
+                    <option value="jewish_state" data-i18n="sector_jewish_state">يهودي حكومي | ממלכתי</option>
+                    <option value="jewish_religious" data-i18n="sector_jewish_rel">يهودي ديني | ממלכתי-דתי</option>
+                  </select>
+                </div>
 
-              <div class="filter-item">
-                <label data-i18n="filter_interest_lbl">الاهتمام المشترك | תחום עניין</label>
-                <select id="filterInterest" onchange="renderMatchesList()">
-                  <option value="all" data-i18n="opt_all_interests">جميع المجالات</option>
-                  <option value="science_env" data-i18n="int_science_env">علوم وبيئة</option>
-                  <option value="history_heritage" data-i18n="int_history_heritage">تاريخ وتراث</option>
-                  <option value="lit_lang" data-i18n="int_lit_lang">آداب ولغات</option>
-                  <option value="arts_music" data-i18n="int_arts_music">فنون وموسيقى</option>
-                  <option value="social_entrepreneurship" data-i18n="int_social_ent">ريادة أعمال مجتمعية</option>
-                </select>
-              </div>
+                <div class="filter-item">
+                  <label data-i18n="filter_stage_lbl">المرحلة العمرية | שכבת גיל</label>
+                  <select id="filterStage" onchange="renderMatchesList()">
+                    <option value="all" data-i18n="opt_all_stages">جميع المراحل</option>
+                    <option value="elementary" data-i18n="stage_elementary">ابتدائي (יסודי)</option>
+                    <option value="middle" data-i18n="stage_middle">إعدادي (חטיבת ביניים)</option>
+                    <option value="high" data-i18n="stage_high">ثانوي (תיכון)</option>
+                  </select>
+                </div>
 
-              <div class="filter-item">
-                <label data-i18n="filter_activity_lbl">نوع النشاط | אופי פעילות</label>
-                <select id="filterActivity" onchange="renderMatchesList()">
-                  <option value="all" data-i18n="opt_all_activities">جميع الأنشطة</option>
-                  <option value="hybrid" data-i18n="act_hybrid">هجين (رقمي + ميداني)</option>
-                  <option value="research" data-i18n="act_research">مشاريع بحثية</option>
-                  <option value="online" data-i18n="act_online">عبر الإنترنت</option>
-                </select>
+                <div class="filter-item">
+                  <label data-i18n="filter_interest_lbl">الاهتمام المشترك | תחום עניין</label>
+                  <select id="filterInterest" onchange="renderMatchesList()">
+                    <option value="all" data-i18n="opt_all_interests">جميع المجالات</option>
+                    <option value="science_env" data-i18n="int_science_env">علوم وبيئة</option>
+                    <option value="history_heritage" data-i18n="int_history_heritage">تاريخ وتراث</option>
+                    <option value="lit_lang" data-i18n="int_lit_lang">آداب ولغات</option>
+                    <option value="arts_music" data-i18n="int_arts_music">فنون وموسيقى</option>
+                    <option value="social_entrepreneurship" data-i18n="int_social_ent">ريادة أعمال مجتمعية</option>
+                  </select>
+                </div>
+
+                <div class="filter-item">
+                  <label data-i18n="filter_activity_lbl">نوع النشاط | אופי פעילות</label>
+                  <select id="filterActivity" onchange="renderMatchesList()">
+                    <option value="all" data-i18n="opt_all_activities">جميع الأنشطة</option>
+                    <option value="hybrid" data-i18n="act_hybrid">هجين (رقمي + ميداني)</option>
+                    <option value="research" data-i18n="act_research">مشاريع بحثية</option>
+                    <option value="online" data-i18n="act_online">عبر الإنترنت</option>
+                  </select>
+                </div>
               </div>
             </div>
+
+            <!-- Matches Grid -->
+            <div id="matchesGridContainer" class="matches-grid"></div>
           </div>
-
-          <!-- Matches Grid -->
-          <div id="matchesGridContainer" class="matches-grid"></div>
         </div>
       </div>
     </section>
@@ -626,37 +676,40 @@
             </p>
 
             <form class="student-login-form" onsubmit="handleStudentLogin(event)">
-              <div class="form-grid-3">
+              <div class="form-grid-2" style="margin-bottom: 16px;">
                 <div class="form-group">
-                  <label data-i18n="lbl_access_code">رمز الغرفة المشتركة | קוד החדר המשותף *</label>
-                  <input type="text" id="studentCodeInput" value="BAYT-2026" required class="code-input" placeholder="BAYT-2026" />
+                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة المخصص للطالب | קוד התלמיד הייעודי של בית הספר *</label>
+                  <input type="text" id="studentCodeInput" value="FAHM-2026" required class="code-input" placeholder="مثال: FAHM-2026 أو AFULA-2026" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_student_nickname">اسمك الأول | שמך הפרטי *</label>
-                  <input type="text" id="studentNameInput" value="أمير | אמיר" required placeholder="مثال: أمير / מאיה" />
-                </div>
-                <div class="form-group">
-                  <label data-i18n="lbl_student_side">اختر مدرستك في الشراكة | בחרו את בית הספר שלכם</label>
-                  <select id="studentSideSelect">
-                    <option value="a" data-i18n="opt_side_a">المدرسة الشريكة (أ) - العربية | בית ספר שותף (א׳) - ערבי</option>
-                    <option value="b" data-i18n="opt_side_b">المدرسة الشريكة (ب) - اليهودية | בית ספר שותף (ב׳) - יהודי</option>
-                  </select>
+                  <label data-i18n="lbl_student_nickname">🧑‍🎓 اسمك الأول واللقب | שמך הפרטי ושם משפחה *</label>
+                  <input type="text" id="studentNameInput" value="أمير جبارين" required placeholder="مثال: أمير جبارين / מאיה לוי" />
                 </div>
               </div>
 
+              <div style="background:var(--green-50); border:1.5px solid var(--green-700); padding:10px 14px; border-radius:10px; font-size:0.86rem; margin-bottom:16px; color:var(--navy-900);">
+                🛡️ <strong>حماية الهوية ومنع التزييف | מניעת התחזות:</strong> يتم تحديد اسم مدرستك وساحتك تلقائياً بناءً على الرمز السري الذي استلمته من مدرستك، ولا يمكن لأي طالب التبديل إلى مدرسة أخرى.
+              </div>
+
               <div class="quick-demo-codes">
-                <span data-i18n="quick_codes_label">🔑 رموز غرف نشطة للتجربة السريعة | קודי חדרים פעילים להתנסות:</span>
-                <button type="button" class="code-chip" onclick="fillStudentCode('BAYT-2026', 'أمير جبارين | אמיר', 'a')">
-                  BAYT-2026 (ابن خلدون أم الفحم 🤝 كرميم العفولة)
+                <span data-i18n="quick_codes_label">🔑 رموز المدارس المخصصة للتجربة (كل رمز يدخل الطالب لمدرسته فقط):</span>
+                <button type="button" class="code-chip" onclick="fillStudentCode('FAHM-2026', 'أمير جبارين')">
+                  🏫 FAHM-2026 (طالب من: ابن خلدون - أم الفحم)
                 </button>
-                <button type="button" class="code-chip" onclick="fillStudentCode('GALIL-101', 'مايا ليفي | מאיה', 'b')">
-                  GALIL-101 (البشارة الناصرة 🤝 أورت ألون نوف هجليل)
+                <button type="button" class="code-chip" onclick="fillStudentCode('AFULA-2026', 'מאיה לוי | مايا ليفي')">
+                  🏫 AFULA-2026 (תלמיד/ה מ: מקיף כרמים - עפולה)
+                </button>
+                <button type="button" class="code-chip" onclick="fillStudentCode('NAZ-101', 'سامر زعبي')">
+                  🏫 NAZ-101 (طالب من: البشارة - الناصرة)
+                </button>
+                <button type="button" class="code-chip" onclick="fillStudentCode('NOF-101', 'עומר כהן | عومر')">
+                  🏫 NOF-101 (תלמיד/ה מ: אורט אלון - נוף הגליל)
                 </button>
               </div>
 
               <button type="submit" class="btn btn-blue btn-lg btn-full">
                 <span>🚀</span>
-                <span data-i18n="btn_enter_classroom_now">دخول لوحة الصف المشترك الآن | כניסה לכיתה המשותפת כעת</span>
+                <span data-i18n="btn_enter_classroom_now">دخول ساحة مدرستي والصف المشترك الآن | כניסה למרחב בית הספר שלי</span>
               </button>
             </form>
           </div>
@@ -1169,6 +1222,6 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="./app.js?v=4"></script>
+  <script src="./app.js?v=5"></script>
 </body>
 </html>

@@ -1083,48 +1083,23 @@ function loadAllSchools(selectedId = null) {
     ...s,
     is_unmatched: s.matched_school_id === null
   }));
-  populateSchoolDropdown(selectedId);
-  const initialId = selectedId || (allSchools.find((s) => s.is_unmatched)?.id || allSchools[0]?.id);
-  if (initialId) {
-    loadSchoolDashboard(initialId);
+  if (selectedId) {
+    loadSchoolDashboard(selectedId);
   }
 }
 
-function populateSchoolDropdown(selectedId = null) {
-  const select = document.getElementById('dashboardSchoolSelect');
-  const topSelect = document.getElementById('quickHeaderSchoolSwitch');
-  const currentVal = selectedId || (select && select.value) || (allSchools[0] && allSchools[0].id);
-
-  const optionsHtml = allSchools
-    .map((s) => {
-      const name = currentLang === 'ar' ? `${s.name_ar} (${s.city_ar})` : `${s.name_he} (${s.city_he})`;
-      const statusText = s.is_unmatched
-        ? currentLang === 'ar'
-          ? '• لم تقترن بعد (טרם שודך)'
-          : '• טרם שודך (פנוי)'
-        : currentLang === 'ar'
-        ? '• مقترنة في شراكة 🤝'
-        : '• שודך לשותפות 🤝';
-      return `<option value="${s.id}" ${Number(currentVal) === s.id ? 'selected' : ''}>${name} ${statusText}</option>`;
-    })
-    .join('');
-
-  if (select) select.innerHTML = optionsHtml;
-  if (topSelect) {
-    topSelect.innerHTML = allSchools
-      .map(
-        (s) =>
-          `<option value="${s.id}" ${Number(currentVal) === s.id ? 'selected' : ''}>${s.name_he} (${s.city_he}) | ${s.name_ar}</option>`
-      )
-      .join('');
-  }
+function populateSchoolDropdown() {
+  // No public school switcher dropdown is rendered to prevent school spoofing
 }
 
 function updateTopWelcomeBanner(school) {
-  if (!school) return;
+  const barEl = document.getElementById('topSchoolWelcomeBar');
   const textEl = document.getElementById('topWelcomeSchoolText');
-  const topSelect = document.getElementById('quickHeaderSchoolSwitch');
-  if (topSelect) topSelect.value = String(school.id);
+  if (!school) {
+    if (barEl) barEl.style.display = 'none';
+    return;
+  }
+  if (barEl) barEl.style.display = 'block';
   if (textEl) {
     textEl.innerHTML = `
       ברוכים הבאים מבית הספר: <strong>${school.name_he} (${school.city_he})</strong>
@@ -1132,6 +1107,48 @@ function updateTopWelcomeBanner(school) {
       أهلاً وسهلاً بكم من: <strong>${school.name_ar} (${school.city_ar})</strong>
     `;
   }
+}
+
+function fillPrincipalLogin(emailVal, passVal) {
+  const inp = document.getElementById('principalLoginInput');
+  const pass = document.getElementById('principalPasswordInput');
+  if (inp) inp.value = emailVal;
+  if (pass) pass.value = passVal || '123456';
+}
+
+function handleSchoolPrincipalLogin(e) {
+  e.preventDefault();
+  const q = (document.getElementById('principalLoginInput').value || '').trim().toLowerCase();
+  const store = getLocalStore();
+  const found = store.schools.find(
+    (s) =>
+      (s.contact_email && s.contact_email.toLowerCase() === q) ||
+      `ibn-${s.id}` === q ||
+      `bayt-${s.id}` === q ||
+      s.name_ar.includes(q) ||
+      s.name_he.includes(q)
+  );
+
+  if (!found) {
+    showToast('⚠️ لم يتم العثور على المدرسة! استخدم البريد الإلكتروني المدرسي المعتمد (مثل bishara@bayt.edu) | בית הספר לא נמצא!');
+    return;
+  }
+
+  loadSchoolDashboard(found.id);
+  showToast(`🏫 ברוכים הבאים מבית הספר: ${found.name_he} | ${found.name_ar}`);
+}
+
+function logoutCurrentSchoolSession() {
+  activeDashboardSchool = null;
+  updateTopWelcomeBanner(null);
+
+  const loginGate = document.getElementById('schoolPrincipalLoginGate');
+  const authDash = document.getElementById('authenticatedSchoolDashboard');
+  if (loginGate) loginGate.style.display = 'block';
+  if (authDash) authDash.style.display = 'none';
+
+  showStudentLoginGate();
+  showToast('🚪 تم تسجيل الخروج من حساب المدرسة بأمان | התנתקת מחשבון בית הספר');
 }
 
 function switchLoggedInSchool(schoolId) {
@@ -1282,8 +1299,14 @@ function loadSchoolDashboard(schoolId) {
   candidates.sort((a, b) => b.match_score - a.match_score);
   currentMatches = candidates;
 
-  const select = document.getElementById('dashboardSchoolSelect');
-  if (select) select.value = String(id);
+  const loginGate = document.getElementById('schoolPrincipalLoginGate');
+  const authDash = document.getElementById('authenticatedSchoolDashboard');
+  const lockedName = document.getElementById('lockedSchoolHeaderName');
+  if (loginGate) loginGate.style.display = 'none';
+  if (authDash) authDash.style.display = 'block';
+  if (lockedName) {
+    lockedName.textContent = `חשבון בית ספר מאומת: ${current.name_he} (${current.city_he}) | الحساب الموثق: ${current.name_ar} (${current.city_ar})`;
+  }
 
   updateTopWelcomeBanner(activeDashboardSchool);
   renderCurrentSchoolProfile();
@@ -1551,17 +1574,16 @@ function triggerMatchAction(targetSchoolId, actionType) {
   }
 }
 
-// Student Space Functions
-function fillStudentCode(code, studentName, side) {
+// Student Space Functions (School-Specific Secret Codes — Prevents Spoofing)
+function fillStudentCode(code, studentName) {
   document.getElementById('studentCodeInput').value = code;
   document.getElementById('studentNameInput').value = studentName;
-  document.getElementById('studentSideSelect').value = side;
 }
 
 function quickStudentDemo(code) {
   navigateTo('students');
   document.getElementById('studentCodeInput').value = code;
-  loginToClassroomCode(code, 'أمير جبارين | אמיר', 'a');
+  loginToClassroomCode(code, 'أمير جبارين | אמיר');
 }
 
 function showStudentLoginGate() {
@@ -1573,28 +1595,56 @@ function handleStudentLogin(e) {
   e.preventDefault();
   const code = document.getElementById('studentCodeInput').value;
   const name = document.getElementById('studentNameInput').value;
-  const side = document.getElementById('studentSideSelect').value;
-  loginToClassroomCode(code, name, side);
+  loginToClassroomCode(code, name);
 }
 
-function loginToClassroomCode(code, studentName, schoolSide) {
+function loginToClassroomCode(code, studentName) {
   const cleanCode = (code || '').trim().toUpperCase();
   const store = getLocalStore();
-  const room = store.classrooms.find((c) => c.code.toUpperCase() === cleanCode);
+
+  // Map school-specific codes to exact classroom + exact school side (no dropdown spoofing possible!)
+  let room = null;
+  let lockedSide = 'a';
+
+  if (cleanCode === 'FAHM-2026' || cleanCode === 'BAYT-2026') {
+    room = store.classrooms.find((c) => c.id === 1) || store.classrooms[0];
+    lockedSide = 'a'; // Ibn Khaldoun - Umm al-Fahm
+  } else if (cleanCode === 'AFULA-2026') {
+    room = store.classrooms.find((c) => c.id === 1) || store.classrooms[0];
+    lockedSide = 'b'; // Kramim - Afula
+  } else if (cleanCode === 'NAZ-101' || cleanCode === 'GALIL-101') {
+    room = store.classrooms.find((c) => c.id === 2) || store.classrooms[1] || store.classrooms[0];
+    lockedSide = 'a'; // Al-Bishara - Nazareth
+  } else if (cleanCode === 'NOF-101') {
+    room = store.classrooms.find((c) => c.id === 2) || store.classrooms[1] || store.classrooms[0];
+    lockedSide = 'b'; // ORT Alon - Nof HaGalil
+  } else if (cleanCode.endsWith('-B')) {
+    const baseCode = cleanCode.slice(0, -2);
+    room = store.classrooms.find((c) => c.code.toUpperCase() === baseCode);
+    lockedSide = 'b';
+  } else if (cleanCode.endsWith('-A')) {
+    const baseCode = cleanCode.slice(0, -2);
+    room = store.classrooms.find((c) => c.code.toUpperCase() === baseCode);
+    lockedSide = 'a';
+  } else {
+    room = store.classrooms.find((c) => c.code.toUpperCase() === cleanCode);
+    lockedSide = 'a';
+  }
+
   if (!room) {
-    showToast('⚠️ رمز الدخول غير صحيح. جرب الرمز التجريبي BAYT-2026 أو GALIL-101');
+    showToast('⚠️ رمز المدرسة غير صحيح! استخدم الرمز المخصص لمدرستك (مثل FAHM-2026 أو AFULA-2026 أو NAZ-101 أو NOF-101)');
     return;
   }
 
   const schoolA = store.schools.find((s) => s.id === room.school_a_id) || store.schools[0];
   const schoolB = store.schools.find((s) => s.id === room.school_b_id) || store.schools[1];
 
-  const chosenSchool = schoolSide === 'b' ? schoolB : schoolA;
+  const chosenSchool = lockedSide === 'b' ? schoolB : schoolA;
   updateTopWelcomeBanner(chosenSchool);
 
   activeStudentSession = {
     name: studentName || 'طالب/ة مشترك',
-    school_side: schoolSide || 'a',
+    school_side: lockedSide,
     school_name_ar: chosenSchool.name_ar,
     school_name_he: chosenSchool.name_he
   };
@@ -1604,8 +1654,8 @@ function loginToClassroomCode(code, studentName, schoolSide) {
   document.getElementById('classroomWorkspace').style.display = 'block';
   showToast(
     currentLang === 'ar'
-      ? `أهلاً بك يا ${activeStudentSession.name} في الغرفة المشتركة (${room.code})!`
-      : `ברוך הבא ${activeStudentSession.name} לחדר המשותף (${room.code})!`
+      ? `🏫 أهلاً بك يا ${activeStudentSession.name} من ${chosenSchool.name_ar}!`
+      : `🏫 ברוך הבא ${activeStudentSession.name} מבית הספר ${chosenSchool.name_he}!`
   );
 }
 

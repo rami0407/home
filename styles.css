@@ -147,22 +147,32 @@ body {
   flex-wrap: wrap;
 }
 
-.welcome-switch-lbl {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #e2e8f0;
+.verified-school-badge {
+  background: rgba(95, 148, 48, 0.28);
+  border: 1px solid #86efac;
+  color: #dcfce7;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
 }
 
-.welcome-school-select {
-  width: auto !important;
-  min-width: 240px;
-  padding: 5px 12px !important;
-  font-size: 0.84rem !important;
+.btn-logout-school {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: var(--font-bilingual);
+  font-size: 0.8rem;
   font-weight: 800;
-  border-radius: 999px !important;
-  border: 1.5px solid var(--gold-500) !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  color: var(--navy-900) !important;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-logout-school:hover {
+  background: #dc2626;
+  border-color: #fca5a5;
 }
 
 .admin-active-pill {
