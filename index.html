@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=8" />
+  <link rel="stylesheet" href="./styles.css?v=9" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -120,7 +120,7 @@
             </div>
           </div>
 
-          <!-- Visual Architectural Showcase Card with Official Logo -->
+          <!-- Visual Showcase Card: Live Platform News & Announcements Feed -->
           <div class="hero-visual">
             <div class="house-showcase-card">
               <div class="window-glow-bar"></div>
@@ -130,54 +130,31 @@
                 </div>
                 <div class="hero-logo-caption">
                   <span class="status-indicator online"></span>
-                  <span data-i18n="live_model_badge">نموذج حي لأصحاب البيت الواحد</span>
+                  <span data-i18n="live_news_badge">📡 أخبار المنصة المباشرة | מבזקי חדשות ועדכוני האתר</span>
                 </div>
               </div>
 
-              <div class="house-pair-preview">
-                <div class="school-pill-box green-side">
-                  <span class="pill-tag" data-i18n="arab_school_tag">مدرسة عربية</span>
-                  <h4>مدرسة ابن خلدون</h4>
-                  <p>أم الفحم • אום אל-פחם</p>
-                </div>
-                <div class="bridge-connector">
-                  <div class="bridge-icon">🤝</div>
-                  <span class="bridge-dist">14.2 كم</span>
-                </div>
-                <div class="school-pill-box blue-side">
-                  <span class="pill-tag" data-i18n="jewish_school_tag">مدرسة يهودية</span>
-                  <h4>מקיף כרמים (كرميم)</h4>
-                  <p>العفولة • עפולה</p>
-                </div>
+              <!-- Breaking / Pinned News Ticker -->
+              <div class="hero-news-ticker" id="heroBreakingTicker">
+                <span class="ticker-tag">⚡ عاجل | מבזק</span>
+                <span class="ticker-text" id="heroTickerText">جاري تحميل آخر أخبار المنصة...</span>
               </div>
 
-              <!-- Live Bilingual Chat Snippet Preview -->
-              <div class="hero-chat-preview">
-                <div class="chat-bubble-mini ar-bubble">
-                  <div class="bubble-meta">
-                    <span>🧑‍🎓 أمير (أم الفحم)</span>
-                    <span class="lang-tag-mini">كتب بالعربية</span>
-                  </div>
-                  <p>مرحباً! فحصنا اليوم نقاء مياه عين الشعرة ونتطلع لمقارنة النتائج معكم.</p>
-                  <div class="bubble-trans" lang="he">
-                    <span>⚡ תרגום מיידי:</span> שלום! בדקנו היום את צלילות המים בעין א-שערה ומחכים להשוות תוצאות איתכם.
-                  </div>
-                </div>
-                <div class="chat-bubble-mini he-bubble" lang="he">
-                  <div class="bubble-meta">
-                    <span>👩‍🎓 מאיה (עפולה)</span>
-                    <span class="lang-tag-mini">כתבה בעברית</span>
-                  </div>
-                  <p>היי אמיר! דגמנו את מעיין חרוד והעלנו את הנתונים למעבדת המחקר המשותפת.</p>
-                  <div class="bubble-trans" dir="rtl">
-                    <span>⚡ ترجمة فورية:</span> أهلاً أمير! أخذنا عينات من عين جالود ورفعنا المعطيات لمختبر البحث المشترك.
-                  </div>
-                </div>
+              <!-- News Category Filter Pills -->
+              <div class="hero-news-filters" id="heroNewsFilters">
+                <button type="button" class="news-filter-pill active" data-news-filter="all" onclick="filterHeroNews('all')">🌟 الكل | הכל</button>
+                <button type="button" class="news-filter-pill" data-news-filter="admin" onclick="filterHeroNews('admin')">📢 إعلانات الإدارة</button>
+                <button type="button" class="news-filter-pill" data-news-filter="school" onclick="filterHeroNews('school')">🏫 مدارس جديدة</button>
+                <button type="button" class="news-filter-pill" data-news-filter="partnership" onclick="filterHeroNews('partnership')">🤝 شراكات</button>
+                <button type="button" class="news-filter-pill" data-news-filter="event" onclick="filterHeroNews('event')">📅 فعاليات وأبحاث</button>
               </div>
+
+              <!-- Dynamic Live News Feed -->
+              <div class="hero-news-feed" id="heroNewsFeedList"></div>
 
               <div class="house-card-footer">
-                <button class="btn-link-arrow" onclick="quickStudentDemo('BAYT-2026')">
-                  <span data-i18n="try_live_classroom">✨ جرّب دخول هذه الغرفة المشتركة الآن (رمز: BAYT-2026) ←</span>
+                <button class="btn-link-arrow" onclick="openSchoolRegistrationPortal()">
+                  <span data-i18n="news_card_cta">🏫 انضم بمدرستك إلى شبكة "بَيْت | בַּיִת" الآن ←</span>
                 </button>
               </div>
             </div>
@@ -1175,6 +1152,9 @@
             <button class="admin-subtab active" id="admTabBtn-moderation" onclick="switchAdminSubTab('moderation')">
               🛡️ ניטור ומחיקת הודעות (גזענות / תוכן לא רלוונטי) | مراقبة وحذف الرسائل المخالفة
             </button>
+            <button class="admin-subtab" id="admTabBtn-news" onclick="switchAdminSubTab('news')">
+              📰 ניהול חדשות ועדכונים בדף הבית | إدارة أخبار صفحة الهبوط
+            </button>
             <button class="admin-subtab" id="admTabBtn-schools" onclick="switchAdminSubTab('schools')">
               🏫 רשימת כל בתי הספר ופרטיהם | قائمة جميع المدارس وتفاصيلها
             </button>
@@ -1199,6 +1179,74 @@
                 </div>
               </div>
               <div id="adminModerationContainer" class="admin-moderation-list"></div>
+            </div>
+          </div>
+
+          <!-- ADMIN PANE 1B: SITE NEWS & ANNOUNCEMENTS MANAGER -->
+          <div id="admPane-news" class="admin-pane" style="display: none;">
+            <div class="admin-panel-card">
+              <div class="admin-panel-header">
+                <div>
+                  <h2>📰 ניהול חדשות ועדכוני האתר בדף הבית | إدارة أخبار وإعلانات صفحة الهبوط</h2>
+                  <p>כל خبر או הודעה שתפרסם כאן יופיעו מיד בשידור חי בכרטיס החדשות בדף הנחיתה (בנוסף לעדכונים אוטומטיים על בתי ספר ושותפויות חדשות).</p>
+                </div>
+              </div>
+
+              <form onsubmit="addAdminNewsItem(event)" class="admin-news-form-card">
+                <div class="form-grid-2" style="margin-bottom: 12px;">
+                  <div class="form-group">
+                    <label>🏷️ סוג החדשה / تصنيف الخبر *</label>
+                    <select id="adminNewsType">
+                      <option value="admin">📢 הודעה חשובה מהנהלת האתר | إعلان هام من إدارة الموقع</option>
+                      <option value="event">📅 מפגש / אירוע קרוב | فعالية / لقاء ميداني قادم</option>
+                      <option value="school">🏫 הצטרפות בית ספר חדש | انضمام مدرسة جديدة</option>
+                      <option value="partnership">🤝 שותפות חדשה | توأمة وشراكة جديدة</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="display:flex; align-items:flex-end;">
+                    <label class="checkbox-card" style="width:100%; height:50px; justify-content:flex-start;">
+                      <input type="checkbox" id="adminNewsPinned" checked />
+                      <span>📌 הצמד לראש לוח החדשות והמבזק | تثبيت في أعلى الشريط الإخباري</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-grid-2" style="margin-bottom: 12px;">
+                  <div class="form-group">
+                    <label>✍️ כותרת החדשה בעברית | عنوان الخبر بالعبرية *</label>
+                    <input type="text" id="adminNewsTitleHe" required placeholder="לדוגמה: נפתחה ההרשמה למפגש הארצי השנתי..." />
+                  </div>
+                  <div class="form-group">
+                    <label>✍️ عنوان الخبر بالعربية | כותרת בערבית *</label>
+                    <input type="text" id="adminNewsTitleAr" required placeholder="مثال: انطلاق التسجيل للمؤتمر السنوي للشراكات..." />
+                  </div>
+                </div>
+
+                <div class="form-grid-2" style="margin-bottom: 14px;">
+                  <div class="form-group">
+                    <label>📝 תוכן העדכון בעברית | نص الخبر بالعبرية *</label>
+                    <textarea id="adminNewsBodyHe" rows="3" required placeholder="פרטי ההודעה או החדשה בעברית..."></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>📝 نص الخبر بالعربية | תוכן העדכון בערבית *</label>
+                    <textarea id="adminNewsBodyAr" rows="3" required placeholder="تفاصيل الخبر أو الإعلان بالعربية..."></textarea>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                  <button type="submit" class="btn btn-green">
+                    <span>📢</span>
+                    <span>פרסם מיד בדף הבית | نشر الخبر في صفحة الهبوط فوراً</span>
+                  </button>
+                  <button type="button" class="btn btn-outline-blue" onclick="translateAdminNewsWithAI()">
+                    <span>⚡</span>
+                    <span>תרגום אוטומטי (עברית ↔ ערבית) | ترجمة تلقائية بين اللغتين</span>
+                  </button>
+                </div>
+              </form>
+
+              <h3 style="margin: 24px 0 12px; color: var(--navy-900);">📋 חדשות ועדכונים פעילים באתר | الأخبار والتحديثات النشطة حالياً:</h3>
+              <div id="adminNewsListContainer"></div>
             </div>
           </div>
 
@@ -1294,6 +1342,6 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="./app.js?v=8"></script>
+  <script src="./app.js?v=9"></script>
 </body>
 </html>

@@ -578,13 +578,62 @@ const INITIAL_STORE = {
       likes: 54,
       year: '2026'
     }
+  ],
+  news: [
+    {
+      id: 101,
+      type: 'admin',
+      pinned: true,
+      date: '2026-11-14',
+      title_ar: '📢 انطلاق الموسم الدراسي الجديد في شبكة "بَيْت | בַּיִת"',
+      title_he: '📢 פתיחת שנת הפעילות החדשה ברשת "בַּיִת | بَيْت"',
+      body_ar: 'ندعو جميع المدارس العربية واليهودية للتسجيل وتحديث اهتماماتها البحثية للبدء في التوأمة الذكية للعام الدراسي.',
+      body_he: 'אנו מזמינים את כל בתי הספר הערביים והיהודיים להירשם ולעדכן את תחומי המחקר שלהם להתחלת שותפויות חדשות.'
+    },
+    {
+      id: 102,
+      type: 'school',
+      pinned: false,
+      date: '2026-11-13',
+      title_ar: '🏫 انضمام 10 مدارس رائدة من الجليل والمثلث والمركز والنقب',
+      title_he: '🏫 10 בתי ספר מובילים הצטרפו מהגליל, המשולש, המרכז והנגב',
+      body_ar: 'تواصل الشبكة توسعها لتشمل مدارس جديدة متاحة للتوأمة الفورية في مجالات البيئة، التراث، والعلوم.',
+      body_he: 'הרשת ממשיכה להתרחב וכוללת בתי ספר חדשים הפנויים לשידוך מיידי בתחומי סביבה, מורשת ומדעים.'
+    },
+    {
+      id: 103,
+      type: 'event',
+      pinned: false,
+      date: '2026-11-12',
+      title_ar: '📅 فتح باب التقديم لمشاريع البحث البيئي المشترك 2026',
+      title_he: '📅 נפתחה ההרשמה לפרויקטי מחקר סביבתיים משותפים 2026',
+      body_ar: 'يمكن للمعلمين والطلاب الآن استخدام مختبر البحث ولوحة العمل التعاونية المترجمة فورياً بين العربية والعبرية.',
+      body_he: 'מורים ותלמידים יכולים כעת להשתמש במעבדת המחקר ובלוח העבודה השיתופי המתורגם מיידית בין עברית לערבית.'
+    },
+    {
+      id: 104,
+      type: 'partnership',
+      pinned: false,
+      date: '2026-11-10',
+      title_ar: '🤝 اكتمال تفعيل نظام المطابقة الذكية والاختيار اليدوي للمدارس',
+      title_he: '🤝 הופעלה מערכת ההתאמה החכמה והסינון הידני לבתי ספר',
+      body_ar: 'تستطيع كل مدرسة الآن استعراض المدارس غير المقترنة بعد وتأسيس غرفة بحث مشترك آمنة لطلابها.',
+      body_he: 'כל בית ספר יכול כעת לצפות בבתי ספר שטרם שודכו ולפתוח חדר מחקר משותף ומאובטח לתלמידיו.'
+    }
   ]
 };
 
 function getLocalStore() {
   try {
     const raw = localStorage.getItem('bayt_platform_db_v2');
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed.news)) {
+        parsed.news = JSON.parse(JSON.stringify(INITIAL_STORE.news));
+        saveLocalStore(parsed);
+      }
+      return parsed;
+    }
   } catch (e) {}
   localStorage.setItem('bayt_platform_db_v2', JSON.stringify(INITIAL_STORE));
   return JSON.parse(JSON.stringify(INITIAL_STORE));
@@ -617,6 +666,8 @@ const I18N = {
     pill_ai_matching: 'مطابقة ذكية وفلترة يدوية للمدارس',
     pill_instant_trans: 'ترجمة فورية ذكية (عربي ↔ עברית)',
     pill_joint_research: 'مختبرات بحث علمي وتراثي مشترك',
+    live_news_badge: '📡 أخبار المنصة المباشرة | מבזקי חדשות ועדכוני האתר',
+    news_card_cta: '🏫 انضم بمدرستك إلى شبكة "بَيْت | בַּיִת" الآن ←',
     live_model_badge: 'نموذج حي لأصحاب البيت الواحد',
     arab_school_tag: 'مدرسة عربية',
     jewish_school_tag: 'مدرسة يهودية',
@@ -803,6 +854,8 @@ const I18N = {
     pill_ai_matching: 'התאמה חכמה וסינון ידני של בתי ספר',
     pill_instant_trans: 'תרגום מיידי חכם (עברית ↔ عربي)',
     pill_joint_research: 'מעבדות מחקר מדעי ומורשתי משותף',
+    live_news_badge: '📡 מבזקי חדשות ועדכוני הפלטפורמה | أخبار المنصة المباشرة',
+    news_card_cta: '🏫 הצטרפו עם בית ספרכם לרשת "בַּיִת | بَيْت" כעת ←',
     live_model_badge: 'מודל חי לשותפים לבית אחד',
     arab_school_tag: 'בית ספר ערבי',
     jewish_school_tag: 'בית ספר יהודי',
@@ -1010,6 +1063,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadPlatformStats();
   loadAllSchools();
   loadAchievements();
+  renderHeroNewsFeed();
   fetchClassroomById(1);
 });
 
@@ -1054,6 +1108,7 @@ function toggleLanguage() {
     renderClassroomWorkspace();
   }
   loadAchievements();
+  renderHeroNewsFeed(activeHeroNewsFilter);
 
   showToast(
     currentLang === 'ar'
@@ -1447,6 +1502,14 @@ function submitSchoolRegistration(e) {
   store.schools.push(newSchool);
   saveLocalStore(store);
 
+  addAutoPlatformNews({
+    type: 'school',
+    title_ar: `🏫 انضمت مدرسة جديدة للمشروع: ${newSchool.name_ar} (${newSchool.city_ar})`,
+    title_he: `🏫 בית ספר חדש הצטרף לפרויקט: ${newSchool.name_he} (${newSchool.city_he})`,
+    body_ar: `أهلاً بكم في شبكة "بَيْت | בַּיִת"! المدرسة متاحة الآن للتوأمة والشراكة البحثية المشتركة.`,
+    body_he: `ברוכים הבאים לרשת "בַּיִת | بَيْت"! בית הספר זמין כעת לשידוך ולשותפות מחקרית משותפת.`
+  });
+
   showToast(`✅ تم تسجيل المدرسة واعتماد رمز الدخول الدائم (${chosenAccessCode}) المرتبط بالإيميل (${contact_email})!`);
   document.getElementById('schoolRegistrationForm').reset();
   loadPlatformStats();
@@ -1773,6 +1836,14 @@ function triggerMatchAction(targetSchoolId, actionType) {
       });
 
       saveLocalStore(store);
+
+      addAutoPlatformNews({
+        type: 'partnership',
+        title_ar: `🤝 انطلاق شراكة جديدة وفتح غرفة بحث مشترك (${room.code})`,
+        title_he: `🤝 שותפות חינוכית חדשה יצאה לדרך ונפתח חדר מחקר משותף (${room.code})`,
+        body_ar: `تم تدشين شراكة تربوية جديدة في مجال: ${room.research_topic_ar}.`,
+        body_he: `הושקה שותפות חינוכית חדשה בנושא: ${room.research_topic_he}.`
+      });
     }
 
     showToast(
@@ -2547,7 +2618,7 @@ function saveAdminCredentials(e) {
 }
 
 function switchAdminSubTab(tabKey) {
-  ['moderation', 'schools', 'projects', 'settings'].forEach((k) => {
+  ['moderation', 'news', 'schools', 'projects', 'settings'].forEach((k) => {
     const pane = document.getElementById(`admPane-${k}`);
     const btn = document.getElementById(`admTabBtn-${k}`);
     if (pane) pane.style.display = k === tabKey ? 'block' : 'none';
@@ -2582,6 +2653,7 @@ function renderAdminDashboard() {
   if (elRes) elRes.textContent = totalResearchItems;
 
   renderAdminModerationList();
+  renderAdminNewsList();
   renderAdminSchoolsTable();
   renderAdminProjectsControl();
 }
@@ -2844,4 +2916,219 @@ function adminDeleteCanvasCard(id) {
   if (activeClassroomData) fetchClassroomById(activeClassroomData.classroom.id);
   showToast('🗑️ הכרטיס נמחק מהלוח השיתופי!');
 }
+
+// =========================================================================
+// LIVE HERO NEWS FEED & ADMIN NEWS MANAGEMENT
+// =========================================================================
+let activeHeroNewsFilter = 'all';
+
+const NEWS_TYPE_LABELS = {
+  admin: { ar: '📢 إعلان الإدارة', he: '📢 הודעת הנהלה' },
+  school: { ar: '🏫 مدرسة جديدة', he: '🏫 בית ספר חדש' },
+  partnership: { ar: '🤝 شراكة جديدة', he: '🤝 שותפות חדשה' },
+  event: { ar: '📅 فعالية / بحث', he: '📅 אירוע / מחקר' }
+};
+
+function addAutoPlatformNews({ type = 'school', title_ar, title_he, body_ar, body_he, pinned = false }) {
+  const store = getLocalStore();
+  if (!Array.isArray(store.news)) store.news = [];
+  const today = new Date().toISOString().slice(0, 10);
+  store.news.unshift({
+    id: Date.now(),
+    type,
+    pinned,
+    date: today,
+    title_ar,
+    title_he,
+    body_ar,
+    body_he
+  });
+  saveLocalStore(store);
+  renderHeroNewsFeed(activeHeroNewsFilter);
+  renderAdminNewsList();
+}
+
+function filterHeroNews(filterType) {
+  activeHeroNewsFilter = filterType;
+  document.querySelectorAll('#heroNewsFilters .news-filter-pill').forEach((btn) => {
+    btn.classList.toggle('active', btn.getAttribute('data-news-filter') === filterType);
+  });
+  renderHeroNewsFeed(filterType);
+}
+
+function renderHeroNewsFeed(filterType = activeHeroNewsFilter) {
+  const listEl = document.getElementById('heroNewsFeedList');
+  const tickerEl = document.getElementById('heroTickerText');
+  if (!listEl) return;
+
+  const store = getLocalStore();
+  const allNews = Array.isArray(store.news) ? [...store.news] : [];
+  allNews.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.id - a.id);
+
+  if (tickerEl) {
+    const topItem = allNews[0];
+    if (topItem) {
+      tickerEl.textContent = currentLang === 'he' ? topItem.title_he : topItem.title_ar;
+    } else {
+      tickerEl.textContent =
+        currentLang === 'he'
+          ? 'ברוכים הבאים לרשת בַּיִת — כל בתי הספר מוזמנים להצטרף'
+          : 'أهلاً بكم في شبكة بَيْت — جميع المدارس مدعوة للانضمام';
+    }
+  }
+
+  const filtered =
+    filterType === 'all' ? allNews : allNews.filter((item) => item.type === filterType);
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `
+      <div class="hero-news-item" style="text-align:center; color:var(--text-muted);">
+        ${currentLang === 'he' ? 'אין כרגע עדכונים בקטגוריה זו.' : 'لا توجد أخبار حالياً في هذا التصنيف.'}
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = filtered
+    .slice(0, 8)
+    .map((item) => {
+      const badge = NEWS_TYPE_LABELS[item.type]
+        ? NEWS_TYPE_LABELS[item.type][currentLang]
+        : NEWS_TYPE_LABELS.admin[currentLang];
+      const title = currentLang === 'he' ? item.title_he : item.title_ar;
+      const body = currentLang === 'he' ? item.body_he : item.body_ar;
+      const pinTag = item.pinned
+        ? `<span style="color:#b45309; font-weight:900; font-size:0.72rem;">📌 ${currentLang === 'he' ? 'נעוץ' : 'مثبّت'}</span>`
+        : '';
+
+      return `
+        <article class="hero-news-item news-type-${item.type}">
+          <div class="news-item-top">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="news-item-badge">${badge}</span>
+              ${pinTag}
+            </div>
+            <span class="news-item-date">${item.date || ''}</span>
+          </div>
+          <div class="news-item-title">${title}</div>
+          <p class="news-item-body">${body}</p>
+        </article>
+      `;
+    })
+    .join('');
+}
+
+async function translateAdminNewsWithAI() {
+  const titleHeEl = document.getElementById('adminNewsTitleHe');
+  const titleArEl = document.getElementById('adminNewsTitleAr');
+  const bodyHeEl = document.getElementById('adminNewsBodyHe');
+  const bodyArEl = document.getElementById('adminNewsBodyAr');
+  if (!titleHeEl || !titleArEl || !bodyHeEl || !bodyArEl) return;
+
+  const hasHe = (titleHeEl.value.trim() || bodyHeEl.value.trim()).length > 0;
+  const hasAr = (titleArEl.value.trim() || bodyArEl.value.trim()).length > 0;
+
+  if (!hasHe && !hasAr) {
+    showToast('⚠️ اكتب الخبر بالعربية أو العبرية أولاً ثم اضغط للترجمة التلقائية');
+    return;
+  }
+
+  showToast('⚡ جاري الترجمة الذكية للخبر...');
+  if (hasHe && !titleArEl.value.trim() && titleHeEl.value.trim()) {
+    titleArEl.value = await translateTextWithNeuralAI(titleHeEl.value.trim(), 'he', 'ar');
+  } else if (hasAr && !titleHeEl.value.trim() && titleArEl.value.trim()) {
+    titleHeEl.value = await translateTextWithNeuralAI(titleArEl.value.trim(), 'ar', 'he');
+  }
+
+  if (hasHe && !bodyArEl.value.trim() && bodyHeEl.value.trim()) {
+    bodyArEl.value = await translateTextWithNeuralAI(bodyHeEl.value.trim(), 'he', 'ar');
+  } else if (hasAr && !bodyHeEl.value.trim() && bodyArEl.value.trim()) {
+    bodyHeEl.value = await translateTextWithNeuralAI(bodyArEl.value.trim(), 'ar', 'he');
+  }
+  showToast('✅ تمت الترجمة التلقائية للخبر بين العربية والعبرية!');
+}
+
+function addAdminNewsItem(e) {
+  e.preventDefault();
+  const type = document.getElementById('adminNewsType')?.value || 'admin';
+  const pinned = Boolean(document.getElementById('adminNewsPinned')?.checked);
+  const title_he = (document.getElementById('adminNewsTitleHe')?.value || '').trim();
+  const title_ar = (document.getElementById('adminNewsTitleAr')?.value || '').trim();
+  const body_he = (document.getElementById('adminNewsBodyHe')?.value || '').trim();
+  const body_ar = (document.getElementById('adminNewsBodyAr')?.value || '').trim();
+
+  if (!title_he || !title_ar || !body_he || !body_ar) {
+    showToast('⚠️ يرجى تعبئة العنوان والنص باللغتين (أو استخدام زر الترجمة التلقائية)');
+    return;
+  }
+
+  addAutoPlatformNews({ type, pinned, title_ar, title_he, body_ar, body_he });
+  e.target.reset();
+  const pinChk = document.getElementById('adminNewsPinned');
+  if (pinChk) pinChk.checked = true;
+  showToast('📢 تم نشر الخبر بنجاح في الشريط الإخباري لصفحة الهبوط!');
+}
+
+function togglePinAdminNews(id) {
+  const store = getLocalStore();
+  if (!Array.isArray(store.news)) return;
+  const item = store.news.find((n) => n.id === Number(id));
+  if (!item) return;
+  item.pinned = !item.pinned;
+  saveLocalStore(store);
+  renderHeroNewsFeed(activeHeroNewsFilter);
+  renderAdminNewsList();
+  showToast(item.pinned ? '📌 تم تثبيت الخبر في أعلى الشريط الإخباري' : 'تم إلغاء تثبيت الخبر');
+}
+
+function deleteAdminNewsItem(id) {
+  const store = getLocalStore();
+  if (!Array.isArray(store.news)) return;
+  store.news = store.news.filter((n) => n.id !== Number(id));
+  saveLocalStore(store);
+  renderHeroNewsFeed(activeHeroNewsFilter);
+  renderAdminNewsList();
+  showToast('🗑️ تم حذف الخبر من صفحة الهبوط!');
+}
+
+function renderAdminNewsList() {
+  const container = document.getElementById('adminNewsListContainer');
+  if (!container) return;
+  const store = getLocalStore();
+  const newsList = Array.isArray(store.news) ? [...store.news] : [];
+  newsList.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.id - a.id);
+
+  if (newsList.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted);">אין חדשות כרגע | لا توجد أخبار حالياً.</p>';
+    return;
+  }
+
+  container.innerHTML = newsList
+    .map((n) => {
+      const lbl = NEWS_TYPE_LABELS[n.type]?.ar || '📢 إعلان';
+      return `
+        <div class="admin-mod-item" style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:240px;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:6px;">
+              <span class="news-item-badge">${lbl}</span>
+              ${n.pinned ? '<span class="badge-tag badge-matched">📌 مثبت بالأعلى | נעוץ</span>' : ''}
+              <span style="font-size:0.78rem; color:var(--text-muted); font-weight:700;">${n.date || ''}</span>
+            </div>
+            <strong style="display:block; color:var(--navy-900); margin-bottom:3px;">${n.title_ar} | ${n.title_he}</strong>
+            <p style="margin:0; font-size:0.86rem; color:var(--text-main);">${n.body_ar}<br/>${n.body_he}</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline-blue btn-sm" onclick="togglePinAdminNews(${n.id})">
+              ${n.pinned ? '📌 إلغاء التثبيت' : '📌 تثبيت بالأعلى'}
+            </button>
+            <button type="button" class="btn-delete-danger" onclick="deleteAdminNewsItem(${n.id})">
+              🗑️ حذف | מחיקה
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
 
