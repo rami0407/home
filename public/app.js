@@ -654,6 +654,7 @@ const firebaseConfig = {
 };
 
 let firebaseDb = null;
+let firestoreDb = null;
 let firebaseSyncReady = false;
 let suppressNextFirebaseWrite = false;
 
@@ -662,6 +663,52 @@ function setFirebaseBadge(text, color = '#86efac') {
   if (el) {
     el.textContent = text;
     el.style.color = color;
+  }
+}
+
+function applyRemotePlatformStore(remoteData, sourceLabel = 'Firebase') {
+  const normalized = {
+    schools: Array.isArray(remoteData.schools) ? remoteData.schools : Object.values(remoteData.schools || {}),
+    match_requests: Array.isArray(remoteData.match_requests) ? remoteData.match_requests : Object.values(remoteData.match_requests || {}),
+    classrooms: Array.isArray(remoteData.classrooms) ? remoteData.classrooms : Object.values(remoteData.classrooms || {}),
+    posts: Array.isArray(remoteData.posts) ? remoteData.posts : Object.values(remoteData.posts || {}),
+    research_data: Array.isArray(remoteData.research_data) ? remoteData.research_data : Object.values(remoteData.research_data || {}),
+    canvas_cards: Array.isArray(remoteData.canvas_cards) ? remoteData.canvas_cards : Object.values(remoteData.canvas_cards || {}),
+    achievements: Array.isArray(remoteData.achievements) ? remoteData.achievements : Object.values(remoteData.achievements || {}),
+    news: Array.isArray(remoteData.news)
+      ? remoteData.news
+      : remoteData.news
+        ? Object.values(remoteData.news)
+        : JSON.parse(JSON.stringify(INITIAL_STORE.news))
+  };
+
+  normalized.schools = normalized.schools.map((s) => ({
+    ...s,
+    interests: Array.isArray(s.interests) ? s.interests : Object.values(s.interests || {})
+  }));
+  normalized.posts = normalized.posts.map((p) => ({
+    ...p,
+    replies: Array.isArray(p.replies) ? p.replies : Object.values(p.replies || {})
+  }));
+
+  suppressNextFirebaseWrite = true;
+  try {
+    localStorage.setItem('bayt_platform_db_v2', JSON.stringify(normalized));
+  } catch (e) {}
+  suppressNextFirebaseWrite = false;
+
+  firebaseSyncReady = true;
+  setFirebaseBadge(`🟢 متصل بـ ${sourceLabel} (مزامنة فورية للبيانات)`);
+
+  loadPlatformStats();
+  loadAllSchools(activeDashboardSchool ? activeDashboardSchool.id : null);
+  loadAchievements();
+  renderHeroNewsFeed(activeHeroNewsFilter);
+  if (activeClassroomData && activeClassroomData.classroom) {
+    fetchClassroomById(activeClassroomData.classroom.id);
+  }
+  if (window.isAdminLoggedIn) {
+    renderAdminDashboard();
   }
 }
 
@@ -679,94 +726,59 @@ function initFirebaseRealtimeSync() {
       if (typeof firebase.analytics === 'function') {
         firebase.analytics();
       }
-    } catch (analyticsErr) {
-      // Analytics may be blocked by ad-blockers; safe to ignore
+    } catch (analyticsErr) {}
+
+    // 1. Primary Cloud Database: Cloud Firestore (bayt_platform / main_store)
+    if (typeof firebase.firestore === 'function') {
+      firestoreDb = firebase.firestore();
+      const storeDocRef = firestoreDb.collection('bayt_platform').doc('main_store');
+
+      storeDocRef.onSnapshot(
+        (docSnap) => {
+          if (docSnap.exists) {
+            applyRemotePlatformStore(docSnap.data(), 'Cloud Firestore');
+          } else {
+            const initialSeed = JSON.parse(JSON.stringify(getLocalStore()));
+            firebaseSyncReady = true;
+            storeDocRef
+              .set(initialSeed)
+              .then(() => {
+                setFirebaseBadge('🟢 متصل بـ Cloud Firestore (تمت تهيئة البيانات السحابية بنجاح)');
+              })
+              .catch((err) => {
+                console.warn('Firestore initial seed error:', err);
+                setFirebaseBadge('⚠️ متصل بـ Firestore — يرجى تفعيل Rules للكتابة', '#fcd34d');
+              });
+          }
+        },
+        (error) => {
+          console.warn('Firestore listener error:', error);
+          setFirebaseBadge('⚠️ تعذرت القراءة من Firestore (تأكد من Rules في تبويب Firestore)', '#fca5a5');
+        }
+      );
+
+      // Sync Admin credentials in Firestore
+      firestoreDb
+        .collection('bayt_platform')
+        .doc('admin_creds')
+        .onSnapshot((snap) => {
+          if (snap.exists) {
+            try {
+              localStorage.setItem('bayt_admin_creds_v1', JSON.stringify(snap.data()));
+            } catch (e) {}
+          }
+        });
     }
 
-    firebaseDb = firebase.database();
-
-    // Sync main platform database (schools, classrooms, posts, news, research, achievements)
-    firebaseDb.ref('bayt_platform_db_v2').on(
-      'value',
-      (snapshot) => {
-        if (snapshot.exists()) {
-          const remoteData = snapshot.val();
-          // Firebase RTDB converts arrays with gaps or empty arrays; normalize required arrays
-          const normalized = {
-            schools: Array.isArray(remoteData.schools) ? remoteData.schools : Object.values(remoteData.schools || {}),
-            match_requests: Array.isArray(remoteData.match_requests) ? remoteData.match_requests : Object.values(remoteData.match_requests || {}),
-            classrooms: Array.isArray(remoteData.classrooms) ? remoteData.classrooms : Object.values(remoteData.classrooms || {}),
-            posts: Array.isArray(remoteData.posts) ? remoteData.posts : Object.values(remoteData.posts || {}),
-            research_data: Array.isArray(remoteData.research_data) ? remoteData.research_data : Object.values(remoteData.research_data || {}),
-            canvas_cards: Array.isArray(remoteData.canvas_cards) ? remoteData.canvas_cards : Object.values(remoteData.canvas_cards || {}),
-            achievements: Array.isArray(remoteData.achievements) ? remoteData.achievements : Object.values(remoteData.achievements || {}),
-            news: Array.isArray(remoteData.news)
-              ? remoteData.news
-              : remoteData.news
-                ? Object.values(remoteData.news)
-                : JSON.parse(JSON.stringify(INITIAL_STORE.news))
-          };
-
-          // Ensure nested arrays like interests and replies are always arrays
-          normalized.schools = normalized.schools.map((s) => ({
-            ...s,
-            interests: Array.isArray(s.interests) ? s.interests : Object.values(s.interests || {})
-          }));
-          normalized.posts = normalized.posts.map((p) => ({
-            ...p,
-            replies: Array.isArray(p.replies) ? p.replies : Object.values(p.replies || {})
-          }));
-
-          suppressNextFirebaseWrite = true;
-          try {
-            localStorage.setItem('bayt_platform_db_v2', JSON.stringify(normalized));
-          } catch (e) {}
-          suppressNextFirebaseWrite = false;
-
-          firebaseSyncReady = true;
-          setFirebaseBadge('🟢 متصل بقاعدة بيانات Firebase Realtime Database (مزامنة فورية)');
-
-          // Refresh active views seamlessly with live cloud data
-          loadPlatformStats();
-          loadAllSchools(activeDashboardSchool ? activeDashboardSchool.id : null);
-          loadAchievements();
-          renderHeroNewsFeed(activeHeroNewsFilter);
-          if (activeClassroomData && activeClassroomData.classroom) {
-            fetchClassroomById(activeClassroomData.classroom.id);
-          }
-          if (window.isAdminLoggedIn) {
-            renderAdminDashboard();
-          }
-        } else {
-          // First-time cloud database initialization: seed Firebase with INITIAL_STORE / local cache
-          const initialSeed = getLocalStore();
-          firebaseSyncReady = true;
-          firebaseDb
-            .ref('bayt_platform_db_v2')
-            .set(JSON.parse(JSON.stringify(initialSeed)))
-            .then(() => {
-              setFirebaseBadge('🟢 متصل بقاعدة بيانات Firebase (تمت تهيئة البيانات السحابية)');
-            })
-            .catch((err) => {
-              console.warn('Firebase initial seed error:', err);
-              setFirebaseBadge('⚠️ متصل بـ Firebase (تحقق من صلاحيات الكتابة Rules)', '#fcd34d');
-            });
+    // 2. Secondary mirror: Firebase Realtime Database (if enabled in project)
+    if (typeof firebase.database === 'function') {
+      firebaseDb = firebase.database();
+      firebaseDb.ref('bayt_platform_db_v2').on('value', (snapshot) => {
+        if (snapshot.exists() && !firestoreDb) {
+          applyRemotePlatformStore(snapshot.val(), 'Realtime Database');
         }
-      },
-      (error) => {
-        console.warn('Firebase RTDB listener error:', error);
-        setFirebaseBadge('⚠️ تعذرت القراءة من Firebase (تأكد من Rules في لوحة Firebase)', '#fca5a5');
-      }
-    );
-
-    // Sync Admin credentials across devices
-    firebaseDb.ref('bayt_admin_creds_v1').on('value', (snap) => {
-      if (snap.exists()) {
-        try {
-          localStorage.setItem('bayt_admin_creds_v1', JSON.stringify(snap.val()));
-        } catch (e) {}
-      }
-    });
+      });
+    }
   } catch (err) {
     console.warn('Firebase initialization failed:', err);
     setFirebaseBadge('💾 وضع التخزين المحلي (خطأ في تهيئة Firebase)', '#fca5a5');
@@ -778,12 +790,22 @@ function saveLocalStore(store) {
     localStorage.setItem('bayt_platform_db_v2', JSON.stringify(store));
   } catch (e) {}
 
-  if (firebaseDb && !suppressNextFirebaseWrite) {
+  if (!suppressNextFirebaseWrite) {
     try {
       const cleanPayload = JSON.parse(JSON.stringify(store));
-      firebaseDb.ref('bayt_platform_db_v2').set(cleanPayload).catch((err) => {
-        console.warn('Firebase write failed:', err);
-      });
+      if (firestoreDb) {
+        firestoreDb
+          .collection('bayt_platform')
+          .doc('main_store')
+          .set(cleanPayload)
+          .catch((err) => console.warn('Firestore write failed:', err));
+      }
+      if (firebaseDb) {
+        firebaseDb
+          .ref('bayt_platform_db_v2')
+          .set(cleanPayload)
+          .catch(() => {});
+      }
     } catch (e) {}
   }
 }
@@ -2757,6 +2779,9 @@ function saveAdminCredentials(e) {
   const code = document.getElementById('admSettingCode').value.trim();
   if (!email || !code) return;
   localStorage.setItem('bayt_admin_creds_v1', JSON.stringify({ email, code }));
+  if (firestoreDb) {
+    firestoreDb.collection('bayt_platform').doc('admin_creds').set({ email, code }).catch(() => {});
+  }
   if (firebaseDb) {
     firebaseDb.ref('bayt_admin_creds_v1').set({ email, code }).catch(() => {});
   }
