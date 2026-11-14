@@ -3188,6 +3188,73 @@ function renderHeroNewsFeed(filterType = activeHeroNewsFilter) {
       `;
     })
     .join('');
+
+  startHeroNewsSlowMotion(allNews);
+}
+
+let heroNewsScrollTimer = null;
+let heroTickerRotateTimer = null;
+let heroNewsPaused = false;
+let heroTickerIdx = 0;
+
+function startHeroNewsSlowMotion(allNews = []) {
+  const listEl = document.getElementById('heroNewsFeedList');
+  const tickerEl = document.getElementById('heroTickerText');
+
+  if (heroNewsScrollTimer) clearInterval(heroNewsScrollTimer);
+  if (heroTickerRotateTimer) clearInterval(heroTickerRotateTimer);
+
+  // Slow continuous vertical scroll of the news cards (pauses on hover/touch)
+  if (listEl) {
+    if (!listEl.dataset.hoverBound) {
+      listEl.dataset.hoverBound = '1';
+      listEl.addEventListener('mouseenter', () => { heroNewsPaused = true; });
+      listEl.addEventListener('mouseleave', () => { heroNewsPaused = false; });
+      listEl.addEventListener('touchstart', () => { heroNewsPaused = true; }, { passive: true });
+      listEl.addEventListener('touchend', () => {
+        setTimeout(() => { heroNewsPaused = false; }, 2200);
+      });
+    }
+
+    listEl.scrollTop = 0;
+    let pauseAtEdge = 0;
+    heroNewsScrollTimer = setInterval(() => {
+      if (heroNewsPaused) return;
+      const maxScroll = listEl.scrollHeight - listEl.clientHeight;
+      if (maxScroll <= 4) return;
+
+      if (pauseAtEdge > 0) {
+        pauseAtEdge--;
+        return;
+      }
+
+      if (listEl.scrollTop >= maxScroll - 1) {
+        pauseAtEdge = 35; // brief calm pause at bottom before looping gently to top
+        setTimeout(() => {
+          if (!heroNewsPaused) listEl.scrollTop = 0;
+        }, 1400);
+      } else {
+        listEl.scrollTop += 1; // ~1px every 55ms -> very smooth, slow, readable motion
+      }
+    }, 55);
+  }
+
+  // Slow rotation of the top breaking news headline every 5 seconds
+  if (tickerEl && allNews.length > 1) {
+    heroTickerIdx = 0;
+    heroTickerRotateTimer = setInterval(() => {
+      if (heroNewsPaused) return;
+      heroTickerIdx = (heroTickerIdx + 1) % allNews.length;
+      const nextItem = allNews[heroTickerIdx];
+      if (!nextItem) return;
+
+      tickerEl.classList.add('ticker-fade');
+      setTimeout(() => {
+        tickerEl.textContent = currentLang === 'he' ? nextItem.title_he : nextItem.title_ar;
+        tickerEl.classList.remove('ticker-fade');
+      }, 380);
+    }, 5000);
+  }
 }
 
 async function translateAdminNewsWithAI() {

@@ -2795,6 +2795,12 @@ textarea:focus {
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.ticker-text.ticker-fade {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 .hero-news-filters {
@@ -2833,6 +2839,16 @@ textarea:focus {
   overflow-y: auto;
   padding: 4px 2px 6px;
   margin-bottom: 14px;
+  scroll-behavior: auto;
+}
+
+.hero-news-feed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hero-news-feed::-webkit-scrollbar-thumb {
+  background: rgba(11, 79, 108, 0.25);
+  border-radius: 999px;
 }
 
 .hero-news-item {
