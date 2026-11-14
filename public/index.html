@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بَيْت | בַּיִת — من اللقاء العابر إلى الشراكة المستدامة</title>
+  <!-- Google Fonts: Readex Pro & Amiri for Arabic, Heebo & Rubik for Hebrew -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Top Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <!-- Brand Logo -->
+      <a href="#landing" class="brand-logo" onclick="navigateTo('landing'); return false;">
+        <div class="logo-emblem" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Roof Left (Navy Blue) & Roof Right (Forest Green) forming one shared house -->
+            <path d="M32 8L8 28H22V52H32V8Z" fill="#0F2C59"/>
+            <path d="M32 8L56 28H42V52H32V8Z" fill="#14532D"/>
+            <!-- Archway / Bridge connecting both sides -->
+            <path d="M23 52C23 42.5 27 37 32 37C37 37 41 42.5 41 52" fill="#F4F6F9"/>
+            <!-- Warm Window Lights -->
+            <rect x="24" y="24" width="6" height="6" rx="1.5" fill="#F4F6F9"/>
+            <rect x="34" y="24" width="6" height="6" rx="1.5" fill="#F4F6F9"/>
+            <!-- Connecting Foundation Line -->
+            <rect x="6" y="52" width="52" height="5" rx="2.5" fill="url(#baytGrad)"/>
+            <defs>
+              <linearGradient id="baytGrad" x1="6" y1="54" x2="58" y2="54" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#0F2C59"/>
+                <stop offset="0.5" stop-color="#134E4A"/>
+                <stop offset="1" stop-color="#14532D"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">
+            <span class="brand-ar">بَيْت</span>
+            <span class="brand-divider">|</span>
+            <span class="brand-he" lang="he">בַּיִת</span>
+          </div>
+          <span class="brand-subtitle" data-i18n="header_tagline">من اللقاء العابر إلى الشراكة المستدامة</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="main-nav" aria-label="Main Navigation">
+        <button class="nav-link active" data-nav="landing" onclick="navigateTo('landing', 'vision-section')" data-i18n="nav_vision">رؤيتنا</button>
+        <span class="nav-dot">•</span>
+        <button class="nav-link" data-nav="goals" onclick="navigateTo('landing', 'goals-section')" data-i18n="nav_goals">أهدافنا</button>
+        <span class="nav-dot">•</span>
+        <button class="nav-link" data-nav="how" onclick="navigateTo('landing', 'how-section')" data-i18n="nav_how">كيف نعمل</button>
+        <span class="nav-dot">•</span>
+        <button class="nav-link" data-nav="students" onclick="navigateTo('students')" data-i18n="nav_students">مساحة الطلاب</button>
+        <span class="nav-dot">•</span>
+        <button class="nav-link nav-cta-pill" data-nav="portal" onclick="navigateTo('portal')" data-i18n="nav_register_school">تسجيل مدرسة / المطابقة</button>
+      </nav>
+
+      <!-- Language Switcher -->
+      <div class="header-actions">
+        <button class="lang-switch-btn" id="langSwitchBtn" onclick="toggleLanguage()" title="تبديل اللغة | החלפת שפה">
+          <span class="lang-icon">🌐</span>
+          <span id="langSwitchLabel">עברית ↔ عربي</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main id="appRoot">
+
+    <!-- ==========================================
+         SECTION 1: LANDING PAGE (الصفحة الرئيسية)
+         ========================================== -->
+    <section id="view-landing" class="view-section active">
+      <!-- Hero Section -->
+      <div class="hero-section">
+        <div class="container hero-grid">
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span class="badge-dot"></span>
+              <span data-i18n="hero_badge">جسر رقمي وتربوي ذكي بين المدارس العربية واليهودية</span>
+            </div>
+            <h1 class="hero-title">
+              <span class="hero-brand-highlight">بَيْت | בַּיִת:</span>
+              <span data-i18n="hero_headline">لكل إنسان بيت، ولكل بيت حكاية، ومن حكاياتنا نبني بيتًا مشتركًا</span>
+            </h1>
+            <p class="hero-lead" data-i18n="hero_sublead">
+              نعيد صياغة العلاقة بين الطلاب والمدارس في المجتمعين العربي واليهودي عبر الانتقال الجذري من مفهوم "الضيف والمضيف" إلى مفهوم "أصحاب البيت الواحد" في حيز آمن ومتساوٍ يجمع بين الفضول المعرفي، الحوار الصادق، والبحث العلمي المشترك.
+            </p>
+            <div class="hero-buttons">
+              <button class="btn btn-green btn-lg" onclick="navigateTo('portal')">
+                <span>🏫</span>
+                <span data-i18n="btn_register_school">سجّل مدرستك الآن</span>
+              </button>
+              <button class="btn btn-blue btn-lg" onclick="navigateTo('students')">
+                <span>🧑‍🎓</span>
+                <span data-i18n="btn_enter_student_space">دخول مساحة الطلاب</span>
+              </button>
+            </div>
+            <div class="hero-quick-highlights">
+              <div class="mini-pill">
+                <span>🤖</span>
+                <span data-i18n="pill_ai_matching">مطابقة ذكية وفلترة يدوية للمدارس</span>
+              </div>
+              <div class="mini-pill">
+                <span>💬</span>
+                <span data-i18n="pill_instant_trans">ترجمة فورية ذكية (عربي ↔ עברית)</span>
+              </div>
+              <div class="mini-pill">
+                <span>🔬</span>
+                <span data-i18n="pill_joint_research">مختبرات بحث علمي وتراثي مشترك</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual Architectural Illustration Card -->
+          <div class="hero-visual">
+            <div class="house-showcase-card">
+              <div class="house-card-header">
+                <span class="status-indicator online"></span>
+                <span data-i18n="live_model_badge">نموذج حي للشراكة المستدامة</span>
+              </div>
+              <div class="house-pair-preview">
+                <div class="school-pill-box blue-side">
+                  <span class="pill-tag" data-i18n="arab_school_tag">مدرسة عربية</span>
+                  <h4>مدرسة ابن خلدون</h4>
+                  <p>أم الفحم • אום אל-פחם</p>
+                </div>
+                <div class="bridge-connector">
+                  <div class="bridge-icon">🤝</div>
+                  <span class="bridge-dist">14.2 كم</span>
+                </div>
+                <div class="school-pill-box green-side">
+                  <span class="pill-tag" data-i18n="jewish_school_tag">مدرسة يهودية</span>
+                  <h4>מקיף כרמים (كرميم)</h4>
+                  <p>العفولة • עפולה</p>
+                </div>
+              </div>
+
+              <!-- Live Bilingual Chat Snippet Preview -->
+              <div class="hero-chat-preview">
+                <div class="chat-bubble-mini ar-bubble">
+                  <div class="bubble-meta">أمير (أم الفحم) • عربي</div>
+                  <p>مرحباً! فحصنا اليوم نقاء مياه عين الشعرة ونتطلع لمقارنة النتائج معكم.</p>
+                  <div class="bubble-trans" lang="he">⚡ תרגום מיידי: שלום! בדקנו היום את צלילות המים בעין א-שערה ומחכים להשוות תוצאות איתכם.</div>
+                </div>
+                <div class="chat-bubble-mini he-bubble" lang="he">
+                  <div class="bubble-meta">מאיה (עפולה) • עברית</div>
+                  <p>היי אמיר! דגמנו את מעיין חרוד והעלנו את הנתונים למעבדת המחקר המשותפת.</p>
+                  <div class="bubble-trans" dir="rtl">⚡ ترجمة فورية: أهلاً أمير! أخذنا عينات من عين جالود ورفعنا المعطيات لمختبر البحث المشترك.</div>
+                </div>
+              </div>
+
+              <div class="house-card-footer">
+                <button class="btn-link-arrow" onclick="quickStudentDemo('BAYT-2026')">
+                  <span data-i18n="try_live_classroom">جرّب دخول هذه الغرفة المشتركة الآن (رمز: BAYT-2026) ←</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Our Vision Section (الرؤية التربوية) -->
+      <div id="vision-section" class="section-block bg-white">
+        <div class="container">
+          <div class="section-header text-center">
+            <span class="section-eyebrow" data-i18n="vision_eyebrow">الرؤية التربوية والإنسانية | החזון החינוכי והאנושי</span>
+            <h2 class="section-title" data-i18n="vision_title">من مفهوم "الضيف والمضيف" إلى "أصحاب البيت الواحد"</h2>
+            <p class="section-desc" data-i18n="vision_text">
+              ينطلق مشروع "بَيْت" من إيمان عميق بأن غياب الشراكة الحقيقية غالباً ما يبدأ من عائق تقني وتنظيمي يحول دون وصول المدارس إلى الشريك المناسب. لذا بنينا جسراً رقمياً وتربوياً ذكياً يجمع المدارس المتقاربة جغرافياً وفكرياً في حيز آمن ومتساوٍ، حيث يتشارك الطلاب الفضول المعرفي، الحوار الصادق، والبحث العلمي المشترك.
+            </p>
+          </div>
+
+          <div class="vision-comparison-grid">
+            <!-- Old Paradigm -->
+            <div class="vision-card old-paradigm">
+              <div class="vision-card-badge" data-i18n="old_model_badge">النموذج التقليدي السابق</div>
+              <h3 data-i18n="old_model_title">الضيف والمضيف | אורח ומארח</h3>
+              <ul class="vision-list">
+                <li data-i18n="old_point_1">زيارات متبادلة عابرة ومناسباتية تنتهي بانتهاء اليوم.</li>
+                <li data-i18n="old_point_2">شعور أحد الطرفين بأنه "ضيف" مؤقت والآخر "مضيف" غير متكافئ.</li>
+                <li data-i18n="old_point_3">تعارف سطحي يعيقه حاجز اللغة وغياب المتابعة التربوية.</li>
+                <li data-i18n="old_point_4">صعوبة تقنية وتنظيمية في إيجاد المدرسة الشريكة المناسبة.</li>
+              </ul>
+            </div>
+
+            <!-- Transformation Arrow -->
+            <div class="vision-transform-center">
+              <div class="transform-circle">
+                <span>بَيْت</span>
+                <span>בַּיִת</span>
+              </div>
+            </div>
+
+            <!-- New Paradigm -->
+            <div class="vision-card new-paradigm">
+              <div class="vision-card-badge highlight" data-i18n="new_model_badge">نموذج "بَيْت | בַּיִת" المستدام</div>
+              <h3 data-i18n="new_model_title">شركاء البيت الواحد | שותפים לבית אחד</h3>
+              <ul class="vision-list">
+                <li data-i18n="new_point_1">مسار تعليمي وبحثي مستمر يمتد على مدار العام الدراسي (رقمي + ميداني).</li>
+                <li data-i18n="new_point_2">ملكية مشتركة متساوية للغرفة البحثية والمخرجات العلمية والمجتمعية.</li>
+                <li data-i18n="new_point_3">تعبير حر باللغة الأم مع ترجمة فورية ذكية تزيل الحواجز اللغوية تماماً.</li>
+                <li data-i18n="new_point_4">خوارزمية ملاءمة ذكية + اختيار يدوي شفاف للمدارس غير المقترنة بعد.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Goals Section (أهداف المشروع) -->
+      <div id="goals-section" class="section-block bg-soft">
+        <div class="container">
+          <div class="section-header text-center">
+            <span class="section-eyebrow" data-i18n="goals_eyebrow">أهدافنا الاستراتيجية | מטרות הפרויקט</span>
+            <h2 class="section-title" data-i18n="goals_title">خمس ركائز لصناعة حياة مشتركة قائمة على الاحترام والمساواة</h2>
+          </div>
+
+          <div class="goals-grid">
+            <div class="goal-card">
+              <div class="goal-icon blue">🗓️</div>
+              <h3 data-i18n="goal_1_title">مسار تعليمي مستمر طوال العام</h3>
+              <p data-i18n="goal_1_desc">تحويل الشراكة من مجرد زيارات متبادلة عابرة إلى مسار تعليمي مستمر يمتد على مدار العام الدراسي، يدمج بين التواصل الرقمي واللقاءات الميدانية.</p>
+            </div>
+
+            <div class="goal-card">
+              <div class="goal-icon green">🗣️</div>
+              <h3 data-i18n="goal_2_title">التعبير باللغة الأم وترجمة فورية ذكية</h3>
+              <p data-i18n="goal_2_desc">تمكين الطلاب من التعبير عن أنفسهم بلغتهم الأم بحرية وثقة، مع توفير أدوات ترجمة فورية ذكية داخل المنصة تتيح فهماً متبادلاً دون حواجز لغوية.</p>
+            </div>
+
+            <div class="goal-card">
+              <div class="goal-icon blue">🔬</div>
+              <h3 data-i18n="goal_3_title">فرق بحثية طلابية لقضايا واقعية</h3>
+              <p data-i18n="goal_3_desc">إشراك طلاب المدرستين في فرق بحثية مشتركة لمعالجة قضايا واقعية تهم مجتمعاتهم (كالبيئة، التراث، العلوم، والمجتمع)، مما ينمي التفكير النقدي والعمل الجماعي.</p>
+            </div>
+
+            <div class="goal-card">
+              <div class="goal-icon green">🤝</div>
+              <h3 data-i18n="goal_4_title">مجتمع مهني داعم للمدراء والمعلمين</h3>
+              <p data-i18n="goal_4_desc">خلق مجتمع مهني داعم للمدراء والمعلمين من كلا المجتمعين لتبادل الخبرات التربوية، التخطيط المشترك، وتطوير مبادرات تعليمية مبتكرة.</p>
+            </div>
+
+            <div class="goal-card goal-card-wide">
+              <div class="goal-icon dual">🧠</div>
+              <div>
+                <h3 data-i18n="goal_5_title">منصة رقمية ذكية للملاءمة (AI Matching) والاختيار المرن</h3>
+                <p data-i18n="goal_5_desc">توفير منصة رقمية ذكية تعتمد على خوارزميات الملاءمة لربط المدارس العربية واليهودية بسهولة بناءً على القرب الجغرافي، المرحلة العمرية، والاهتمامات التربوية المشتركة، مع إتاحة البحث اليدوي وتمييز المدارس التي لم تقترن بعد.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How It Works Section (كيف يعمل؟) -->
+      <div id="how-section" class="section-block bg-white">
+        <div class="container">
+          <div class="section-header text-center">
+            <span class="section-eyebrow" data-i18n="how_eyebrow">مسار العمل خطوة بخطوة | איך זה עובד?</span>
+            <h2 class="section-title" data-i18n="how_title">كيف تنتقل مدرستكم إلى شراكة "بَيْت | בַּיִת"؟</h2>
+          </div>
+
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-number">1</div>
+              <h3 data-i18n="step_1_title">التسجيل وتحديد الاحتياجات</h3>
+              <p data-i18n="step_1_desc">تسجل المدرسة وتعبئ استمارة الاحتياجات، المرحلة العمرية، الاهتمامات المشتركة، ونوع النشاط المفضل.</p>
+              <button class="btn-step-link" onclick="navigateTo('portal')" data-i18n="step_1_action">افتح استمارة التسجيل ←</button>
+            </div>
+
+            <div class="step-card featured-step">
+              <div class="step-number">2</div>
+              <h3 data-i18n="step_2_title">المطابقة الذكية والاختيار اليدوي</h3>
+              <p data-i18n="step_2_desc">
+                يقوم النظام باقتراح الشريك الأنسب جغرافياً وتربوياً، مع إمكانية الاختيار والفرز اليدوي حسب خصائص المدارس، ويقوم الموقع بتمييز المدارس التي لم تقترن بعد بوضوح (טרם שודכו).
+              </p>
+              <button class="btn-step-link" onclick="navigateTo('portal')" data-i18n="step_2_action">استعرض اقتراحات الشراكة ←</button>
+            </div>
+
+            <div class="step-card">
+              <div class="step-number">3</div>
+              <h3 data-i18n="step_3_title">اللقاء والعمل البحثي المشترك</h3>
+              <p data-i18n="step_3_desc">عند موافقة الطرفين، تُنشأ "الغرفة المشتركة" ويحصل الطلاب على رمز دخول آمن للمنتدى المترجم ومختبر البحث التعاوني.</p>
+              <button class="btn-step-link" onclick="navigateTo('students')" data-i18n="step_3_action">ادخل مساحة الطلاب ←</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Statistics Section (إحصائيات وأرقام) -->
+      <div class="stats-banner">
+        <div class="container">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value" id="statSchoolsCount">10</div>
+              <div class="stat-label" data-i18n="stat_schools">مدرسة عربية ويهودية مسجلة</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statUnmatchedCount">8</div>
+              <div class="stat-label" data-i18n="stat_unmatched">مدارس متاحة للتوأمة الفورية (טרם שודכו)</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statStudentsCount">496</div>
+              <div class="stat-label" data-i18n="stat_students">طالب وطالبة في المساحات المشتركة</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statProjectsCount">5</div>
+              <div class="stat-label" data-i18n="stat_projects">مشاريع بحثية ومبادرات منجزة</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shared Wall Preview on Landing Page -->
+      <div class="section-block bg-soft">
+        <div class="container">
+          <div class="section-header-flex">
+            <div>
+              <span class="section-eyebrow" data-i18n="wall_eyebrow">جدار الإنجازات المشترك | קיר ההישגים המשותף</span>
+              <h2 class="section-title" data-i18n="wall_title">مخرجات بحثية وإبداعية صنعها طلابنا معاً</h2>
+            </div>
+            <button class="btn btn-outline-blue" onclick="navigateTo('students'); switchStudentTab('wall');" data-i18n="view_all_achievements">
+              استعراض المعرض الرقمي الكامل ←
+            </button>
+          </div>
+          <div id="landingAchievementsGrid" class="achievements-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SECTION 2: MATCHING & REGISTRATION PORTAL (نظام التسجيل والمطابقة)
+         ========================================================== -->
+    <section id="view-portal" class="view-section">
+      <div class="portal-hero-bar">
+        <div class="container portal-hero-inner">
+          <div>
+            <span class="portal-badge" data-i18n="portal_badge">قسم مدراء المدارس ومركزي التربية الاجتماعية</span>
+            <h1 data-i18n="portal_title">بوابة التسجيل والمطابقة الذكية (AI Matching & Manual Selection)</h1>
+            <p data-i18n="portal_subtitle">سجّل مدرستك أو اختر إحدى المدارس المسجلة لاستعراض اقتراحات التوأمة الذكية، الفلترة اليدوية، وإنشاء الغرفة المشتركة.</p>
+          </div>
+          <div class="portal-mode-tabs">
+            <button id="tabBtnDashboard" class="portal-tab-btn active" onclick="switchPortalMode('dashboard')">
+              <span>🧭</span>
+              <span data-i18n="tab_school_dashboard">لوحة تحكم المدرسة والمطابقة</span>
+            </button>
+            <button id="tabBtnRegister" class="portal-tab-btn" onclick="switchPortalMode('register')">
+              <span>➕</span>
+              <span data-i18n="tab_new_registration">تسجيل مدرسة جديدة</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="container section-padding">
+        <!-- SUBVIEW 2A: REGISTRATION FORM -->
+        <div id="portal-register-pane" class="portal-pane" style="display: none;">
+          <div class="form-card">
+            <div class="form-card-header">
+              <h2 data-i18n="reg_form_title">استمارة تسجيل مدرسة في شبكة "بَيْت | בַּיִת"</h2>
+              <p data-i18n="reg_form_desc">عبئ معلومات المدرسة والاهتمامات التربوية ليقوم النظام باقتراح أفضل المدارس الشريكة جغرافياً وفكرياً.</p>
+            </div>
+
+            <form id="schoolRegistrationForm" onsubmit="submitSchoolRegistration(event)">
+              <div class="form-section-title" data-i18n="reg_sec_basic">1. معلومات المدرسة الأساسية | פרטי בית הספר</div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label data-i18n="lbl_school_name">اسم المدرسة (بالعربية أو العبرية) *</label>
+                  <input type="text" id="regName" required placeholder="مثال: مدرسة الحكمة الثانوية / תיכון אל-חכמה" />
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_school_city">الموقع الجغرافي (البلدة / المدينة) *</label>
+                  <input type="text" id="regCity" list="citiesList" required placeholder="مثال: الناصرة، حيفا، العفولة، الطيرة..." />
+                  <datalist id="citiesList">
+                    <option value="أم الفحم"></option>
+                    <option value="العفولة"></option>
+                    <option value="الناصرة"></option>
+                    <option value="نوف هجليل"></option>
+                    <option value="حيفا"></option>
+                    <option value="الطيرة"></option>
+                    <option value="كفار سابا"></option>
+                    <option value="رهط"></option>
+                    <option value="بئر السبع"></option>
+                    <option value="طمرة"></option>
+                    <option value="كرميئيل"></option>
+                    <option value="سخنين"></option>
+                    <option value="عكا"></option>
+                    <option value="باقة الغربية"></option>
+                    <option value="الخضيرة"></option>
+                    <option value="القدس"></option>
+                  </datalist>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_sector">القطاع التعليمي | מגזר *</label>
+                  <select id="regSector" required>
+                    <option value="arab" data-i18n="sector_arab">عربي | ערבי</option>
+                    <option value="jewish_state" data-i18n="sector_jewish_state">يهودي حكومي (ממלכתי)</option>
+                    <option value="jewish_religious" data-i18n="sector_jewish_rel">يهودي ديني (ממלכתי-דתי)</option>
+                    <option value="bilingual" data-i18n="sector_bilingual">ثنائي اللغة / مشترك (דו-לשוני)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_age_stage">المرحلة العمرية والصفوف المستهدفة *</label>
+                  <div class="inline-inputs">
+                    <select id="regAgeStage" required>
+                      <option value="elementary" data-i18n="stage_elementary">ابتدائي (יסודי)</option>
+                      <option value="middle" selected data-i18n="stage_middle">إعدادي (חטיבת ביניים)</option>
+                      <option value="high" data-i18n="stage_high">ثانوي (תיכון)</option>
+                    </select>
+                    <input type="text" id="regGrades" value="8-9" placeholder="الصفوف: 8-9" style="max-width: 140px;" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section-title" data-i18n="reg_sec_interests">2. الاهتمامات والمجالات التربوية المشتركة | תחומי עניין</div>
+              <div class="checkbox-cards-grid" id="regInterestsGroup">
+                <label class="checkbox-card">
+                  <input type="checkbox" name="interests" value="science_env" checked />
+                  <span class="cb-icon">🌿</span>
+                  <span class="cb-label" data-i18n="int_science_env">علوم وبيئة (מדעים וסביבה)</span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="interests" value="lit_lang" />
+                  <span class="cb-icon">📚</span>
+                  <span class="cb-label" data-i18n="int_lit_lang">آداب ولغات (ספרות ושפות)</span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="interests" value="history_heritage" checked />
+                  <span class="cb-icon">🏺</span>
+                  <span class="cb-label" data-i18n="int_history_heritage">تاريخ وتراث (היסטוריה ומורשת)</span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="interests" value="arts_music" />
+                  <span class="cb-icon">🎨</span>
+                  <span class="cb-label" data-i18n="int_arts_music">فنون وموسيقى (אמנות ומוזיקה)</span>
+                </label>
+                <label class="checkbox-card">
+                  <input type="checkbox" name="interests" value="social_entrepreneurship" />
+                  <span class="cb-icon">🚀</span>
+                  <span class="cb-label" data-i18n="int_social_ent">ريادة أعمال مجتمعية (יזמות חברתית)</span>
+                </label>
+              </div>
+
+              <div class="form-section-title" data-i18n="reg_sec_activity">3. نوع النشاط المفضل ونبذة عن المدرسة | אופי הפעילות</div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label data-i18n="lbl_activity_type">نوع النشاط المفضل *</label>
+                  <select id="regActivityType">
+                    <option value="hybrid" data-i18n="act_hybrid">هجين: لقاءات رقمية + جولات ميدانية (היברידי)</option>
+                    <option value="research" data-i18n="act_research">مشاريع بحثية مشتركة (פרויקטי מחקר)</option>
+                    <option value="online" data-i18n="act_online">عبر الإنترنت فقط (מקוון בלבד)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_school_bio">نبذة قصيرة عن رؤية المدرسة للشراكة</label>
+                  <input type="text" id="regBio" placeholder="نطمح لبناء شراكة بحثية وإنسانية مستدامة مع مدرسة جارة..." />
+                </div>
+              </div>
+
+              <div class="form-section-title" data-i18n="reg_sec_contact">4. شخص التواصل المسؤول | איש קשר</div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label data-i18n="lbl_contact_name">الاسم الكامل *</label>
+                  <input type="text" id="regContactName" required placeholder="مثال: أ. ريم جبارين / יעל לוי" />
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_contact_role">الوظيفة *</label>
+                  <select id="regContactRole">
+                    <option value="مدير/ة المدرسة | מנהל/ת בית הספר">مدير/ة المدرسة | מנהל/ת בית הספר</option>
+                    <option value="مركز/ة تربية اجتماعية | רכז/ת חינוך חברתי">مركز/ة تربية اجتماعية | רכז/ת חינוך חברתי</option>
+                    <option value="مركز/ة مشاريع مشتركة | רכז/ת פרויקטים">مركز/ة مشاريع مشتركة | רכז/ת פרויקטים</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_contact_email">البريد الإلكتروني المدرسي *</label>
+                  <input type="email" id="regContactEmail" required placeholder="principal@school.edu" />
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_contact_phone">رقم الهاتف *</label>
+                  <input type="tel" id="regContactPhone" required placeholder="050-0000000" />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-green btn-lg">
+                  <span>✨</span>
+                  <span data-i18n="btn_submit_registration">حفظ التسجيل والانتقال لاقتراحات المطابقة الذكية</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- SUBVIEW 2B: SCHOOL DASHBOARD & AI MATCHING -->
+        <div id="portal-dashboard-pane" class="portal-pane">
+          <!-- Active School Switcher Bar (for testing & switching between registered schools) -->
+          <div class="active-school-bar">
+            <div class="active-school-selector">
+              <label for="dashboardSchoolSelect" data-i18n="lbl_active_school_view">المدرسة الحالية في لوحة التحكم:</label>
+              <select id="dashboardSchoolSelect" onchange="loadSchoolDashboard(this.value)"></select>
+            </div>
+            <div id="activeSchoolStatusBadge" class="school-match-pill"></div>
+          </div>
+
+          <!-- Current School Summary Card -->
+          <div id="currentSchoolProfileCard" class="current-school-card"></div>
+
+          <!-- Filter & Search Controls (AI Matching + Manual Selection by School Characteristics + Unmatched Marking) -->
+          <div class="matching-controls-card">
+            <div class="matching-controls-header">
+              <div>
+                <h3 data-i18n="matches_heading">🤖 اقتراحات الشراكة الذكية والاختيار اليدوي (AI Matches & Manual Filter)</h3>
+                <p data-i18n="matches_subheading">
+                  يرتب النظام المدارس تلقائياً حسب درجة الملاءمة (المسافة الجغرافية، المرحلة العمرية، الاهتمامات المشتركة)، ويمكنك الفلترة يدوياً حسب خصائص المدرسة أو إظهار المدارس التي لم تقترن بعد فقط (בתי ספר שטרם שודכו).
+                </p>
+              </div>
+              <div class="unmatched-toggle-box">
+                <label class="switch-label">
+                  <input type="checkbox" id="filterUnmatchedOnly" onchange="renderMatchesList()" />
+                  <span class="switch-Visual"></span>
+                  <span data-i18n="filter_only_unmatched">إظهار المدارس التي لم تقترن بعد فقط (טרם שודכו בלבד)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="manual-filters-grid">
+              <div class="filter-item">
+                <label data-i18n="filter_sector_lbl">القطاع | מגזר</label>
+                <select id="filterSector" onchange="renderMatchesList()">
+                  <option value="all" data-i18n="opt_all_sectors">جميع القطاعات (موصى به: شريك من المجتمع الآخر)</option>
+                  <option value="cross" data-i18n="opt_cross_sector">شراكة عربية-يهودية (דו-לאומי)</option>
+                  <option value="arab" data-i18n="sector_arab">عربي | ערבי</option>
+                  <option value="jewish_state" data-i18n="sector_jewish_state">يهودي حكومي | ממלכתי</option>
+                  <option value="jewish_religious" data-i18n="sector_jewish_rel">يهودي ديني | ממלכתי-דתי</option>
+                </select>
+              </div>
+
+              <div class="filter-item">
+                <label data-i18n="filter_stage_lbl">المرحلة العمرية | שכבת גיל</label>
+                <select id="filterStage" onchange="renderMatchesList()">
+                  <option value="all" data-i18n="opt_all_stages">جميع المراحل</option>
+                  <option value="elementary" data-i18n="stage_elementary">ابتدائي (יסודי)</option>
+                  <option value="middle" data-i18n="stage_middle">إعدادي (חטיבת ביניים)</option>
+                  <option value="high" data-i18n="stage_high">ثانوي (תיכון)</option>
+                </select>
+              </div>
+
+              <div class="filter-item">
+                <label data-i18n="filter_interest_lbl">الاهتمام المشترك | תחום עניין</label>
+                <select id="filterInterest" onchange="renderMatchesList()">
+                  <option value="all" data-i18n="opt_all_interests">جميع المجالات</option>
+                  <option value="science_env" data-i18n="int_science_env">علوم وبيئة</option>
+                  <option value="history_heritage" data-i18n="int_history_heritage">تاريخ وتراث</option>
+                  <option value="lit_lang" data-i18n="int_lit_lang">آداب ولغات</option>
+                  <option value="arts_music" data-i18n="int_arts_music">فنون وموسيقى</option>
+                  <option value="social_entrepreneurship" data-i18n="int_social_ent">ريادة أعمال مجتمعية</option>
+                </select>
+              </div>
+
+              <div class="filter-item">
+                <label data-i18n="filter_activity_lbl">نوع النشاط | אופי פעילות</label>
+                <select id="filterActivity" onchange="renderMatchesList()">
+                  <option value="all" data-i18n="opt_all_activities">جميع الأنشطة</option>
+                  <option value="hybrid" data-i18n="act_hybrid">هجين (رقمي + ميداني)</option>
+                  <option value="research" data-i18n="act_research">مشاريع بحثية</option>
+                  <option value="online" data-i18n="act_online">عبر الإنترنت</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Matches Grid -->
+          <div id="matchesGridContainer" class="matches-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SECTION 3: STUDENTS & SHARED LEARNING SPACE (مساحة الطلاب)
+         ========================================================== -->
+    <section id="view-students" class="view-section">
+      <!-- Student Safe Login Gate (shown when not yet inside a classroom, or switchable anytime) -->
+      <div id="studentLoginGate" class="student-login-wrapper">
+        <div class="container">
+          <div class="student-login-card">
+            <div class="login-card-badge">🔒 دخول آمن بدون بيانات شخصية حساسة | כניסה בטוחה ללא פרטים רגישים</div>
+            <h1 data-i18n="student_login_title">مساحة الطلاب والتعلم المشترك | מרחב התלמידים והלמידה המשותפת</h1>
+            <p data-i18n="student_login_desc">
+              أدخل الرمز المخصص الذي وفرته لك مدرستك للدخول إلى لوحة الصف المشترك، منتدى "نتحدث معاً" المزود بالترجمة الفورية، ومختبر البحث العلمي.
+            </p>
+
+            <form class="student-login-form" onsubmit="handleStudentLogin(event)">
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label data-i18n="lbl_access_code">رمز الغرفة المشتركة (Access Code) *</label>
+                  <input type="text" id="studentCodeInput" value="BAYT-2026" required class="code-input" placeholder="BAYT-2026" />
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_student_nickname">اسمك الأول (أو لقبك في الفريق) *</label>
+                  <input type="text" id="studentNameInput" value="سارة | שרה" required placeholder="مثال: أمير / מאיה" />
+                </div>
+                <div class="form-group">
+                  <label data-i18n="lbl_student_side">اختر مدرستك في الشراكة</label>
+                  <select id="studentSideSelect">
+                    <option value="a">المدرسة الشريكة (أ) - العربية</option>
+                    <option value="b">المدرسة الشريكة (ب) - اليهودية</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="quick-demo-codes">
+                <span data-i18n="quick_codes_label">رموز غرف نشطة للتجربة السريعة:</span>
+                <button type="button" class="code-chip" onclick="fillStudentCode('BAYT-2026', 'أمير جبارين', 'a')">
+                  🔑 BAYT-2026 (ابن خلدون أم الفحم 🤝 كرميم العفولة)
+                </button>
+                <button type="button" class="code-chip" onclick="fillStudentCode('GALIL-101', 'مايا ليفي | מאיה', 'b')">
+                  🔑 GALIL-101 (البشارة الناصرة 🤝 أورت ألون نوف هجليل)
+                </button>
+              </div>
+
+              <button type="submit" class="btn btn-blue btn-lg btn-full">
+                <span>🚀</span>
+                <span data-i18n="btn_enter_classroom_now">دخول لوحة الصف المشترك الآن</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Classroom Workspace -->
+      <div id="classroomWorkspace" style="display: none;">
+        <!-- Classroom Top Banner -->
+        <div class="classroom-banner">
+          <div class="container">
+            <div class="classroom-banner-top">
+              <div class="classroom-code-pill">
+                <span>🔑</span>
+                <span id="activeRoomCode">BAYT-2026</span>
+              </div>
+              <div class="student-identity-pill">
+                <span>🧑‍🎓</span>
+                <span id="activeStudentBadge">طالب مشترك</span>
+                <button class="btn-change-room" onclick="showStudentLoginGate()" data-i18n="btn_switch_code">تغيير الرمز / الحساب</button>
+              </div>
+            </div>
+
+            <h1 id="activeRoomTitle" class="classroom-partnership-title">
+              مدرسة ابن خلدون، أم الفحم 🤝 مدرسة كرميم، العفولة
+            </h1>
+            <div class="classroom-topic-box">
+              <span class="topic-label" data-i18n="lbl_joint_research_topic">🔬 موضوع البحث المشترك:</span>
+              <strong id="activeRoomTopic">جودة المياه الجوفية والينابيع وحكايات كبار السن في وادي عارة ومرج ابن عامر</strong>
+            </div>
+            <div class="classroom-supervisors" id="activeRoomSupervisors"></div>
+
+            <!-- Workspace Navigation Tabs -->
+            <div class="workspace-tabs">
+              <button class="ws-tab active" id="wsTabForum" onclick="switchStudentTab('forum')">
+                <span>💬</span>
+                <span data-i18n="ws_tab_forum">المنتدى التفاعلي "نتحدث معاً" (ترجمة فورية)</span>
+              </button>
+              <button class="ws-tab" id="wsTabLab" onclick="switchStudentTab('lab')">
+                <span>🧪</span>
+                <span data-i18n="ws_tab_lab">مختبر البحث والعمل المشترك</span>
+              </button>
+              <button class="ws-tab" id="wsTabWall" onclick="switchStudentTab('wall')">
+                <span>🏆</span>
+                <span data-i18n="ws_tab_wall">جدار الإنجازات (المعرض الرقمي)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="container section-padding">
+          <!-- TAB 1: DISCUSSION FORUM ("نتحدث معاً | מדברים יחד") -->
+          <div id="student-pane-forum" class="student-pane active">
+            <div class="forum-layout">
+              <!-- Sidebar: Icebreaker Categories & Translation Info -->
+              <aside class="forum-sidebar">
+                <div class="sidebar-box">
+                  <h3 data-i18n="icebreakers_title">🧊 مواضيع لكسر الجليد | נושאים לשבירת הקרח</h3>
+                  <p class="sidebar-hint" data-i18n="icebreakers_hint">بإشراف المعلمين — اختر موضوعاً للنقاش والتعارف:</p>
+                  <div class="category-list">
+                    <button class="cat-btn active" data-cat="all" onclick="filterForumCategory('all')">
+                      <span>🌟</span> <span data-i18n="cat_all">جميع النقاشات</span>
+                    </button>
+                    <button class="cat-btn" data-cat="self_intro" onclick="filterForumCategory('self_intro')">
+                      <span>👋</span> <span data-i18n="cat_self_intro">تعريف بالنفس | הצגה עצמית</span>
+                    </button>
+                    <button class="cat-btn" data-cat="hobbies" onclick="filterForumCategory('hobbies')">
+                      <span>🎸</span> <span data-i18n="cat_hobbies">هواياتنا | התחביבים שלנו</span>
+                    </button>
+                    <button class="cat-btn" data-cat="favorite_food" onclick="filterForumCategory('favorite_food')">
+                      <span>オリーブ</span> <span data-i18n="cat_food">أكلتنا المفضلة | המאכל האהוב</span>
+                    </button>
+                    <button class="cat-btn" data-cat="holidays" onclick="filterForumCategory('holidays')">
+                      <span>🌱</span> <span data-i18n="cat_holidays">أعيادنا ومناسباتنا | חגים ומועדים</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="sidebar-box translation-explainer-box">
+                  <div class="trans-badge-header">⚡ ميزة الترجمة الفورية الذكية</div>
+                  <p data-i18n="trans_explainer_text">
+                    اكتب بلغتك الأم (العربية أو العبرية) بحرية وثقة! سيقوم النظام بترجمة رسالتك فوراً لزميلك في المدرسة الشريكة بضغطة زر لكسر حاجز اللغة تماماً.
+                  </p>
+                </div>
+              </aside>
+
+              <!-- Main Forum Feed & Composer -->
+              <div class="forum-main">
+                <!-- New Post Composer -->
+                <div class="composer-card">
+                  <div class="composer-header">
+                    <h3 data-i18n="composer_title">✍️ شارك في حوار "نتحدث معاً | מדברים יחד"</h3>
+                    <span class="supervised-pill" data-i18n="supervised_badge">🛡️ بإشراف المعلمين</span>
+                  </div>
+                  <form onsubmit="submitForumPost(event)">
+                    <div class="composer-controls">
+                      <select id="postCategorySelect" required>
+                        <option value="self_intro" data-i18n="cat_self_intro">👋 تعريف بالنفس | הצגה עצמית</option>
+                        <option value="hobbies" data-i18n="cat_hobbies">🎸 هواياتنا | התחביבים שלנו</option>
+                        <option value="favorite_food" data-i18n="cat_food">🍲 أكلتنا المفضلة | המאכל האהוב</option>
+                        <option value="holidays" data-i18n="cat_holidays">🌱 أعيادنا ومناسباتنا | חגים ומועדים</option>
+                      </select>
+                      <button type="button" class="btn-instant-preview" onclick="previewComposerTranslation()">
+                        <span>⚡</span>
+                        <span data-i18n="btn_preview_translation">معاينة الترجمة الفورية قبل النشر</span>
+                      </button>
+                    </div>
+                    <textarea id="postContentInput" rows="3" required placeholder="اكتب رسالتك هنا بالعربية أو العبرية... | כתבו כאן את ההודעה שלכם בערבית או בעברית..."></textarea>
+                    <div id="composerTranslationPreview" class="composer-trans-preview" style="display: none;"></div>
+                    <div class="composer-footer">
+                      <span class="composer-tip" data-i18n="composer_tip">تُحفظ الرسالة باللغتين تلقائياً ليتمكن زملاؤك من قراءتها بلغتهم.</span>
+                      <button type="submit" class="btn btn-green">
+                        <span data-i18n="btn_publish_post">نشر المشاركة في المنتدى</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Posts Feed -->
+                <div id="forumPostsContainer" class="forum-posts-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: COLLABORATIVE RESEARCH HUB (مختبر البحث والعمل المشترك) -->
+          <div id="student-pane-lab" class="student-pane" style="display: none;">
+            <div class="lab-grid-top">
+              <!-- Part A: Data Sharing (مشاركة المعطيات الميدانية) -->
+              <div class="lab-panel">
+                <div class="lab-panel-header">
+                  <div>
+                    <h3 data-i18n="lab_data_title">📂 1. مشاركة المعطيات الميدانية (Data Sharing)</h3>
+                    <p data-i18n="lab_data_desc">يرفع الطلاب صوراً، مقابلات مع كبار السن، أو قياسات علمية من بلداتهم لمقارنتها.</p>
+                  </div>
+                  <button class="btn btn-outline-green btn-sm" onclick="toggleDataUploadForm()">
+                    <span>➕</span> <span data-i18n="btn_upload_data">رفع معطى جديد</span>
+                  </button>
+                </div>
+
+                <!-- Upload Data Collapsible Form -->
+                <form id="uploadResearchForm" class="lab-mini-form" style="display: none;" onsubmit="submitResearchData(event)">
+                  <div class="form-grid-2">
+                    <select id="resDataType" required>
+                      <option value="measurement">🧪 قياس علمي / مخبري (מדידה מדעית)</option>
+                      <option value="interview">🎙️ مقابلة مع كبار السن (ראיון ותיקים)</option>
+                      <option value="photo">📷 توثيق مصور (תיעוד מצולם)</option>
+                    </select>
+                    <input type="text" id="resTown" required placeholder="البلدة (مثال: أم الفحم / العفولة)" />
+                  </div>
+                  <input type="text" id="resTitle" required placeholder="عنوان المعطى أو العينة..." />
+                  <textarea id="resSummary" rows="2" required placeholder="ملخص النتائج أو القصة التي تم توثيقها..."></textarea>
+                  <input type="text" id="resBadge" placeholder="مؤشر رقمي مختصر (مثال: pH 7.5 | 12 صورة)" />
+                  <button type="submit" class="btn btn-green btn-sm" data-i18n="btn_save_data">حفظ ومشاركة مع الفريق</button>
+                </form>
+
+                <div id="researchDataList" class="research-data-list"></div>
+              </div>
+
+              <!-- Part C: Smart AI Research Mentor (المرشد الذكي) -->
+              <div class="lab-panel mentor-panel">
+                <div class="lab-panel-header">
+                  <div>
+                    <h3 data-i18n="lab_mentor_title">🤖 3. المرشد البحثي الذكي (AI Research Mentor)</h3>
+                    <p data-i18n="lab_mentor_desc">يقدم نصائح وأفكاراً للطلاب باللغتين حول كيفية تطوير بحثهم المشترك.</p>
+                  </div>
+                </div>
+
+                <div class="mentor-quick-prompts">
+                  <button class="prompt-chip" onclick="askMentorPreset('مياه')">💧 كيف نقارن عينات المياه؟</button>
+                  <button class="prompt-chip" onclick="askMentorPreset('مقابلة')">🎙️ أسئلة لمقابلة كبار السن</button>
+                  <button class="prompt-chip" onclick="askMentorPreset('خطة')">📋 كيف نقسم المهام بين المدرستين؟</button>
+                </div>
+
+                <div id="mentorConversationBox" class="mentor-chat-box"></div>
+
+                <form class="mentor-input-row" onsubmit="submitMentorQuestion(event)">
+                  <input type="text" id="mentorQuestionInput" required placeholder="اسأل المرشد الذكي بالعربية أو العبرية... | שאלו את המנטור החכם..." />
+                  <button type="submit" class="btn btn-blue btn-sm" data-i18n="btn_ask_mentor">اطلب نصيحة</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Part B: Collaborative Canvas / Padlet (لوحة العمل التعاوني) -->
+            <div class="canvas-board-wrapper">
+              <div class="canvas-header">
+                <div>
+                  <h3 data-i18n="lab_canvas_title">📌 2. لوحة العمل التعاوني المشترك (Collaborative Research Canvas)</h3>
+                  <p data-i18n="lab_canvas_desc">مساحة Padlet تفاعلية لترتيب الأفكار، الفرضيات، خطوات العمل الميداني، وصياغة توصيات البحث معاً باللغتين.</p>
+                </div>
+                <form class="canvas-add-bar" onsubmit="submitCanvasCard(event)">
+                  <select id="canvasColSelect">
+                    <option value="ideas" data-i18n="col_ideas">💡 أفكار وفرضيات</option>
+                    <option value="field_work" data-i18n="col_field">🔍 العمل الميداني</option>
+                    <option value="drafting" data-i18n="col_drafting">✍️ صياغة البحث</option>
+                    <option value="conclusions" data-i18n="col_conclusions">🌱 النتائج والتوصيات</option>
+                  </select>
+                  <input type="text" id="canvasCardInput" required placeholder="أضف بطاقة فكرة أو مهمة للوحة... | הוסיפו כרטיס רעיון..." />
+                  <button type="submit" class="btn btn-green btn-sm" data-i18n="btn_add_card">+ إضافة بطاقة</button>
+                </form>
+              </div>
+
+              <div class="canvas-columns-grid">
+                <div class="canvas-col">
+                  <div class="canvas-col-header blue-top">
+                    <span>💡</span> <h4 data-i18n="col_ideas">أفكار وفرضيات | רעיונות והשערות</h4>
+                  </div>
+                  <div id="canvas-col-ideas" class="canvas-cards-stack"></div>
+                </div>
+
+                <div class="canvas-col">
+                  <div class="canvas-col-header amber-top">
+                    <span>🔍</span> <h4 data-i18n="col_field">العمل الميداني | עבודת שדה</h4>
+                  </div>
+                  <div id="canvas-col-field_work" class="canvas-cards-stack"></div>
+                </div>
+
+                <div class="canvas-col">
+                  <div class="canvas-col-header teal-top">
+                    <span>✍️</span> <h4 data-i18n="col_drafting">صياغة البحث | כתיבת המחקר</h4>
+                  </div>
+                  <div id="canvas-col-drafting" class="canvas-cards-stack"></div>
+                </div>
+
+                <div class="canvas-col">
+                  <div class="canvas-col-header green-top">
+                    <span>🌱</span> <h4 data-i18n="col_conclusions">النتائج والتوصيات | מסקנות והמלצות</h4>
+                  </div>
+                  <div id="canvas-col-conclusions" class="canvas-cards-stack"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: SHARED WALL OF ACHIEVEMENTS (جدار الإنجازات) -->
+          <div id="student-pane-wall" class="student-pane" style="display: none;">
+            <div class="wall-header-card">
+              <div>
+                <h2 data-i18n="wall_full_title">🏆 جدار الإنجازات المشترك (Shared Wall of Achievements)</h2>
+                <p data-i18n="wall_full_desc">معرض رقمي يعرض النتائج النهائية للأبحاث المشتركة (فيديو، عروض تقديمية، خرائط تفاعلية، ومجسمات) لجميع الطلاب والمدارس في المنصة للاستلهام منها.</p>
+              </div>
+            </div>
+            <div id="studentAchievementsGrid" class="achievements-grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <div class="brand-title">
+          <span class="brand-ar">بَيْت</span>
+          <span class="brand-divider">|</span>
+          <span class="brand-he" lang="he">בַּיִת</span>
+        </div>
+        <p data-i18n="footer_about">
+          منصة رقمية وتربوية لبناء شراكات مستدامة بين المدارس العربية واليهودية: من اللقاء العابر إلى أصحاب البيت الواحد.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4 data-i18n="footer_nav_title">أقسام المنصة</h4>
+        <ul>
+          <li><a href="#landing" onclick="navigateTo('landing'); return false;" data-i18n="nav_vision">الرؤية والأهداف</a></li>
+          <li><a href="#portal" onclick="navigateTo('portal'); return false;" data-i18n="nav_register_school">تسجيل المدارس والمطابقة الذكية</a></li>
+          <li><a href="#students" onclick="navigateTo('students'); return false;" data-i18n="nav_students">مساحة الطلاب والمنتدى المترجم</a></li>
+          <li><a href="#wall" onclick="navigateTo('students'); switchStudentTab('wall'); return false;" data-i18n="ws_tab_wall">جدار الإنجازات المشترك</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 data-i18n="footer_partners_title">شركاء الرؤية والتواصل</h4>
+        <p>📧 info@bayt-shared.org</p>
+        <p>📍 حيفا • الناصرة • أم الفحم • العفولة • القدس</p>
+        <p class="footer-legal" data-i18n="footer_legal">جميع الحقوق محفوظة © 2026 مشروع "بَيْت | בַּיִת" • سياسة الخصوصية وأمان الطلاب</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast-notification" style="display: none;"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
