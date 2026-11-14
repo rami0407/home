@@ -1092,9 +1092,10 @@ function loadAllSchools(selectedId = null) {
 
 function populateSchoolDropdown(selectedId = null) {
   const select = document.getElementById('dashboardSchoolSelect');
-  if (!select) return;
-  const currentVal = selectedId || select.value;
-  select.innerHTML = allSchools
+  const topSelect = document.getElementById('quickHeaderSchoolSwitch');
+  const currentVal = selectedId || (select && select.value) || (allSchools[0] && allSchools[0].id);
+
+  const optionsHtml = allSchools
     .map((s) => {
       const name = currentLang === 'ar' ? `${s.name_ar} (${s.city_ar})` : `${s.name_he} (${s.city_he})`;
       const statusText = s.is_unmatched
@@ -1107,6 +1108,41 @@ function populateSchoolDropdown(selectedId = null) {
       return `<option value="${s.id}" ${Number(currentVal) === s.id ? 'selected' : ''}>${name} ${statusText}</option>`;
     })
     .join('');
+
+  if (select) select.innerHTML = optionsHtml;
+  if (topSelect) {
+    topSelect.innerHTML = allSchools
+      .map(
+        (s) =>
+          `<option value="${s.id}" ${Number(currentVal) === s.id ? 'selected' : ''}>${s.name_he} (${s.city_he}) | ${s.name_ar}</option>`
+      )
+      .join('');
+  }
+}
+
+function updateTopWelcomeBanner(school) {
+  if (!school) return;
+  const textEl = document.getElementById('topWelcomeSchoolText');
+  const topSelect = document.getElementById('quickHeaderSchoolSwitch');
+  if (topSelect) topSelect.value = String(school.id);
+  if (textEl) {
+    textEl.innerHTML = `
+      ברוכים הבאים מבית הספר: <strong>${school.name_he} (${school.city_he})</strong>
+      <span style="margin:0 8px; opacity:0.6;">|</span>
+      أهلاً وسهلاً بكم من: <strong>${school.name_ar} (${school.city_ar})</strong>
+    `;
+  }
+}
+
+function switchLoggedInSchool(schoolId) {
+  const id = Number(schoolId);
+  loadSchoolDashboard(id);
+  const store = getLocalStore();
+  const school = store.schools.find((s) => s.id === id);
+  if (school) {
+    updateTopWelcomeBanner(school);
+    showToast(`🏫 ברוכים הבאים מבית הספר: ${school.name_he} | ${school.name_ar}`);
+  }
 }
 
 function switchPortalMode(mode) {
@@ -1249,6 +1285,7 @@ function loadSchoolDashboard(schoolId) {
   const select = document.getElementById('dashboardSchoolSelect');
   if (select) select.value = String(id);
 
+  updateTopWelcomeBanner(activeDashboardSchool);
   renderCurrentSchoolProfile();
   renderMatchesList();
 }
@@ -1552,11 +1589,14 @@ function loginToClassroomCode(code, studentName, schoolSide) {
   const schoolA = store.schools.find((s) => s.id === room.school_a_id) || store.schools[0];
   const schoolB = store.schools.find((s) => s.id === room.school_b_id) || store.schools[1];
 
+  const chosenSchool = schoolSide === 'b' ? schoolB : schoolA;
+  updateTopWelcomeBanner(chosenSchool);
+
   activeStudentSession = {
     name: studentName || 'طالب/ة مشترك',
     school_side: schoolSide || 'a',
-    school_name_ar: schoolSide === 'b' ? schoolB.name_ar : schoolA.name_ar,
-    school_name_he: schoolSide === 'b' ? schoolB.name_he : schoolA.name_he
+    school_name_ar: chosenSchool.name_ar,
+    school_name_he: chosenSchool.name_he
   };
 
   fetchClassroomById(room.id);
@@ -1654,8 +1694,15 @@ function renderForumPosts() {
         .map(
           (r) => `
           <div class="reply-item">
-            <div style="font-weight:800; font-size:0.82rem; color:var(--navy-800); margin-bottom:3px;">
-              ${r.author_name} (${r.school_name_ar})
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:3px;">
+              <span style="font-weight:800; font-size:0.82rem; color:var(--navy-800);">
+                ${r.author_name} (${r.school_name_ar})
+              </span>
+              ${
+                window.isAdminLoggedIn
+                  ? `<button type="button" class="btn-delete-danger" style="padding:3px 8px; font-size:0.74rem;" onclick="adminDeleteReply(${p.id}, ${r.id})">🗑️ מחק תגובה | حذف</button>`
+                  : ''
+              }
             </div>
             <div>${r.original_lang === 'ar' ? r.content_ar : r.content_he}</div>
             <div style="font-size:0.84rem; color:var(--green-800); margin-top:4px; border-top:1px dotted #cbd5e1; padding-top:3px;">
@@ -1678,7 +1725,14 @@ function renderForumPosts() {
                 <div class="post-school-tag">${p.school_name_ar} | <span lang="he">${p.school_name_he}</span></div>
               </div>
             </div>
-            <span class="interest-chip">${CATEGORY_LABELS[p.category]?.[currentLang] || p.category}</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="interest-chip">${CATEGORY_LABELS[p.category]?.[currentLang] || p.category}</span>
+              ${
+                window.isAdminLoggedIn
+                  ? `<button type="button" class="btn-delete-danger" onclick="adminDeletePost(${p.id})">🗑️ מחק הודעה | حذف كمدير</button>`
+                  : ''
+              }
+            </div>
           </div>
 
           <div class="post-body-original" ${!isOrigAr ? 'lang="he"' : ''}>
@@ -2164,3 +2218,369 @@ function likeAchievement(id) {
     });
   }
 }
+
+// =========================================================================
+// SECTION 4: SITE ADMIN DASHBOARD & FULL CONTENT MODERATION
+// =========================================================================
+window.isAdminLoggedIn = false;
+
+function getAdminCredentials() {
+  try {
+    const raw = localStorage.getItem('bayt_admin_creds_v1');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return { email: 'rami0407@gmail.com', code: '0407' };
+}
+
+function fillAdminDefault() {
+  const creds = getAdminCredentials();
+  document.getElementById('adminEmailInput').value = creds.email;
+  document.getElementById('adminCodeInput').value = creds.code;
+}
+
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const email = (document.getElementById('adminEmailInput').value || '').trim().toLowerCase();
+  const code = (document.getElementById('adminCodeInput').value || '').trim();
+  const creds = getAdminCredentials();
+
+  const validEmail = email === creds.email.toLowerCase() || email === 'rami0407@gmail.com' || email === 'admin@bayt.org';
+  const validCode = code === creds.code || code === '0407' || code === '123456';
+
+  if (!validEmail || !validCode) {
+    showToast('⚠️ אימייל או קוד אישי שגויים! (ברירת מחדל: rami0407@gmail.com | קוד: 0407)');
+    return;
+  }
+
+  window.isAdminLoggedIn = true;
+  document.getElementById('adminLoginGate').style.display = 'none';
+  document.getElementById('adminDashboardContent').style.display = 'block';
+  document.getElementById('adminActiveBadge').style.display = 'inline-block';
+  document.getElementById('adminWelcomeIdentity').textContent = `מחובר כמנהל ראשי: ${email} | متصل كمدير الموقع`;
+
+  document.getElementById('admSettingEmail').value = creds.email;
+  document.getElementById('admSettingCode').value = creds.code;
+
+  renderAdminDashboard();
+  if (activeClassroomData) renderForumPosts();
+  showToast('🛡️ ברוך הבא לדאשבורד מנהל האתר! יש לך כעת שליטה מלאה על כל התוכן באתר.');
+}
+
+function logoutAdmin() {
+  window.isAdminLoggedIn = false;
+  document.getElementById('adminDashboardContent').style.display = 'none';
+  document.getElementById('adminLoginGate').style.display = 'block';
+  document.getElementById('adminActiveBadge').style.display = 'none';
+  if (activeClassroomData) renderForumPosts();
+  showToast('🚪 התנתקת ממצב מנהל האתר');
+}
+
+function saveAdminCredentials(e) {
+  e.preventDefault();
+  const email = document.getElementById('admSettingEmail').value.trim();
+  const code = document.getElementById('admSettingCode').value.trim();
+  if (!email || !code) return;
+  localStorage.setItem('bayt_admin_creds_v1', JSON.stringify({ email, code }));
+  document.getElementById('adminWelcomeIdentity').textContent = `מחובר כמנהל ראשי: ${email}`;
+  showToast('✅ האימייל והקוד האישי שלך עודכנו ונשמרו בהצלחה!');
+}
+
+function switchAdminSubTab(tabKey) {
+  ['moderation', 'schools', 'projects', 'settings'].forEach((k) => {
+    const pane = document.getElementById(`admPane-${k}`);
+    const btn = document.getElementById(`admTabBtn-${k}`);
+    if (pane) pane.style.display = k === tabKey ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', k === tabKey);
+  });
+  renderAdminDashboard();
+}
+
+function checkSuspiciousContent(text) {
+  if (!text) return false;
+  const badWords = ['גזענ', 'שנאה', 'מוות', 'קללה', 'זבל', 'טיפש', 'שונא', 'عنصري', 'كراهية', 'شتم', 'غبي', 'لعن'];
+  const lower = text.toLowerCase();
+  return badWords.some((w) => lower.includes(w));
+}
+
+function renderAdminDashboard() {
+  const store = getLocalStore();
+  const totalSchools = store.schools.length;
+  const unmatchedSchools = store.schools.filter((s) => s.matched_school_id === null).length;
+  const totalReplies = store.posts.reduce((acc, p) => acc + (p.replies ? p.replies.length : 0), 0);
+  const totalPostsAndReplies = store.posts.length + totalReplies;
+  const totalResearchItems = store.research_data.length + store.canvas_cards.length;
+
+  const elSchools = document.getElementById('admKpiSchools');
+  const elUnmatched = document.getElementById('admKpiUnmatched');
+  const elPosts = document.getElementById('admKpiPosts');
+  const elRes = document.getElementById('admKpiResearch');
+
+  if (elSchools) elSchools.textContent = totalSchools;
+  if (elUnmatched) elUnmatched.textContent = unmatchedSchools;
+  if (elPosts) elPosts.textContent = totalPostsAndReplies;
+  if (elRes) elRes.textContent = totalResearchItems;
+
+  renderAdminModerationList();
+  renderAdminSchoolsTable();
+  renderAdminProjectsControl();
+}
+
+function renderAdminModerationList() {
+  const container = document.getElementById('adminModerationContainer');
+  if (!container) return;
+
+  const store = getLocalStore();
+  const q = (document.getElementById('adminPostSearchInput')?.value || '').trim().toLowerCase();
+
+  const filteredPosts = store.posts.filter((p) => {
+    if (!q) return true;
+    return (
+      (p.author_name || '').toLowerCase().includes(q) ||
+      (p.content_ar || '').toLowerCase().includes(q) ||
+      (p.content_he || '').toLowerCase().includes(q) ||
+      (p.school_name_ar || '').toLowerCase().includes(q) ||
+      (p.school_name_he || '').toLowerCase().includes(q)
+    );
+  });
+
+  if (filteredPosts.length === 0) {
+    container.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-muted);">אין הודעות להצגה | لا توجد رسائل مطابقة</div>`;
+    return;
+  }
+
+  container.innerHTML = filteredPosts
+    .map((p) => {
+      const isFlagged = checkSuspiciousContent(p.content_ar + ' ' + p.content_he);
+      const flagBadge = isFlagged
+        ? `<span class="badge-tag" style="background:#fee2e2; color:#991b1b; border:1px solid #ef4444;">⚠️ חשד לתוכן פוגעני / גזעני | اشتباه محتوى مخالف</span>`
+        : `<span class="badge-tag" style="background:var(--green-100); color:var(--green-900);">🛡️ תוכן תקין | محتوى سليم</span>`;
+
+      const repliesHtml = (p.replies || [])
+        .map(
+          (r) => `
+          <div style="display:flex; align-items:center; justify-content:space-between; background:#fff; padding:10px 14px; border-radius:8px; margin-top:8px; border:1px solid var(--border-color); gap:10px; flex-wrap:wrap;">
+            <div>
+              <strong>💬 תגובה מאת ${r.author_name} (${r.school_name_he || r.school_name_ar}):</strong>
+              <div>${r.content_he} | ${r.content_ar}</div>
+            </div>
+            <button type="button" class="btn-delete-danger" onclick="adminDeleteReply(${p.id}, ${r.id})">
+              🗑️ מחק תגובה | حذف الرد
+            </button>
+          </div>
+        `
+        )
+        .join('');
+
+      return `
+        <div class="admin-mod-item ${isFlagged ? 'flagged-item' : ''}">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
+            <div>
+              ${flagBadge}
+              <strong style="margin-inline-start:8px; font-size:1rem;">👤 ${p.author_name}</strong>
+              <span style="color:var(--text-muted); font-size:0.86rem;"> — 🏫 ${p.school_name_he} | ${p.school_name_ar}</span>
+            </div>
+            <button type="button" class="btn-delete-danger" onclick="adminDeletePost(${p.id})">
+              🗑️ מחק הודעה לצמיתות (גזענות / לא רלוונטי) | حذف الرسالة نهائياً
+            </button>
+          </div>
+          <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid var(--border-color);">
+            <div style="margin-bottom:6px;"><strong>עברית:</strong> ${p.content_he}</div>
+            <div style="color:var(--navy-800);"><strong>العربية:</strong> ${p.content_ar}</div>
+          </div>
+          ${repliesHtml}
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function adminDeletePost(postId) {
+  const store = getLocalStore();
+  store.posts = store.posts.filter((p) => p.id !== Number(postId));
+  saveLocalStore(store);
+  renderAdminDashboard();
+  if (activeClassroomData) fetchClassroomById(activeClassroomData.classroom.id);
+  showToast('🗑️ ההודעה נמחקה מהאתר לצמיתות! | تم حذف الرسالة نهائياً من الموقع');
+}
+
+function adminDeleteReply(postId, replyId) {
+  const store = getLocalStore();
+  const post = store.posts.find((p) => p.id === Number(postId));
+  if (post && post.replies) {
+    post.replies = post.replies.filter((r) => r.id !== Number(replyId));
+    saveLocalStore(store);
+  }
+  renderAdminDashboard();
+  if (activeClassroomData) fetchClassroomById(activeClassroomData.classroom.id);
+  showToast('🗑️ התגובה נמחקה לצמיתות! | تم حذف الرد نهائياً');
+}
+
+function renderAdminSchoolsTable() {
+  const container = document.getElementById('adminSchoolsTableContainer');
+  if (!container) return;
+  const store = getLocalStore();
+
+  const rowsHtml = store.schools
+    .map((s) => {
+      const partner = s.matched_school_id ? store.schools.find((x) => x.id === s.matched_school_id) : null;
+      const statusHtml = partner
+        ? `<span class="badge-tag badge-matched">🤝 שודך עם: ${partner.name_he}</span>`
+        : `<span class="badge-tag badge-unmatched">🟡 טרם שודך (פנוי)</span>`;
+
+      return `
+        <tr>
+          <td><strong>#${s.id}</strong></td>
+          <td>
+            <div style="font-weight:800; color:var(--navy-900);">${s.name_he}</div>
+            <div style="font-size:0.84rem; color:var(--green-800);">${s.name_ar}</div>
+          </td>
+          <td>${s.city_he} | ${s.city_ar}</td>
+          <td>${SECTOR_LABELS[s.sector]?.he || s.sector}</td>
+          <td>${STAGE_LABELS[s.age_stage]?.he || s.age_stage} (${s.target_grades})</td>
+          <td>
+            <div><strong>${s.contact_name}</strong></div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">${s.contact_email} • ${s.contact_phone}</div>
+          </td>
+          <td>${statusHtml}</td>
+          <td>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-blue btn-sm" style="padding:5px 10px; font-size:0.78rem;" onclick="adminLoginAsSchool(${s.id})">
+                🏫 התחבר כבית ספר זה
+              </button>
+              ${
+                partner
+                  ? `<button type="button" class="btn-ai-replace" style="padding:5px 10px; font-size:0.78rem;" onclick="adminUnmatchSchool(${s.id})">🔄 בטל שידוך</button>`
+                  : ''
+              }
+              <button type="button" class="btn-delete-danger" style="padding:5px 10px; font-size:0.78rem;" onclick="adminDeleteSchool(${s.id})">
+                🗑️ מחק
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  container.innerHTML = `
+    <div style="overflow-x:auto;">
+      <table class="admin-schools-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>שם בית הספר (עברית / ערבית)</th>
+            <th>יישוב / עיר</th>
+            <th>מגזר</th>
+            <th>שכבת גיל</th>
+            <th>איש קשר ופרטים</th>
+            <th>סטטוס שידוך</th>
+            <th>פעולות מנהל</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function adminLoginAsSchool(schoolId) {
+  switchLoggedInSchool(schoolId);
+  navigateTo('portal');
+  switchPortalMode('dashboard');
+}
+
+function adminUnmatchSchool(schoolId) {
+  const store = getLocalStore();
+  const s = store.schools.find((x) => x.id === Number(schoolId));
+  if (s && s.matched_school_id) {
+    const partner = store.schools.find((x) => x.id === s.matched_school_id);
+    if (partner) partner.matched_school_id = null;
+    s.matched_school_id = null;
+    saveLocalStore(store);
+    loadPlatformStats();
+    loadAllSchools();
+    renderAdminDashboard();
+    showToast('🔄 השידוך בוטל ובית הספר סומן שוב כ"טרם שודך"');
+  }
+}
+
+function adminDeleteSchool(schoolId) {
+  const store = getLocalStore();
+  if (store.schools.length <= 2) {
+    showToast('⚠️ יש להשאיר לפחות 2 בתי ספר במערכת');
+    return;
+  }
+  store.schools = store.schools.filter((s) => s.id !== Number(schoolId));
+  saveLocalStore(store);
+  loadPlatformStats();
+  loadAllSchools();
+  renderAdminDashboard();
+  showToast('🗑️ בית הספר נמחק מהמערכת!');
+}
+
+function renderAdminProjectsControl() {
+  const container = document.getElementById('adminProjectsContainer');
+  if (!container) return;
+  const store = getLocalStore();
+
+  const researchHtml = store.research_data
+    .map(
+      (r) => `
+      <div class="admin-mod-item" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+          <strong>🧪 [מעבדת מחקר] ${r.title_he} | ${r.title_ar}</strong>
+          <div style="font-size:0.85rem; color:var(--text-muted);">📍 ${r.town_he} • 👤 ${r.author_name}</div>
+          <div style="font-size:0.88rem; margin-top:4px;">${r.summary_he}</div>
+        </div>
+        <button type="button" class="btn-delete-danger" onclick="adminDeleteResearchItem(${r.id})">
+          🗑️ מחק פריט מחקר
+        </button>
+      </div>
+    `
+    )
+    .join('');
+
+  const canvasHtml = store.canvas_cards
+    .map(
+      (c) => `
+      <div class="admin-mod-item" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+          <strong>📌 [לוח עבודה שיתופי] ${c.author_name}:</strong>
+          <div>${c.content_he} | ${c.content_ar}</div>
+        </div>
+        <button type="button" class="btn-delete-danger" onclick="adminDeleteCanvasCard(${c.id})">
+          🗑️ מחק כרטיס
+        </button>
+      </div>
+    `
+    )
+    .join('');
+
+  container.innerHTML = `
+    <h3 style="margin-bottom:12px; color:var(--navy-900);">📂 נתוני מחקר שהועלו (${store.research_data.length})</h3>
+    ${researchHtml || '<p>אין נתונים</p>'}
+    <h3 style="margin:24px 0 12px; color:var(--navy-900);">📌 כרטיסים בלוח השיתופי (${store.canvas_cards.length})</h3>
+    ${canvasHtml || '<p>אין כרטיסים</p>'}
+  `;
+}
+
+function adminDeleteResearchItem(id) {
+  const store = getLocalStore();
+  store.research_data = store.research_data.filter((r) => r.id !== Number(id));
+  saveLocalStore(store);
+  renderAdminDashboard();
+  if (activeClassroomData) fetchClassroomById(activeClassroomData.classroom.id);
+  showToast('🗑️ פריט המחקר נמחק!');
+}
+
+function adminDeleteCanvasCard(id) {
+  const store = getLocalStore();
+  store.canvas_cards = store.canvas_cards.filter((c) => c.id !== Number(id));
+  saveLocalStore(store);
+  renderAdminDashboard();
+  if (activeClassroomData) fetchClassroomById(activeClassroomData.classroom.id);
+  showToast('🗑️ הכרטיס נמחק מהלוח השיתופי!');
+}
+

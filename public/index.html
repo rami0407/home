@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=3" />
+  <link rel="stylesheet" href="./styles.css?v=4" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -17,6 +17,25 @@
     <div class="ambient-orb orb-blue"></div>
     <div class="ambient-orb orb-green"></div>
     <div class="ambient-orb orb-gold"></div>
+  </div>
+
+  <!-- Top School Welcome Banner (ברוכים הבאים מבית הספר...) -->
+  <div class="top-school-welcome-bar" id="topSchoolWelcomeBar">
+    <div class="container top-welcome-inner">
+      <div class="welcome-school-greeting">
+        <span class="welcome-house-icon">🏫</span>
+        <span id="topWelcomeSchoolText" class="welcome-text-main">
+          ברוכים הבאים מבית הספר: <strong>חטיבת ביניים אבן ח׳לדון (אום אל-פחם)</strong> | أهلاً وسهلاً بكم من: <strong>مدرسة ابن خلدون الإعدادية (أم الفحم)</strong>
+        </span>
+      </div>
+      <div class="welcome-school-actions">
+        <label for="quickHeaderSchoolSwitch" class="welcome-switch-lbl">החלף בית ספר מחובר | تبديل المدرسة:</label>
+        <select id="quickHeaderSchoolSwitch" class="welcome-school-select" onchange="switchLoggedInSchool(this.value)"></select>
+        <span id="adminActiveBadge" class="admin-active-pill" style="display: none;" onclick="navigateTo('admin')">
+          🛡️ מחובר כמנהל האתר (Admin)
+        </span>
+      </div>
+    </div>
   </div>
 
   <!-- Top Header -->
@@ -44,6 +63,7 @@
         <button class="nav-link" data-nav="how" onclick="navigateTo('landing', 'how-section')" data-i18n="nav_how">كيف نعمل</button>
         <button class="nav-link" data-nav="students" onclick="navigateTo('students')" data-i18n="nav_students">🧑‍🎓 مساحة الطلاب</button>
         <button class="nav-link nav-cta-pill" data-nav="portal" onclick="navigateTo('portal')" data-i18n="nav_register_school">🏫 تسجيل مدرسة / المطابقة</button>
+        <button class="nav-link nav-admin-pill" data-nav="admin" onclick="navigateTo('admin')" data-i18n="nav_admin">🛡️ ניהול האתר | لوحة المدير</button>
       </nav>
 
       <!-- Language Switcher -->
@@ -939,6 +959,175 @@
       </div>
     </section>
 
+    <!-- ==========================================================
+         SECTION 4: SITE ADMIN DASHBOARD (דאשבורד מנהל האתר | لوحة مدير الموقع)
+         ========================================================== -->
+    <section id="view-admin" class="view-section">
+      <!-- Admin Login Gate -->
+      <div id="adminLoginGate" class="student-login-wrapper">
+        <div class="container">
+          <div class="student-login-card admin-login-card">
+            <img src="./logo.jpg" alt="Bayt Logo" style="width:92px; height:92px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
+            <div>
+              <span class="login-card-badge" style="background:var(--gold-100); color:#92400e; border:1px solid var(--gold-500);">
+                🛡️ כניסת מנהל האתר הראשי | دخول مدير الموقع العام
+              </span>
+            </div>
+            <h1>דאשבורד ניהול ובקרה — "בַּיִת | بَيْت"</h1>
+            <p>
+              הזן את האימייל האישי והקוד הסודי שלך כמנהל האתר כדי לצפות בכל בתי הספר הרשומים, לנטר את התוכן באתר, ולמחוק הודעות לא רלוונטיות או גזעניות.
+            </p>
+
+            <form class="student-login-form" onsubmit="handleAdminLogin(event)">
+              <div class="form-grid-2" style="margin-bottom: 18px;">
+                <div class="form-group">
+                  <label>📧 האימייל האישי של מנהל האתר | البريد الإلكتروني للمدير *</label>
+                  <input type="email" id="adminEmailInput" value="rami0407@gmail.com" required placeholder="rami0407@gmail.com" />
+                </div>
+                <div class="form-group">
+                  <label>🔑 קוד אישי סודי | الرمز الشخصي السري *</label>
+                  <input type="password" id="adminCodeInput" value="0407" required class="code-input" placeholder="0407" />
+                </div>
+              </div>
+
+              <div class="quick-demo-codes" style="justify-content: space-between;">
+                <span>💡 פרטי ברירת מחדל (ניתן לשנותם מתוך הדאשבורד): <strong>rami0407@gmail.com</strong> | קוד אישי: <strong>0407</strong></span>
+                <button type="button" class="code-chip" onclick="fillAdminDefault()">מילוי מהיר | تعبئة سريعة</button>
+              </div>
+
+              <button type="submit" class="btn btn-blue btn-lg btn-full">
+                <span>🛡️</span>
+                <span>כניסה לדאשבורד מנהל האתר | دخول لوحة تحكم المدير</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Admin Control Center -->
+      <div id="adminDashboardContent" style="display: none;">
+        <div class="portal-hero-bar admin-hero-bar">
+          <div class="container portal-hero-inner">
+            <div>
+              <span class="portal-badge">🛡️ מצב מנהל ראשי פעיל | وضع المدير العام نشط</span>
+              <h1>דאשבורד מנהל האתר הראשי — שליטה מלאה וניטור תוכן</h1>
+              <p id="adminWelcomeIdentity">מחובר כמנהל: rami0407@gmail.com</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-outline-green btn-sm" style="background:#fff;" onclick="switchAdminSubTab('settings')">
+                ⚙️ שינוי אימייל וקוד אישי | إعدادات حساب المدير
+              </button>
+              <button class="btn btn-sm" style="background:#dc2626; color:#fff;" onclick="logoutAdmin()">
+                🚪 התנתק מניהול | خروج
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="container section-padding">
+          <!-- Admin Live KPIs -->
+          <div class="admin-kpi-grid">
+            <div class="admin-kpi-card">
+              <div class="kpi-num" id="admKpiSchools">10</div>
+              <div class="kpi-lbl">🏫 סה"כ בתי ספר באתר | إجمالي المدارس المسجلة</div>
+            </div>
+            <div class="admin-kpi-card">
+              <div class="kpi-num" id="admKpiUnmatched" style="color:var(--gold-600);">8</div>
+              <div class="kpi-lbl">🟡 בתי ספר שטרם שודכו | مدارس لم تقترن بعد</div>
+            </div>
+            <div class="admin-kpi-card">
+              <div class="kpi-num" id="admKpiPosts" style="color:var(--green-800);">4</div>
+              <div class="kpi-lbl">💬 הודעות ותגובות בפורום | رسائل وردود المنتدى</div>
+            </div>
+            <div class="admin-kpi-card">
+              <div class="kpi-num" id="admKpiResearch">8</div>
+              <div class="kpi-lbl">🔬 פרויקטי מחקר וכרטיסי לוח | مشاريع وبطاقات بحثية</div>
+            </div>
+          </div>
+
+          <!-- Admin Navigation Tabs -->
+          <div class="admin-subtabs-bar">
+            <button class="admin-subtab active" id="admTabBtn-moderation" onclick="switchAdminSubTab('moderation')">
+              🛡️ ניטור ומחיקת הודעות (גזענות / תוכן לא רלוונטי) | مراقبة وحذف الرسائل المخالفة
+            </button>
+            <button class="admin-subtab" id="admTabBtn-schools" onclick="switchAdminSubTab('schools')">
+              🏫 רשימת כל בתי הספר ופרטיהם | قائمة جميع المدارس وتفاصيلها
+            </button>
+            <button class="admin-subtab" id="admTabBtn-projects" onclick="switchAdminSubTab('projects')">
+              🔬 שליטה במעבדת המחקר ולוח העבודה | إدارة المشاريع واللوحة التعاونية
+            </button>
+            <button class="admin-subtab" id="admTabBtn-settings" onclick="switchAdminSubTab('settings')">
+              🔑 הגדרות אימייל וקוד אישי של המנהל | إعدادات البريد والرمز الشخصي
+            </button>
+          </div>
+
+          <!-- ADMIN PANE 1: CONTENT MODERATION (DELETE IRRELEVANT OR RACIST MESSAGES) -->
+          <div id="admPane-moderation" class="admin-pane">
+            <div class="admin-panel-card">
+              <div class="admin-panel-header">
+                <div>
+                  <h2>🛡️ ניטור שיח ומחיקת הודעות ותגובות (Forum & Chat Moderation)</h2>
+                  <p>כאן תוכל לצפות בכל ההודעות והתגובות שנכתבו באתר ולמחוק מיד כל הודעה לא רלוונטית, פוגענית או גזענית בלחיצת כפתור.</p>
+                </div>
+                <div style="min-width:280px;">
+                  <input type="text" id="adminPostSearchInput" oninput="renderAdminModerationList()" placeholder="🔍 חפש מילה או שם כותב בהודעות... | ابحث في الرسائل..." />
+                </div>
+              </div>
+              <div id="adminModerationContainer" class="admin-moderation-list"></div>
+            </div>
+          </div>
+
+          <!-- ADMIN PANE 2: ALL SCHOOLS DIRECTORY & CONTROL -->
+          <div id="admPane-schools" class="admin-pane" style="display: none;">
+            <div class="admin-panel-card">
+              <div class="admin-panel-header">
+                <div>
+                  <h2>🏫 כל בתי הספר הרשומים באתר (פירוט מלא ושליטה)</h2>
+                  <p>צפה במספר בתי הספר, מי הם, אנשי הקשר, סטטוס השידוך שלהם, התחבר בשם כל בית ספר או מחק בית ספר מהמערכת.</p>
+                </div>
+                <button class="btn btn-green btn-sm" onclick="navigateTo('portal'); switchPortalMode('register');">
+                  ➕ הוספת בית ספר חדש | إضافة مدرسة جديدة
+                </button>
+              </div>
+              <div id="adminSchoolsTableContainer" class="admin-table-wrapper"></div>
+            </div>
+          </div>
+
+          <!-- ADMIN PANE 3: RESEARCH PROJECTS & CANVAS CONTROL -->
+          <div id="admPane-projects" class="admin-pane" style="display: none;">
+            <div class="admin-panel-card">
+              <h2>🔬 ניהול ומחיקת פריטי מחקר, כרטיסי לוח שיתופי וקיר הישגים</h2>
+              <p style="color:var(--text-muted); margin-bottom:18px;">שליטה מלאה בכל התכנים שהועלו למעבדת המחקר וללוח השיתופי.</p>
+              <div id="adminProjectsContainer"></div>
+            </div>
+          </div>
+
+          <!-- ADMIN PANE 4: ADMIN EMAIL & PERSONAL CODE SETTINGS -->
+          <div id="admPane-settings" class="admin-pane" style="display: none;">
+            <div class="admin-panel-card" style="max-width: 680px;">
+              <h2>🔑 עדכון האימייל והקוד האישי שלך כמנהל האתר</h2>
+              <p style="color:var(--text-muted); margin-bottom:20px;">
+                כאן תוכל להגדיר את כתובת האימייל האישית שלך ואת הקוד האישי הסודי שלך לכניסה לדאשבורד המנהל.
+              </p>
+              <form onsubmit="saveAdminCredentials(event)">
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label>📧 האימייל האישי של המנהל | البريد الإلكتروني للمدير *</label>
+                  <input type="email" id="admSettingEmail" required />
+                </div>
+                <div class="form-group" style="margin-bottom:20px;">
+                  <label>🔒 הקוד האישי הסודי החדש | الرمز الشخصي السري الجديد *</label>
+                  <input type="text" id="admSettingCode" required class="code-input" />
+                </div>
+                <button type="submit" class="btn btn-green btn-lg">
+                  💾 שמור אימייל וקוד אישי חדש | حفظ بيانات المدير الجديدة
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Footer -->
@@ -980,6 +1169,6 @@
   <!-- Toast Notification -->
   <div id="toastNotification" class="toast-notification" style="display: none;"></div>
 
-  <script src="./app.js?v=3"></script>
+  <script src="./app.js?v=4"></script>
 </body>
 </html>
