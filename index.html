@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=14" />
+  <link rel="stylesheet" href="./styles.css?v=15" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -818,12 +818,12 @@
             <form id="studentLoginForm" class="student-login-form" onsubmit="handleStudentLogin(event)">
               <div class="form-grid-2" style="margin-bottom: 14px;">
                 <div class="form-group">
-                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة | קוד בית הספר *</label>
-                  <input type="text" id="studentCodeInput" value="FAHM-2026" required class="code-input" placeholder="FAHM-2026" dir="ltr" style="text-align: center;" />
+                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة (أو اتركه فارغاً للدخول بالاسم/الهوية) | קוד בית הספר *</label>
+                  <input type="text" id="studentCodeInput" class="code-input" placeholder="مثال: BAYT-481 أو FAHM-2026" dir="ltr" style="text-align: center;" />
                 </div>
                 <div class="form-group">
                   <label data-i18n="lbl_student_nickname">🧑‍🎓 اسمك المسجّل أو رقم الهوية | שמך או ת.ז *</label>
-                  <input type="text" id="studentNameInput" value="أمير جبارين" required placeholder="مثال: أمير جبارين أو رقم الهوية" />
+                  <input type="text" id="studentNameInput" required placeholder="مثال: سَماح / סמאח أو رقم الهوية" />
                 </div>
               </div>
 
@@ -1472,6 +1472,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-  <script src="./app.js?v=14"></script>
+  <script src="./app.js?v=15"></script>
 </body>
 </html>

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=14" />
+  <link rel="stylesheet" href="./styles.css?v=15" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -117,6 +117,17 @@
                 <span class="pill-icon">🔬</span>
                 <span data-i18n="pill_joint_research">مختبرات بحث علمي وتراثي مشترك</span>
               </div>
+            </div>
+
+            <div class="hero-cta-actions" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:22px;">
+              <button type="button" class="btn btn-blue btn-lg" onclick="openStudentJoinOrLogin()" style="box-shadow:0 8px 20px rgba(37,99,235,0.28);">
+                <span>🧑‍🎓</span>
+                <span>دخول الطالب / استمارة الانضمام | כניסת תלמיד / הצטרפות</span>
+              </button>
+              <button type="button" class="btn btn-green btn-lg" onclick="openSchoolRegistrationPortal()">
+                <span>🏫</span>
+                <span>بوابة المدرسة | כניסת בית ספר</span>
+              </button>
             </div>
           </div>
 
@@ -660,10 +671,14 @@
                 </div>
 
                 <form onsubmit="addSchoolStudent(event)" class="hub-student-form">
-                  <div class="form-grid-3" style="margin-bottom: 12px;">
+                  <div class="form-grid-4" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin-bottom: 12px;">
                     <div class="form-group">
                       <label>🧑‍🎓 שם התלמיד/ה | اسم الطالب/ة *</label>
                       <input type="text" id="hubStudentName" required placeholder="לדוגמה: נועה כהן / أمير جبارين" />
+                    </div>
+                    <div class="form-group">
+                      <label>🔐 ת.ז / קוד אישי | رقم الهوية / الكود</label>
+                      <input type="text" id="hubStudentId" dir="ltr" placeholder="9 أرقام أو كود خاص" />
                     </div>
                     <div class="form-group">
                       <label>🏫 כיתה / שכבה | الصف *</label>
@@ -675,14 +690,24 @@
                     </div>
                   </div>
                   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                    <button type="submit" class="btn btn-green">
-                      <span>➕</span>
-                      <span>הוסף תלמיד/ה לבית הספר | إضافة طالب/ة لقائمة المدرسة</span>
-                    </button>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                      <button type="submit" class="btn btn-green">
+                        <span>➕</span>
+                        <span>הוסף תלמיד/ה | إضافة طالب/ة</span>
+                      </button>
+                      <label class="btn btn-blue" style="cursor:pointer; margin:0;">
+                        <span>📤 رفع ملف طلاب (Excel / CSV)</span>
+                        <input type="file" id="hubStudentsBulkFile" accept=".xls,.xlsx,.csv,.tsv,.txt" style="display:none;" onchange="handleSchoolBulkStudentsUpload(event)" />
+                      </label>
+                      <button type="button" class="btn" style="background:#0f766e; color:#fff;" onclick="exportSchoolStudentsCSV()">
+                        <span>📥 استرجاع وتصدير قائمة ومعطيات الطلاب</span>
+                      </button>
+                    </div>
                     <div id="hubStudentAccessCodeInfo" class="hub-code-chip"></div>
                   </div>
                 </form>
 
+                <div id="hubPendingStudentsContainer" style="margin-top: 16px;"></div>
                 <div id="hubStudentsListContainer" style="margin-top: 18px;"></div>
               </div>
 
@@ -785,15 +810,20 @@
               أدخل الرمز السري المخصص لمدرستك للدخول مباشرة إلى ساحة مدرستك، منتدى "نتحدث معاً" المترجم، ومختبر البحث العلمي.
             </p>
 
-            <form class="student-login-form" onsubmit="handleStudentLogin(event)">
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:16px 0;">
+              <button type="button" id="stuTabBtnLogin" class="btn btn-blue" onclick="switchStudentAuthMode('login')">🔑 دخول طالب مسجّل | כניסת תלמיד רשום</button>
+              <button type="button" id="stuTabBtnRequest" class="btn" style="background:#f1f5f9; color:#0f172a; border:1.5px solid #cbd5e1;" onclick="switchStudentAuthMode('request')">📝 استمارة تسجيل طالب جديد (بانتظار إذن المدرسة)</button>
+            </div>
+
+            <form id="studentLoginForm" class="student-login-form" onsubmit="handleStudentLogin(event)">
               <div class="form-grid-2" style="margin-bottom: 14px;">
                 <div class="form-group">
-                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة المخصص للطالب | קוד התלמיד *</label>
-                  <input type="text" id="studentCodeInput" value="FAHM-2026" required class="code-input" placeholder="FAHM-2026" dir="ltr" style="text-align: center;" />
+                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة (أو اتركه فارغاً للدخول بالاسم/الهوية) | קוד בית הספר *</label>
+                  <input type="text" id="studentCodeInput" class="code-input" placeholder="مثال: BAYT-481 أو FAHM-2026" dir="ltr" style="text-align: center;" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_student_nickname">🧑‍🎓 اسمك الأول واللقب | שמך הפרטי *</label>
-                  <input type="text" id="studentNameInput" value="أمير جبارين" required placeholder="مثال: أمير جبارين / מאיה לוי" />
+                  <label data-i18n="lbl_student_nickname">🧑‍🎓 اسمك المسجّل أو رقم الهوية | שמך או ת.ז *</label>
+                  <input type="text" id="studentNameInput" required placeholder="مثال: سَماح / סמאח أو رقم الهوية" />
                 </div>
               </div>
 
@@ -823,6 +853,39 @@
                 <span>🚀</span>
                 <span data-i18n="btn_enter_classroom_now">دخول ساحة مدرستي والصف المشترك الآن | כניסה למרחב בית הספר</span>
               </button>
+            </form>
+
+            <form id="studentRequestForm" class="student-login-form" style="display:none; text-align:right;" onsubmit="handleStudentJoinRequest(event)">
+              <div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:12px; padding:12px; margin-bottom:14px; font-size:0.9rem; color:#92400e;">
+                ⏳ <strong>ملاحظة هامة | הערה חשובה:</strong> بعد تعبئة الاستمارة وإرسالها، يُرفع طلبك إلى إدارة مدرستك ولن تتمكن من الدخول إلا بعد منحك <strong>إذن الدخول</strong> من قِبل المدرسة.
+              </div>
+              <div class="form-grid-2" style="margin-bottom:12px;">
+                <div class="form-group">
+                  <label>🏫 اختر مدرستك | בחר בית ספר *</label>
+                  <select id="studentReqSchoolSelect" required></select>
+                </div>
+                <div class="form-group">
+                  <label>🧑‍🎓 الاسم الكامل للطالب/ة | שם מלא *</label>
+                  <input type="text" id="studentReqName" required placeholder="مثال: ليان إغبارية / איתי כהן" />
+                </div>
+                <div class="form-group">
+                  <label>🔐 رقم الهوية / الكود الشخصي | תעודת זהות *</label>
+                  <input type="text" id="studentReqId" dir="ltr" required placeholder="9 أرقام" />
+                </div>
+                <div class="form-group">
+                  <label>🏫 الصف | כיתה *</label>
+                  <input type="text" id="studentReqGrade" required placeholder="مثال: السادس ب / ח׳2" />
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label>🔬 المجال البحثي أو سبب الانضمام (اختياري) | תחום עניין</label>
+                <input type="text" id="studentReqTeam" placeholder="مثال: البحث البيئي / التراث المشترك" />
+              </div>
+              <button type="submit" class="btn btn-green btn-lg btn-full" style="height:52px;">
+                <span>📨</span>
+                <span>إرسال الاستمارة وانتظار إذن المدرسة | שלח בקשה והמתן לאישור בית הספר</span>
+              </button>
+              <div id="studentReqStatusBox" style="margin-top:12px;"></div>
             </form>
           </div>
         </div>
@@ -1409,6 +1472,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-  <script src="./app.js?v=14"></script>
+  <script src="./app.js?v=15"></script>
 </body>
 </html>

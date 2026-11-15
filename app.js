@@ -2143,51 +2143,113 @@ function handleStudentLogin(e) {
 function loginToClassroomCode(code, studentName) {
   const cleanCode = (code || '').trim().toUpperCase();
   const cleanInput = (studentName || '').trim();
+  const cleanDigits = cleanInput.replace(/\D/g, '');
   const store = getLocalStore();
+
+  const matchesStudentRecord = (st) => {
+    if (!st) return false;
+    const byId = cleanDigits && st.studentIdNumber && String(st.studentIdNumber).replace(/\D/g, '') === cleanDigits;
+    const byName = cleanInput && st.name && st.name.trim().toLowerCase() === cleanInput.toLowerCase();
+    return Boolean(byId || byName);
+  };
 
   // Map school-specific codes to exact classroom + exact school side (no dropdown spoofing possible!)
   let room = null;
   let lockedSide = 'a';
+  let explicitlyTargetedSide = false;
 
   if (cleanCode === 'FAHM-2026' || cleanCode === 'BAYT-2026') {
     room = store.classrooms.find((c) => c.id === 1) || store.classrooms[0];
     lockedSide = 'a'; // Ibn Khaldoun - Umm al-Fahm
+    explicitlyTargetedSide = true;
   } else if (cleanCode === 'AFULA-2026') {
     room = store.classrooms.find((c) => c.id === 1) || store.classrooms[0];
     lockedSide = 'b'; // Kramim - Afula
+    explicitlyTargetedSide = true;
   } else if (cleanCode === 'NAZ-101' || cleanCode === 'GALIL-101') {
     room = store.classrooms.find((c) => c.id === 2) || store.classrooms[1] || store.classrooms[0];
     lockedSide = 'a'; // Al-Bishara - Nazareth
+    explicitlyTargetedSide = true;
   } else if (cleanCode === 'NOF-101') {
     room = store.classrooms.find((c) => c.id === 2) || store.classrooms[1] || store.classrooms[0];
     lockedSide = 'b'; // ORT Alon - Nof HaGalil
+    explicitlyTargetedSide = true;
   } else if (cleanCode.endsWith('-B')) {
     const baseCode = cleanCode.slice(0, -2);
     room = store.classrooms.find((c) => c.code.toUpperCase() === baseCode);
     lockedSide = 'b';
+    explicitlyTargetedSide = true;
   } else if (cleanCode.endsWith('-A')) {
     const baseCode = cleanCode.slice(0, -2);
     room = store.classrooms.find((c) => c.code.toUpperCase() === baseCode);
     lockedSide = 'a';
-  } else {
+    explicitlyTargetedSide = true;
+  } else if (cleanCode) {
     room = store.classrooms.find((c) => c.code.toUpperCase() === cleanCode);
     lockedSide = 'a';
   }
 
+  // Smart lookup by registered student name or ID across all schools (when code is omitted, or shared room code like BAYT-481 belongs to either school A or B)
+  let matchedStudent = null;
+  let chosenSchool = null;
+
+  if (room && !explicitlyTargetedSide) {
+    const sA = store.schools.find((s) => s.id === room.school_a_id);
+    const sB = store.schools.find((s) => s.id === room.school_b_id);
+    const inA = sA && Array.isArray(sA.students) ? sA.students.find(matchesStudentRecord) : null;
+    const inB = sB && Array.isArray(sB.students) ? sB.students.find(matchesStudentRecord) : null;
+    if (inB && !inA) {
+      lockedSide = 'b';
+      chosenSchool = sB;
+      matchedStudent = inB;
+    } else if (inA) {
+      lockedSide = 'a';
+      chosenSchool = sA;
+      matchedStudent = inA;
+    } else if (sB && Array.isArray(sB.pending_students) && sB.pending_students.find(matchesStudentRecord)) {
+      lockedSide = 'b';
+      chosenSchool = sB;
+    }
+  }
+
+  // If no room code was entered (or student wasn't in the default code's school), search all schools for this registered student
+  if (!matchedStudent && cleanInput) {
+    for (const sc of store.schools) {
+      const foundPending = Array.isArray(sc.pending_students) ? sc.pending_students.find(matchesStudentRecord) : null;
+      if (foundPending) {
+        showToast(`⏳ طلبك قيد الانتظار يا ${foundPending.name} — يرجى انتظار موافقة وإذن إدارة ${sc.name_ar}!`);
+        return;
+      }
+      const foundStu = Array.isArray(sc.students) ? sc.students.find(matchesStudentRecord) : null;
+      if (foundStu) {
+        const scRoom = store.classrooms.find(
+          (c) => Number(c.school_a_id) === Number(sc.id) || Number(c.school_b_id) === Number(sc.id)
+        );
+        if (scRoom) {
+          room = scRoom;
+          lockedSide = Number(scRoom.school_b_id) === Number(sc.id) ? 'b' : 'a';
+          chosenSchool = sc;
+          matchedStudent = foundStu;
+          break;
+        }
+      }
+    }
+  }
+
   if (!room) {
-    showToast('⚠️ رمز المدرسة غير صحيح! استخدم الرمز المخصص لمدرستك أو قدّم استمارة انضمام.');
+    showToast('⚠️ لم يتم العثور على الغرفة أو الطالب! أدخل رمز مدرستك الصحيح أو قدّم استمارة انضمام.');
     return;
   }
 
   const schoolA = store.schools.find((s) => s.id === room.school_a_id) || store.schools[0];
   const schoolB = store.schools.find((s) => s.id === room.school_b_id) || store.schools[1];
 
-  const chosenSchool = lockedSide === 'b' ? schoolB : schoolA;
-  const cleanDigits = cleanInput.replace(/\D/g, '');
+  if (!chosenSchool) {
+    chosenSchool = lockedSide === 'b' ? schoolB : schoolA;
+  }
+
   const pendingList = Array.isArray(chosenSchool.pending_students) ? chosenSchool.pending_students : [];
-  const pendingMatch = pendingList.find(
-    (st) => (cleanDigits && st.studentIdNumber === cleanDigits) || (st.name && st.name.toLowerCase() === cleanInput.toLowerCase())
-  );
+  const pendingMatch = pendingList.find(matchesStudentRecord);
   if (pendingMatch) {
     showToast(`⏳ طلبك قيد الانتظار يا ${pendingMatch.name} — يرجى انتظار موافقة وإذن إدارة ${chosenSchool.name_ar}!`);
     return;
@@ -2196,9 +2258,9 @@ function loginToClassroomCode(code, studentName) {
   const approvedList = Array.isArray(chosenSchool.students) ? chosenSchool.students : [];
   const demoNames = ['أمير جبارين', 'מאיה לוי | مايا ليفي', 'سامر زعبي', 'עומר כהן | عومر', 'أمير جبارين | אמיר'];
   const isDemoUser = demoNames.includes(cleanInput);
-  let matchedStudent = approvedList.find(
-    (st) => (cleanDigits && st.studentIdNumber === cleanDigits) || (st.name && st.name.toLowerCase() === cleanInput.toLowerCase())
-  );
+  if (!matchedStudent) {
+    matchedStudent = approvedList.find(matchesStudentRecord);
+  }
 
   if (approvedList.length > 0 && !matchedStudent && !isDemoUser) {
     showToast(`🔒 لم يتم تسجيلك بعد في قائمة ${chosenSchool.name_ar}. يرجى تعبئة استمارة الانضمام وانتظار إذن مدرستك!`);
