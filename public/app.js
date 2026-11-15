@@ -143,7 +143,10 @@ const INITIAL_STORE = {
       bio_ar: 'مدرسة رائدة في البحث العلمي البيئي وتوثيق التراث المحلي في وادي عارة، نؤمن ببناء جسور الحوار عبر المشاريع العلمية الميدانية.',
       bio_he: 'בית ספר מוביל במחקר מדעי-סביבתי ותיעוד מורשת מקומית בוואדי עארה, המאמין בבניית גשרי שיח דרך פרויקטים מדעיים משותפים.',
       students_count: 65,
-      matched_school_id: 2
+      matched_school_id: 2,
+      students: [
+        { id: 1001, name: 'أمير جبارين | אמיר ג׳בארין', studentIdNumber: '100000001', grade: '8-أ', team: 'فريق المياه والبيئة' }
+      ]
     },
     {
       id: 2,
@@ -165,7 +168,10 @@ const INITIAL_STORE = {
       bio_ar: 'مدرسة تهتم بالاستدامة البيئية، الفنون، والمبادرات المجتمعية في مرج ابن عامر، وتسعى لشراكة حقيقية ومستدامة مع مدارس المنطقة.',
       bio_he: 'בית ספר המקדם קיימות סביבתית, אמנויות ויוזמות קהילתיות בעמק יזרעאל, ושואף לשותפות אמיתית ומתמשכת עם בתי ספר באזור.',
       students_count: 60,
-      matched_school_id: 1
+      matched_school_id: 1,
+      students: [
+        { id: 1002, name: 'מאיה לוי | مايا ليفي', studentIdNumber: '100000002', grade: 'ח׳2', team: 'צוות מים וסביבה' }
+      ]
     },
     {
       id: 3,
@@ -187,7 +193,10 @@ const INITIAL_STORE = {
       bio_ar: 'نبحث عن مدرسة شريكة لطلاب الصفوف العاشرة والحادية عشرة لتطوير مشاريع ريادة أعمال مجتمعية وأبحاث بيئية مشتركة.',
       bio_he: 'מחפשים בית ספר שותף לתלמידי כיתות י׳-י״א לפיתוח מיזמים חברתיים ומחקרי סביבה משותפים.',
       students_count: 50,
-      matched_school_id: null
+      matched_school_id: null,
+      students: [
+        { id: 1003, name: 'سامر زعبي | סאמר זועבי', studentIdNumber: '100000003', grade: '10-ب', team: 'الريادة والبيئة' }
+      ]
     },
     {
       id: 4,
@@ -209,7 +218,10 @@ const INITIAL_STORE = {
       bio_ar: 'مدرسة ثانوية تكنولوجية وإنسانية في نوف هجليل، متحمسون لبناء بيت مشترك مع مدرسة جارة في الناصرة للبحث العلمي والريادة.',
       bio_he: 'תיכון טכנולוגי-ערכי בנוף הגליל, נרגשים לבנות בית משותף עם בית ספר שכן בנצרת למחקר מדעי ויזמות חברתית.',
       students_count: 55,
-      matched_school_id: null
+      matched_school_id: null,
+      students: [
+        { id: 1004, name: 'עומר כהן | عومر كوهين', studentIdNumber: '100000004', grade: 'י׳1', team: 'יזמות ומדעים' }
+      ]
     },
     {
       id: 5,
@@ -2146,11 +2158,15 @@ function loginToClassroomCode(code, studentName) {
   const cleanDigits = cleanInput.replace(/\D/g, '');
   const store = getLocalStore();
 
+  // Strict ID-only verification: nicknames or non-ID text are strictly rejected
+  if (!cleanDigits || cleanDigits.length < 4) {
+    showToast('🔒 ممنوع الدخول بالاسم المستعار! يجب إدخال رقم الهوية المسجّل والمعتمد من إدارة مدرستك (أرقام فقط).');
+    return;
+  }
+
   const matchesStudentRecord = (st) => {
-    if (!st) return false;
-    const byId = cleanDigits && st.studentIdNumber && String(st.studentIdNumber).replace(/\D/g, '') === cleanDigits;
-    const byName = cleanInput && st.name && st.name.trim().toLowerCase() === cleanInput.toLowerCase();
-    return Boolean(byId || byName);
+    if (!st || !st.studentIdNumber) return false;
+    return String(st.studentIdNumber).replace(/\D/g, '') === cleanDigits;
   };
 
   // Map school-specific codes to exact classroom + exact school side (no dropdown spoofing possible!)
@@ -2256,15 +2272,16 @@ function loginToClassroomCode(code, studentName) {
   }
 
   const approvedList = Array.isArray(chosenSchool.students) ? chosenSchool.students : [];
-  const demoNames = ['أمير جبارين', 'מאיה לוי | مايا ليفي', 'سامر زعبي', 'עומר כהן | عومر', 'أمير جبارين | אמיר'];
-  const isDemoUser = demoNames.includes(cleanInput);
   if (!matchedStudent) {
     matchedStudent = approvedList.find(matchesStudentRecord);
   }
 
-  if (approvedList.length > 0 && !matchedStudent && !isDemoUser) {
-    showToast(`🔒 لم يتم تسجيلك بعد في قائمة ${chosenSchool.name_ar}. يرجى تعبئة استمارة الانضمام وانتظار إذن مدرستك!`);
+  // Strict approval gate: student MUST be explicitly approved in school.students with a matching ID number
+  if (!matchedStudent) {
+    showToast(`🔒 ممنوع الدخول: رقم الهوية (${cleanDigits}) غير مسجّل أو غير مؤشّر/معتمد من إدارة ${chosenSchool.name_ar}! يرجى تقديم طلب انضمام وانتظار إذن المدرسة.`);
     switchStudentAuthMode('request');
+    const reqIdEl = document.getElementById('studentReqId');
+    if (reqIdEl) reqIdEl.value = cleanDigits;
     return;
   }
 

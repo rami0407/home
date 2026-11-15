@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=15" />
+  <link rel="stylesheet" href="./styles.css?v=16" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -818,33 +818,33 @@
             <form id="studentLoginForm" class="student-login-form" onsubmit="handleStudentLogin(event)">
               <div class="form-grid-2" style="margin-bottom: 14px;">
                 <div class="form-group">
-                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة (أو اتركه فارغاً للدخول بالاسم/الهوية) | קוד בית הספר *</label>
+                  <label data-i18n="lbl_access_code">🔑 رمز المدرسة (اختياري) | קוד בית הספר *</label>
                   <input type="text" id="studentCodeInput" class="code-input" placeholder="مثال: BAYT-481 أو FAHM-2026" dir="ltr" style="text-align: center;" />
                 </div>
                 <div class="form-group">
-                  <label data-i18n="lbl_student_nickname">🧑‍🎓 اسمك المسجّل أو رقم الهوية | שמך או ת.ז *</label>
-                  <input type="text" id="studentNameInput" required placeholder="مثال: سَماح / סמאח أو رقم الهوية" />
+                  <label data-i18n="lbl_student_nickname">🪪 رقم الهوية المسجّل والمعتمد للطالب فقط | מספר ת.ז. רשום בלבד *</label>
+                  <input type="text" id="studentNameInput" required inputmode="numeric" dir="ltr" style="text-align: center;" placeholder="أدخل رقم الهوية المسجّل (أرقام فقط، مثال: 300819851)" />
                 </div>
               </div>
 
               <div class="demo-accounts-box">
-                <span class="demo-box-title">🔑 رموز المدارس المخصصة للتجربة (كل رمز يدخل الطالب لمدرسته فقط لمنع التزييف):</span>
+                <span class="demo-box-title">🔑 رموز وهويات تجريبية معتمدة (الدخول يتم فقط برقم هوية مسجّل ومؤشّر من المدرسة):</span>
                 <div class="demo-accounts-grid cols-2">
-                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('FAHM-2026', 'أمير جبارين')">
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('FAHM-2026', '100000001')">
                     <strong>🏫 مدرسة ابن خلدون — أم الفحم</strong>
-                    <span>Code: FAHM-2026</span>
+                    <span>Code: FAHM-2026 • ID: 100000001</span>
                   </button>
-                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('AFULA-2026', 'מאיה לוי | مايا ليفي')">
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('AFULA-2026', '100000002')">
                     <strong>🏫 מקיף כרמים — עפולה</strong>
-                    <span>Code: AFULA-2026</span>
+                    <span>Code: AFULA-2026 • ID: 100000002</span>
                   </button>
-                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('NAZ-101', 'سامر زعبي')">
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('NAZ-101', '100000003')">
                     <strong>🏫 مدرسة البشارة — الناصرة</strong>
-                    <span>Code: NAZ-101</span>
+                    <span>Code: NAZ-101 • ID: 100000003</span>
                   </button>
-                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('NOF-101', 'עומר כהן | عومر')">
+                  <button type="button" class="demo-account-btn" onclick="fillStudentCode('NOF-101', '100000004')">
                     <strong>🏫 אורט אלון — נוף הגליל</strong>
-                    <span>Code: NOF-101</span>
+                    <span>Code: NOF-101 • ID: 100000004</span>
                   </button>
                 </div>
               </div>
@@ -1472,6 +1472,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-  <script src="./app.js?v=15"></script>
+  <script src="./app.js?v=16"></script>
 </body>
 </html>
