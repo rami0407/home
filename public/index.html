@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700;800;900&family=Readex+Pro:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=19" />
+  <link rel="stylesheet" href="./styles.css?v=20" />
 </head>
 <body>
   <!-- Decorative Ambient Background Shapes -->
@@ -654,6 +654,8 @@
                 <div id="schoolHubPartnerBadge"></div>
               </div>
 
+              <div id="schoolHubRoomsBar" style="margin-bottom: 14px;"></div>
+
               <div class="school-hub-tabs">
                 <button type="button" class="school-hub-tab active" id="hubTabBtn-students" onclick="switchSchoolHubTab('students')">
                   🧑‍🎓 נתוני התלמידים שלי (פרטי) | طلاب مدرستي
@@ -947,6 +949,10 @@
                 <span>💬</span>
                 <span data-i18n="ws_tab_forum">المنتدى التفاعلي "نتحدث معاً" (ترجمة فورية)</span>
               </button>
+              <button class="ws-tab" id="wsTabGroupRoom" onclick="switchStudentTab('grouproom')">
+                <span>👥</span>
+                <span>غرفة مجموعتي الخاصة | חדר הקבוצה שלי</span>
+              </button>
               <button class="ws-tab" id="wsTabLab" onclick="switchStudentTab('lab')">
                 <span>🧪</span>
                 <span data-i18n="ws_tab_lab">مختبر البحث والعمل المشترك</span>
@@ -1206,6 +1212,11 @@
               </div>
             </div>
             <div id="studentAchievementsGrid" class="achievements-grid"></div>
+          </div>
+
+          <!-- TAB 4: PRIVATE JOINT GROUP ROOM -->
+          <div id="student-pane-grouproom" class="student-pane" style="display: none;">
+            <div id="studentGroupRoomContent"></div>
           </div>
         </div>
       </div>
@@ -1504,6 +1515,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-  <script src="./app.js?v=20"></script>
+  <script src="./app.js?v=21"></script>
 </body>
 </html>

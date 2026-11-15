@@ -2350,9 +2350,22 @@ function loginToClassroomCode(code, studentName) {
       }
       const foundStu = Array.isArray(sc.students) ? sc.students.find(matchesStudentRecord) : null;
       if (foundStu) {
-        const scRoom = store.classrooms.find(
+        const scRooms = store.classrooms.filter(
           (c) => Number(c.school_a_id) === Number(sc.id) || Number(c.school_b_id) === Number(sc.id)
         );
+        const stuGradeNorm = String(foundStu.grade || '').trim().toLowerCase();
+        const scRoom =
+          scRooms.find((c) =>
+            (c.joint_groups || []).some((g) =>
+              (g.members || []).some(
+                (m) => Number(m.school_id) === Number(sc.id) && String(m.name || '').trim() === String(foundStu.name || '').trim()
+              )
+            )
+          ) ||
+          scRooms.find(
+            (c) => c.grade_label && stuGradeNorm && String(c.grade_label).toLowerCase().includes(stuGradeNorm)
+          ) ||
+          scRooms[0];
         if (scRoom) {
           room = scRoom;
           lockedSide = Number(scRoom.school_b_id) === Number(sc.id) ? 'b' : 'a';
@@ -2437,14 +2450,20 @@ function switchStudentTab(tabKey) {
   document.getElementById('studentLoginGate').style.display = 'none';
   document.getElementById('classroomWorkspace').style.display = 'block';
 
-  ['forum', 'lab', 'wall'].forEach((k) => {
+  ['forum', 'grouproom', 'lab', 'wall'].forEach((k) => {
     const pane = document.getElementById(`student-pane-${k}`);
     if (pane) pane.style.display = k === tabKey ? 'block' : 'none';
   });
 
   document.getElementById('wsTabForum').classList.toggle('active', tabKey === 'forum');
+  const grpTabBtn = document.getElementById('wsTabGroupRoom');
+  if (grpTabBtn) grpTabBtn.classList.toggle('active', tabKey === 'grouproom');
   document.getElementById('wsTabLab').classList.toggle('active', tabKey === 'lab');
   document.getElementById('wsTabWall').classList.toggle('active', tabKey === 'wall');
+
+  if (tabKey === 'grouproom' && activeClassroomData) {
+    renderStudentGroupRoom(activeClassroomData.classroom);
+  }
 }
 
 function renderClassroomWorkspace() {
@@ -2468,6 +2487,7 @@ function renderClassroomWorkspace() {
 
   document.getElementById('activeRoomSupervisors').textContent = `👩‍🏫 إشراف تربوي مشترك | ליווי פדגוגי: ${classroom.supervisor_ar} 🤝 ${classroom.supervisor_he}`;
   renderStudentMyGroupBanner(classroom);
+  renderStudentGroupRoom(classroom);
 
   renderForumPosts();
   renderResearchDataList();
@@ -3691,14 +3711,26 @@ function switchSchoolHubTab(tabKey) {
   renderSchoolPartnershipHub();
 }
 
+let activeHubRoomId = null;
+let activeStudentSelectedGroupId = null;
+
+function selectSchoolHubRoom(roomId) {
+  activeHubRoomId = Number(roomId);
+  renderSchoolPartnershipHub();
+}
+
 function getMatchedContextForSchool(schoolId) {
   const store = getLocalStore();
   const school = store.schools.find((s) => s.id === Number(schoolId));
   if (!school) return null;
 
-  const room = store.classrooms.find(
+  const rooms = store.classrooms.filter(
     (c) => Number(c.school_a_id) === school.id || Number(c.school_b_id) === school.id
   );
+  const room =
+    rooms.find((r) => Number(r.id) === Number(activeHubRoomId)) || rooms[0] || null;
+  if (room) activeHubRoomId = room.id;
+
   const partnerId = room
     ? Number(room.school_a_id) === school.id
       ? Number(room.school_b_id)
@@ -3706,7 +3738,7 @@ function getMatchedContextForSchool(schoolId) {
     : school.matched_school_id;
   const partner = partnerId ? store.schools.find((s) => s.id === Number(partnerId)) : null;
 
-  return { store, school, room, partner };
+  return { store, school, room, rooms, partner };
 }
 
 function renderSchoolPartnershipHub() {
@@ -3714,10 +3746,59 @@ function renderSchoolPartnershipHub() {
   const ctx = getMatchedContextForSchool(activeDashboardSchool.id);
   if (!ctx) return;
 
-  const { store, school, room, partner } = ctx;
+  const { store, school, room, rooms, partner } = ctx;
   const subtitleEl = document.getElementById('schoolHubSubtitle');
   const partnerBadgeEl = document.getElementById('schoolHubPartnerBadge');
   const codeInfoEl = document.getElementById('hubStudentAccessCodeInfo');
+  const roomsBarEl = document.getElementById('schoolHubRoomsBar');
+
+  if (roomsBarEl) {
+    const otherSchools = store.schools.filter((s) => Number(s.id) !== Number(school.id));
+    const roomPillsHtml = (rooms || [])
+      .map((r) => {
+        const pId = Number(r.school_a_id) === Number(school.id) ? r.school_b_id : r.school_a_id;
+        const pSch = store.schools.find((s) => Number(s.id) === Number(pId));
+        const label = r.grade_label ? `${r.grade_label}` : `${r.code}`;
+        const isCurrent = room && Number(r.id) === Number(room.id);
+        return `<button type="button" class="room-chip-btn ${isCurrent ? 'active' : ''}" onclick="selectSchoolHubRoom(${r.id})">🏫 ${escapeHtml(label)} 🤝 ${escapeHtml(pSch ? pSch.name_ar : '')} (${escapeHtml(r.code)})</button>`;
+      })
+      .join('');
+
+    roomsBarEl.innerHTML = `
+      <div class="school-rooms-bar">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:${rooms.length > 0 ? '8px' : '0'};">
+          <strong style="font-size:0.88rem; color:var(--navy-900);">🏫 الشراكات والصفوف النشطة للمدرسة (${rooms.length}) | כיתות ושותפויות בית הספר:</strong>
+          <button type="button" class="btn btn-sm btn-green" onclick="toggleExtraClassPartnershipForm()">
+            ➕ إضافة صف / شعبة بشراكة جديدة | הוסף כיתה לשותפות
+          </button>
+        </div>
+        ${rooms.length > 0 ? `<div class="school-rooms-pills">${roomPillsHtml}</div>` : ''}
+        <form id="extraClassPartnershipForm" onsubmit="createExtraClassPartnership(event, ${school.id})" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed #cbd5e1;">
+          <div class="form-grid-3" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; align-items:end;">
+            <div class="form-group" style="margin:0;">
+              <label style="font-size:0.82rem;">اسم الصف / الشعبة | כיתה / שכבה *</label>
+              <input type="text" id="extraClassGradeInput" required placeholder="مثلاً: السابع أ | ז׳1" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label style="font-size:0.82rem;">المدرسة الشريكة | בית הספר השותף *</label>
+              <select id="extraClassPartnerSelect" required>
+                <option value="">-- اختر مدرسة --</option>
+                ${otherSchools.map((s) => `<option value="${s.id}">${escapeHtml(s.name_ar)} | ${escapeHtml(s.name_he)} (${escapeHtml(s.city_ar)})</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label style="font-size:0.82rem;">موضوع البحث (اختياري)</label>
+              <input type="text" id="extraClassTopicInput" placeholder="مثلاً: الطاقة المتجددة" />
+            </div>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button type="submit" class="btn btn-blue btn-sm">✅ إنشاء غرفة الصف المشتركة</button>
+            <button type="button" class="btn btn-sm" style="background:#e2e8f0; color:#0f172a;" onclick="toggleExtraClassPartnershipForm()">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
 
   const schoolSide = room && Number(room.school_b_id) === school.id ? 'b' : 'a';
   const studentRoomCode = room ? room.code : `BAYT-${school.id}0${school.id}`;
@@ -4397,13 +4478,271 @@ function renderStudentMyGroupBanner(classroom) {
 
   banner.innerHTML = `
     <div class="student-my-group-banner">
-      <div style="font-weight:900; margin-bottom:6px;">
-        👥 مجموعتك المشتركة | הקבוצה המשותפת שלך: ${escapeHtml(myGroup.name)}
-        ${myGroup.topic ? `<span style="font-weight:500; opacity:0.92;"> — 🔬 ${escapeHtml(myGroup.topic)}</span>` : ''}
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+        <div style="font-weight:900;">
+          👥 مجموعتك المشتركة | הקבוצה המשותפת שלך: ${escapeHtml(myGroup.name)}
+          ${myGroup.topic ? `<span style="font-weight:500; opacity:0.92;"> — 🔬 ${escapeHtml(myGroup.topic)}</span>` : ''}
+        </div>
+        <button type="button" class="btn btn-sm" style="background:#ffffff; color:var(--navy-900); font-weight:800;" onclick="switchStudentTab('grouproom')">
+          🚀 افتح غرفة مجموعتي الخاصة
+        </button>
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:6px;">${membersHtml}</div>
     </div>
   `;
+}
+
+function selectActiveStudentGroup(groupId) {
+  activeStudentSelectedGroupId = groupId;
+  if (activeClassroomData) renderStudentGroupRoom(activeClassroomData.classroom);
+}
+
+function renderStudentGroupRoom(classroom) {
+  const container = document.getElementById('studentGroupRoomContent');
+  if (!container || !classroom) return;
+
+  const store = getLocalStore();
+  const liveRoom = store.classrooms.find((c) => Number(c.id) === Number(classroom.id)) || classroom;
+  const groups = Array.isArray(liveRoom.joint_groups) ? liveRoom.joint_groups : [];
+
+  if (groups.length === 0) {
+    container.innerHTML = `
+      <div class="group-room-card" style="text-align:center; padding:28px;">
+        <h3 style="color:var(--navy-900); margin-bottom:8px;">👥 لا توجد مجموعات مشتركة بعد | אין עדיין קבוצות משותפות</h3>
+        <p style="color:var(--text-muted); margin:0;">بانتظار قيام مركّزي المدرستين بتقسيم الطلاب إلى مجموعات مشتركة (تلقائياً أو يدوياً).</p>
+      </div>
+    `;
+    return;
+  }
+
+  const stuSchoolId = Number(activeStudentSession?.school_id || 0);
+  const stuName = String(activeStudentSession?.name || '').trim();
+  const isCoordinatorPreview = !stuName || stuName.includes('مدير') || stuName.includes('مركّز') || stuName.includes('מנהל');
+
+  const myGroups = groups.filter((g) =>
+    (g.members || []).some((m) => Number(m.school_id) === stuSchoolId && String(m.name || '').trim() === stuName)
+  );
+  const visibleGroups = myGroups.length > 0 && !isCoordinatorPreview ? myGroups : groups;
+
+  let activeGroup =
+    visibleGroups.find((g) => g.id === activeStudentSelectedGroupId) || visibleGroups[0];
+  if (activeGroup) activeStudentSelectedGroupId = activeGroup.id;
+
+  const messages = Array.isArray(activeGroup.messages) ? activeGroup.messages : [];
+  const tasks = Array.isArray(activeGroup.tasks) ? activeGroup.tasks : [];
+
+  const membersChips = (activeGroup.members || [])
+    .map((m) => {
+      const sch = store.schools.find((s) => Number(s.id) === Number(m.school_id));
+      const schName = sch ? (currentLang === 'ar' ? sch.name_ar : sch.name_he) : '';
+      return `<span class="badge-tag badge-matched">🧑‍🎓 ${escapeHtml(m.name)} — ${escapeHtml(schName)}</span>`;
+    })
+    .join(' ');
+
+  const groupSelectorHtml =
+    visibleGroups.length > 1
+      ? `<div class="school-rooms-pills" style="margin-bottom:14px;">
+           ${visibleGroups
+             .map(
+               (g) =>
+                 `<button type="button" class="room-chip-btn ${g.id === activeGroup.id ? 'active' : ''}" onclick="selectActiveStudentGroup('${g.id}')">👥 ${escapeHtml(g.name)}</button>`
+             )
+             .join('')}
+         </div>`
+      : '';
+
+  container.innerHTML = `
+    ${groupSelectorHtml}
+    <div class="group-room-card" style="margin-bottom:16px; background:linear-gradient(135deg,#f0f9ff 0%,#f0fdf4 100%);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <span class="portal-badge" style="margin-bottom:6px; display:inline-block;">🔒 غرفة عمل ومحادثة خاصة بالمجموعة | חדר קבוצה פרטי</span>
+          <h2 style="color:var(--navy-900); margin:0 0 6px;">👥 ${escapeHtml(activeGroup.name)}</h2>
+          ${activeGroup.topic ? `<p style="margin:0; color:var(--green-800); font-weight:700;">🔬 موضوع المجموعة: ${escapeHtml(activeGroup.topic)}</p>` : ''}
+        </div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;">${membersChips}</div>
+    </div>
+
+    <div class="group-room-grid">
+      <!-- Group Private Chat -->
+      <div class="group-room-card">
+        <h3 style="color:var(--navy-900); margin:0 0 10px;">💬 محادثة المجموعة الخاصة (${messages.length})</h3>
+        <div class="group-chat-box" id="groupChatMessagesBox">
+          ${
+            messages.length === 0
+              ? '<p style="color:var(--text-muted); text-align:center; margin:20px 0;">ابدأوا الحوار داخل مجموعتكم الخاصة هنا! 👋</p>'
+              : messages
+                  .map(
+                    (msg) => `
+                  <div class="group-chat-msg">
+                    <div style="display:flex; justify-content:space-between; gap:8px; font-size:0.8rem; margin-bottom:4px;">
+                      <strong style="color:var(--navy-900);">🧑‍🎓 ${escapeHtml(msg.author_name)} <span style="color:var(--text-muted); font-weight:500;">(${escapeHtml(msg.school_name || '')})</span></strong>
+                      <span style="color:var(--text-muted);">${escapeHtml(msg.time_label || '')}</span>
+                    </div>
+                    <div style="font-size:0.93rem; color:#0f172a;">${escapeHtml(msg.text)}</div>
+                  </div>
+                `
+                  )
+                  .join('')
+          }
+        </div>
+        <form onsubmit="postGroupMessage(event, ${liveRoom.id}, '${activeGroup.id}')" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="groupMessageInput" required placeholder="اكتب رسالة لزملائك في المجموعة... | כתבו הודעה לקבוצה..." style="flex:1; min-width:200px;" />
+          <button type="submit" class="btn btn-blue">إرسال | שלח</button>
+        </form>
+      </div>
+
+      <!-- Group Tasks Checklist -->
+      <div class="group-room-card">
+        <h3 style="color:var(--navy-900); margin:0 0 10px;">✅ مهام وأهداف المجموعة (${tasks.length})</h3>
+        <form onsubmit="addGroupTask(event, ${liveRoom.id}, '${activeGroup.id}')" style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+          <input type="text" id="groupTaskInput" required placeholder="أضف مهمة بحثية للمجموعة..." style="flex:1; min-width:160px;" />
+          <button type="submit" class="btn btn-green btn-sm">➕ إضافة</button>
+        </form>
+        ${
+          tasks.length === 0
+            ? '<p style="color:var(--text-muted); font-size:0.88rem;">لا توجد مهام بعد. أضف أول خطوة لبحث مجموعتكم!</p>'
+            : tasks
+                .map(
+                  (t, idx) => `
+                <label class="group-task-item" style="cursor:pointer;">
+                  <span style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleGroupTask(${liveRoom.id}, '${activeGroup.id}', ${idx})" />
+                    <span style="${t.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'font-weight:600;'}">${escapeHtml(t.title)}</span>
+                  </span>
+                  <small style="color:var(--text-muted);">${escapeHtml(t.author || '')}</small>
+                </label>
+              `
+                )
+                .join('')
+        }
+      </div>
+    </div>
+  `;
+}
+
+function postGroupMessage(e, roomId, groupId) {
+  e.preventDefault();
+  const input = document.getElementById('groupMessageInput');
+  const text = (input?.value || '').trim();
+  if (!text) return;
+
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room || !Array.isArray(room.joint_groups)) return;
+
+  const grp = room.joint_groups.find((g) => g.id === groupId);
+  if (!grp) return;
+
+  if (!Array.isArray(grp.messages)) grp.messages = [];
+  const schoolName =
+    currentLang === 'ar'
+      ? activeStudentSession?.school_name_ar || ''
+      : activeStudentSession?.school_name_he || '';
+
+  grp.messages.push({
+    id: Date.now(),
+    author_name: activeStudentSession?.name || 'طالب مشترك',
+    school_name: schoolName,
+    text,
+    time_label: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+
+  saveLocalStore(store);
+  if (activeClassroomData) activeClassroomData.classroom = room;
+  renderStudentGroupRoom(room);
+}
+
+function addGroupTask(e, roomId, groupId) {
+  e.preventDefault();
+  const input = document.getElementById('groupTaskInput');
+  const title = (input?.value || '').trim();
+  if (!title) return;
+
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room || !Array.isArray(room.joint_groups)) return;
+
+  const grp = room.joint_groups.find((g) => g.id === groupId);
+  if (!grp) return;
+
+  if (!Array.isArray(grp.tasks)) grp.tasks = [];
+  grp.tasks.push({
+    title,
+    done: false,
+    author: activeStudentSession?.name || ''
+  });
+
+  saveLocalStore(store);
+  if (activeClassroomData) activeClassroomData.classroom = room;
+  renderStudentGroupRoom(room);
+}
+
+function toggleGroupTask(roomId, groupId, taskIndex) {
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room || !Array.isArray(room.joint_groups)) return;
+
+  const grp = room.joint_groups.find((g) => g.id === groupId);
+  if (!grp || !Array.isArray(grp.tasks) || !grp.tasks[taskIndex]) return;
+
+  grp.tasks[taskIndex].done = !grp.tasks[taskIndex].done;
+  saveLocalStore(store);
+  if (activeClassroomData) activeClassroomData.classroom = room;
+  renderStudentGroupRoom(room);
+}
+
+function toggleExtraClassPartnershipForm() {
+  const form = document.getElementById('extraClassPartnershipForm');
+  if (form) {
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+function createExtraClassPartnership(e, schoolId) {
+  e.preventDefault();
+  const gradeLabel = (document.getElementById('extraClassGradeInput')?.value || '').trim();
+  const partnerId = Number(document.getElementById('extraClassPartnerSelect')?.value || 0);
+  const customTopic = (document.getElementById('extraClassTopicInput')?.value || '').trim();
+
+  if (!gradeLabel || !partnerId) {
+    showToast('⚠️ يُرجى إدخال اسم الصف واختيار المدرسة الشريكة.');
+    return;
+  }
+
+  const store = getLocalStore();
+  const schoolA = store.schools.find((s) => Number(s.id) === Number(schoolId));
+  const schoolB = store.schools.find((s) => Number(s.id) === Number(partnerId));
+  if (!schoolA || !schoolB) return;
+
+  const code = `BAYT-${Math.floor(100 + Math.random() * 899)}`;
+  const newRoomId = Math.max(...store.classrooms.map((c) => Number(c.id) || 0), 0) + 1;
+
+  const newRoom = {
+    id: newRoomId,
+    code,
+    grade_label: gradeLabel,
+    school_a_id: schoolA.id,
+    school_b_id: schoolB.id,
+    title_ar: `${schoolA.name_ar} (${gradeLabel}) 🤝 ${schoolB.name_ar}`,
+    title_he: `${schoolA.name_he} (${gradeLabel}) 🤝 ${schoolB.name_he}`,
+    research_topic_ar: customTopic || `مشروع صف ${gradeLabel} المشترك بين ${schoolA.city_ar} و${schoolB.city_ar}`,
+    research_topic_he: customTopic || `פרויקט משותף (${gradeLabel}) בין ${schoolA.city_he} ל${schoolB.city_he}`,
+    supervisor_ar: schoolA.contact_name,
+    supervisor_he: schoolB.contact_name,
+    joint_groups: []
+  };
+
+  store.classrooms.push(newRoom);
+  if (!schoolA.matched_school_id) schoolA.matched_school_id = schoolB.id;
+  if (!schoolB.matched_school_id) schoolB.matched_school_id = schoolA.id;
+
+  activeHubRoomId = newRoomId;
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  loadPlatformStats();
+  showToast(`🎉 تم فتح شراكة وغرفة جديدة لصف "${gradeLabel}" برمز (${code})!`);
 }
 
 function addSchoolStudent(e) {
