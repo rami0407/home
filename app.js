@@ -1743,6 +1743,8 @@ function loadSchoolDashboard(schoolId) {
           : reqRecord
           ? reqRecord.status
           : 'none',
+        req_direction: reqRecord ? (Number(reqRecord.from_school_id) === id ? 'outgoing' : 'incoming') : null,
+        classroom_id: existingRoom ? existingRoom.id : null,
         classroom_code: existingRoom ? existingRoom.code : null
       };
     });
@@ -1761,8 +1763,55 @@ function loadSchoolDashboard(schoolId) {
 
   updateTopWelcomeBanner(activeDashboardSchool);
   renderCurrentSchoolProfile();
+  renderIncomingMatchRequests();
   renderSchoolPartnershipHub();
   renderMatchesList();
+}
+
+function renderIncomingMatchRequests() {
+  const box = document.getElementById('incomingMatchRequestsBox');
+  if (!box || !activeDashboardSchool) return;
+
+  const incoming = currentMatches.filter(
+    (m) => (m.partnership_status === 'pending' || m.partnership_status === 'interested') && m.req_direction === 'incoming'
+  );
+
+  if (incoming.length === 0) {
+    box.innerHTML = '';
+    return;
+  }
+
+  box.innerHTML = `
+    <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7); border:2px solid var(--gold-500); border-radius:16px; padding:18px 20px; box-shadow:var(--shadow-sm);">
+      <h4 style="color:var(--navy-900); margin:0 0 10px;">
+        📩 בקשות שידוך ממתינות לאישורך כאחראי בית הספר (${incoming.length}) | طلبات توأمة بانتظار موافقتك:
+      </h4>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        ${incoming
+          .map(
+            (m) => `
+          <div style="background:#fff; border:1px solid #fde68a; border-radius:12px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div>
+              <strong>🏫 ${m.name_he} | ${m.name_ar}</strong>
+              <div style="font-size:0.84rem; color:var(--text-muted);">
+                📍 ${m.city_he} (${m.distance_km} ק"מ) • אחראי/ת: ${m.contact_name} • התאמה: ${m.match_score}%
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-green btn-sm" onclick="triggerMatchAction(${m.id}, 'approve_and_create')">
+                ✅ אשר שידוך וצור חדר משותף | موافقة وإنشاء الغرفة
+              </button>
+              <button type="button" class="btn-delete-danger" onclick="triggerMatchAction(${m.id}, 'reject')">
+                ❌ דחה | رفض
+              </button>
+            </div>
+          </div>
+        `
+          )
+          .join('')}
+      </div>
+    </div>
+  `;
 }
 
 function renderCurrentSchoolProfile() {
@@ -1868,16 +1917,42 @@ function renderMatchesList() {
 
       let actionBtnHtml = '';
       if (m.partnership_status === 'room_created' && m.classroom_code) {
+        const mySide = m.id < activeDashboardSchool.id ? 'b' : 'a';
         actionBtnHtml = `
-          <button class="btn btn-blue btn-sm" onclick="quickStudentDemo('${m.classroom_code}')">
+          <button class="btn btn-blue btn-sm" onclick="enterMatchedStudentWorkspace(${m.classroom_id}, '${mySide}')">
             🚀 ${currentLang === 'ar' ? `دخول الغرفة المشتركة (${m.classroom_code})` : `כניסה לחדר המשותף (${m.classroom_code})`}
           </button>
         `;
-      } else if (m.partnership_status === 'mutual_approved' || m.partnership_status === 'interested') {
+      } else if (m.partnership_status === 'pending' && m.req_direction === 'incoming') {
+        actionBtnHtml = `
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:0.8rem; font-weight:800; color:#b45309;">
+              📩 ${currentLang === 'ar' ? 'طلب توأمة بانتظار موافقتك!' : 'בקשת שידוך ממתינה לאישורך!'}
+            </span>
+            <button class="btn btn-green btn-sm" onclick="triggerMatchAction(${m.id}, 'approve_and_create')">
+              ✅ ${currentLang === 'ar' ? 'موافقة وإنشاء الغرفة' : 'אשר שידוך וצור חדר'}
+            </button>
+            <button class="btn-delete-danger" onclick="triggerMatchAction(${m.id}, 'reject')">
+              ❌ ${currentLang === 'ar' ? 'رفض' : 'דחה'}
+            </button>
+          </div>
+        `;
+      } else if ((m.partnership_status === 'pending' || m.partnership_status === 'interested') && m.req_direction === 'outgoing') {
+        actionBtnHtml = `
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:0.8rem; font-weight:800; color:#b45309;">
+              ⏳ ${currentLang === 'ar' ? 'تم إرسال الطلب — بانتظار موافقة مسؤول المدرسة الشريكة' : 'בקשה נשלחה — ממתין לאישור האחראי בבית הספר השותף'}
+            </span>
+            <button class="btn btn-outline-blue btn-sm" onclick="triggerMatchAction(${m.id}, 'cancel')">
+              ✖ ${currentLang === 'ar' ? 'إلغاء الطلب' : 'בטל בקשה'}
+            </button>
+          </div>
+        `;
+      } else if (m.partnership_status === 'mutual_approved') {
         actionBtnHtml = `
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <span style="font-size:0.8rem; font-weight:800; color:var(--green-800);">
-              ✅ ${currentLang === 'ar' ? 'وافق الطرفان!' : 'שני הצדדים אישרו!'}
+              ✅ ${currentLang === 'ar' ? 'وافق مسؤولا المدرستين!' : 'שני האחראים אישרו!'}
             </span>
             <button class="btn btn-green btn-sm" onclick="triggerMatchAction(${m.id}, 'create_room')">
               🏠 ${currentLang === 'ar' ? '[ إنشاء الغرفة المشتركة ]' : '[ יצירת החדר המשותף ]'}
@@ -1887,7 +1962,7 @@ function renderMatchesList() {
       } else {
         actionBtnHtml = `
           <button class="btn btn-outline-green btn-sm" onclick="triggerMatchAction(${m.id}, 'interest')">
-            🤝 ${currentLang === 'ar' ? '[ إبداء اهتمام بالتوأمة ]' : '[ הבעת עניין בתאומוּת ]'}
+            🤝 ${currentLang === 'ar' ? '[ إرسال طلب توأمة لمسؤول المدرسة ]' : '[ שלח בקשת שידוך לאחראי בית הספר ]'}
           </button>
         `;
       }
@@ -1954,22 +2029,47 @@ function triggerMatchAction(targetSchoolId, actionType) {
       store.match_requests.push({
         from_school_id: sA,
         to_school_id: sB,
-        status: 'mutual_approved'
+        status: 'pending'
       });
-    } else {
+    } else if (Number(existingReq.from_school_id) !== sA && existingReq.status === 'pending') {
+      // If the other school had already sent a request, clicking this completes mutual approval
       existingReq.status = 'mutual_approved';
     }
     saveLocalStore(store);
     showToast(
       currentLang === 'ar'
-        ? '🤝 تم إرسال إبداء الاهتمام والموافقة المتبادلة! يمكنك الآن إنشاء الغرفة المشتركة.'
-        : '🤝 נשלחה הבעת עניין ואושרה הדדית! כעת ניתן ליצור את החדר המשותף.'
+        ? `⏳ تم إرسال طلب التوأمة إلى مسؤول ${schoolB.name_ar} — يُنشأ الحيز المشترك فقط بعد موافقة مسؤولي المدرستين.`
+        : `⏳ בקשת השידוך נשלחה לאחראי ב-${schoolB.name_he} — החדר המשותף ייפתח רק לאחר אישור האחראים משני בתי הספר.`
     );
     loadSchoolDashboard(sA);
     return;
   }
 
-  if (actionType === 'create_room') {
+  if (actionType === 'cancel' || actionType === 'reject') {
+    store.match_requests = store.match_requests.filter(
+      (q) =>
+        !(
+          (Number(q.from_school_id) === sA && Number(q.to_school_id) === sB) ||
+          (Number(q.from_school_id) === sB && Number(q.to_school_id) === sA)
+        )
+    );
+    saveLocalStore(store);
+    showToast(actionType === 'reject' ? '❌ בקשת השידוך נדחתה.' : '✖ בקשת השידוך בוטלה.');
+    loadSchoolDashboard(sA);
+    return;
+  }
+
+  if (actionType === 'approve_and_create' || actionType === 'create_room') {
+    // Enforce two-school coordinator approval: cannot create room from an unapproved outgoing request
+    if (
+      existingReq &&
+      existingReq.status === 'pending' &&
+      Number(existingReq.from_school_id) === sA &&
+      actionType === 'create_room'
+    ) {
+      showToast('⏳ לא ניתן לפתוח חדר לבד! יש להמתין לאישור האחראי בבית הספר השותף.');
+      return;
+    }
     let room = store.classrooms.find(
       (c) =>
         (c.school_a_id === sA && c.school_b_id === sB) ||
