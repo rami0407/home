@@ -825,6 +825,8 @@ function saveLocalStore(store) {
 const I18N = {
   ar: {
     header_tagline: 'من اللقاء العابر إلى الشراكة المستدامة',
+    nav_home: '🏠 الصفحة الرئيسية',
+    nav_home_back: 'الصفحة الرئيسية',
     nav_vision: 'رؤيتنا',
     nav_goals: 'أهدافنا',
     nav_how: 'كيف نعمل',
@@ -1013,6 +1015,8 @@ const I18N = {
   },
   he: {
     header_tagline: 'ממפגש חולף לשותפות בת-קיימא',
+    nav_home: '🏠 דף הבית',
+    nav_home_back: 'דף הבית',
     nav_vision: 'החזון שלנו',
     nav_goals: 'מטרות הפרויקט',
     nav_how: 'איך זה עובד',
@@ -1299,7 +1303,15 @@ function navigateTo(viewKey, scrollTargetId = null) {
   document.getElementById(`view-${viewKey}`).classList.add('active');
 
   document.querySelectorAll('.main-nav .nav-link').forEach((btn) => btn.classList.remove('active'));
-  const navBtn = document.querySelector(`.main-nav .nav-link[data-nav="${viewKey}"]`);
+  const navKey =
+    scrollTargetId === 'vision-section'
+      ? 'vision'
+      : scrollTargetId === 'goals-section'
+        ? 'goals'
+        : scrollTargetId === 'how-section'
+          ? 'how'
+          : viewKey;
+  const navBtn = document.querySelector(`.main-nav .nav-link[data-nav="${navKey}"]`);
   if (navBtn) navBtn.classList.add('active');
 
   if (scrollTargetId) {

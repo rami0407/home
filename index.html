@@ -58,7 +58,8 @@
 
       <!-- Navigation Links -->
       <nav class="main-nav" aria-label="Main Navigation">
-        <button class="nav-link active" data-nav="landing" onclick="navigateTo('landing', 'vision-section')" data-i18n="nav_vision">رؤيتنا</button>
+        <button class="nav-link active" data-nav="landing" onclick="navigateTo('landing')" data-i18n="nav_home">🏠 الصفحة الرئيسية</button>
+        <button class="nav-link" data-nav="vision" onclick="navigateTo('landing', 'vision-section')" data-i18n="nav_vision">رؤيتنا</button>
         <button class="nav-link" data-nav="goals" onclick="navigateTo('landing', 'goals-section')" data-i18n="nav_goals">أهدافنا</button>
         <button class="nav-link" data-nav="how" onclick="navigateTo('landing', 'how-section')" data-i18n="nav_how">كيف نعمل</button>
         <button class="nav-link" data-nav="students" onclick="navigateTo('students')" data-i18n="nav_students">🧑‍🎓 مساحة الطلاب</button>
@@ -343,6 +344,11 @@
       <div class="portal-hero-bar">
         <div class="container portal-hero-inner">
           <div>
+            <div style="margin-bottom: 10px;">
+              <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.16); color:#fff; border:1px solid rgba(255,255,255,0.35);" onclick="navigateTo('landing')">
+                🏠 <span data-i18n="nav_home_back">الصفحة الرئيسية | דף הבית</span>
+              </button>
+            </div>
             <span class="portal-badge" data-i18n="portal_badge">قسم مدراء المدارس ومركزي التربية الاجتماعية</span>
             <h1 data-i18n="portal_title">بوابة التسجيل والمطابقة الذكية (AI Matching & Manual Selection)</h1>
             <p data-i18n="portal_subtitle">سجّل مدرستك أو اختر إحدى المدارس المسجلة لاستعراض اقتراحات التوأمة الذكية، الفلترة اليدوية، وإنشاء الغرفة المشتركة.</p>
@@ -799,6 +805,11 @@
       <div id="studentLoginGate" class="student-login-wrapper">
         <div class="container">
           <div class="student-login-card">
+            <div style="display:flex; justify-content:flex-start; margin-bottom:10px;">
+              <button type="button" class="btn btn-sm" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;" onclick="navigateTo('landing')">
+                🏠 <span data-i18n="nav_home_back">الصفحة الرئيسية | דף הבית</span>
+              </button>
+            </div>
             <img src="./logo.jpg" alt="شعار بَيْت | בַּיִת" style="width:84px; height:84px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
             <div>
               <span class="login-card-badge">🔒 دخول آمن بدون بيانات حساسة | כניסה בטוחה ללא פרטים רגישים</span>
@@ -896,9 +907,14 @@
         <div class="classroom-banner">
           <div class="container">
             <div class="classroom-banner-top">
-              <div class="classroom-code-pill">
-                <span>🔑</span>
-                <span id="activeRoomCode">BAYT-2026</span>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.16); color:#fff; border:1px solid rgba(255,255,255,0.35);" onclick="navigateTo('landing')">
+                  🏠 <span data-i18n="nav_home_back">الصفحة الرئيسية | דף הבית</span>
+                </button>
+                <div class="classroom-code-pill">
+                  <span>🔑</span>
+                  <span id="activeRoomCode">BAYT-2026</span>
+                </div>
               </div>
               <div class="student-identity-pill">
                 <span>🧑‍🎓</span>
@@ -1194,6 +1210,11 @@
       <div id="adminLoginGate" class="student-login-wrapper">
         <div class="container">
           <div class="student-login-card admin-login-card">
+            <div style="display:flex; justify-content:flex-start; margin-bottom:10px;">
+              <button type="button" class="btn btn-sm" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;" onclick="navigateTo('landing')">
+                🏠 <span data-i18n="nav_home_back">الصفحة الرئيسية | דף הבית</span>
+              </button>
+            </div>
             <img src="./logo.jpg" alt="Bayt Logo" style="width:84px; height:84px; object-fit:contain; margin-bottom:10px; border-radius:16px;" />
             <div>
               <span class="login-card-badge" style="background:var(--gold-100); color:#92400e; border:1px solid var(--gold-500);">
@@ -1237,6 +1258,9 @@
               <p id="adminWelcomeIdentity">מחובר כמנהל האתר</p>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.16); color:#fff; border:1px solid rgba(255,255,255,0.35);" onclick="navigateTo('landing')">
+                🏠 <span data-i18n="nav_home_back">الصفحة الرئيسية | דף הבית</span>
+              </button>
               <button class="btn btn-outline-green btn-sm" style="background:#fff;" onclick="switchAdminSubTab('settings')">
                 ⚙️ שינוי אימייל וקוד אישי | إعدادات حساب المدير
               </button>
@@ -1471,6 +1495,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-  <script src="./app.js?v=18"></script>
+  <script src="./app.js?v=19"></script>
 </body>
 </html>
