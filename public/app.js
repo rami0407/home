@@ -2467,6 +2467,7 @@ function renderClassroomWorkspace() {
       : `${classroom.research_topic_he} | ${classroom.research_topic_ar}`;
 
   document.getElementById('activeRoomSupervisors').textContent = `👩‍🏫 إشراف تربوي مشترك | ליווי פדגוגי: ${classroom.supervisor_ar} 🤝 ${classroom.supervisor_he}`;
+  renderStudentMyGroupBanner(classroom);
 
   renderForumPosts();
   renderResearchDataList();
@@ -3681,7 +3682,7 @@ let activeSchoolHubTab = 'students';
 
 function switchSchoolHubTab(tabKey) {
   activeSchoolHubTab = tabKey;
-  ['students', 'forum', 'projects'].forEach((k) => {
+  ['students', 'groups', 'forum', 'projects'].forEach((k) => {
     const pane = document.getElementById(`hubPane-${k}`);
     const btn = document.getElementById(`hubTabBtn-${k}`);
     if (pane) pane.style.display = k === tabKey ? 'block' : 'none';
@@ -3977,6 +3978,432 @@ function renderSchoolPartnershipHub() {
       `;
     }
   }
+
+  // 4. Render Joint Student Groups (Auto & Manual)
+  renderHubJointGroups(store, school, room, partner);
+}
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getStudentSafeKey(stu, idx) {
+  return String(stu.id || `${stu.name || ''}_${idx}`);
+}
+
+function normalizeTeamLabel(teamStr) {
+  return String(teamStr || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
+function renderHubJointGroups(store, school, room, partner) {
+  const container = document.getElementById('hubGroupsContent');
+  if (!container) return;
+
+  if (!partner || !room) {
+    container.innerHTML = `
+      <div style="background:var(--gold-100); border:1px solid var(--gold-500); border-radius:12px; padding:18px; color:#92400e;">
+        <strong>🔒 المجموعات المشتركة مغلقة حتى اختيار المدرسة الشريكة | הקבוצות המשותפות ייפתחו לאחר בחירת בית הספר השותף</strong>
+        <p style="margin:6px 0 0; font-size:0.9rem;">
+          بعد إدخال طلاب مدرستك واختيار المدرسة الشريكة، ستتمكن من تقسيم الطلاب إلى مجموعات عمل مشتركة بين المدرستين تلقائياً أو يدوياً.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  const myStudents = Array.isArray(school.students) ? school.students : [];
+  const partnerStudents = Array.isArray(partner.students) ? partner.students : [];
+  const groups = Array.isArray(room.joint_groups) ? room.joint_groups : [];
+
+  // Track which students are already assigned to at least one group
+  const assignedKeys = new Set();
+  groups.forEach((g) => {
+    (g.members || []).forEach((m) => {
+      assignedKeys.add(`${m.school_id}:${m.student_key}`);
+    });
+  });
+
+  const renderPickerList = (studentsList, ownerSchool) => {
+    if (studentsList.length === 0) {
+      return `<p style="font-size:0.84rem; color:var(--text-muted); margin:6px 0;">لا يوجد طلاب مسجلون بعد في ${ownerSchool.name_ar}.</p>`;
+    }
+    return studentsList
+      .map((stu, idx) => {
+        const sKey = getStudentSafeKey(stu, idx);
+        const isAssigned = assignedKeys.has(`${ownerSchool.id}:${sKey}`);
+        const teamText = stu.team ? ` • ${stu.team}` : '';
+        return `
+          <label class="student-picker-item">
+            <input type="checkbox" class="manual-group-stu-cb" data-school-id="${ownerSchool.id}" data-student-key="${sKey}" data-student-name="${escapeHtml(stu.name)}" data-student-grade="${escapeHtml(stu.grade || '')}" data-student-team="${escapeHtml(stu.team || '')}" />
+            <span>
+              <strong>${escapeHtml(stu.name)}</strong>
+              <span style="color:var(--text-muted); font-size:0.8rem;">(${escapeHtml(stu.grade || '-')}${escapeHtml(teamText)})</span>
+              ${isAssigned ? '<span style="background:#dcfce7; color:#166534; font-size:0.72rem; padding:1px 6px; border-radius:999px; margin-inline-start:4px;">في مجموعة</span>' : ''}
+            </span>
+          </label>
+        `;
+      })
+      .join('');
+  };
+
+  container.innerHTML = `
+    <div class="hub-privacy-note" style="margin-bottom:16px;">
+      🤝 <strong>بناء المجموعات المشتركة بين المدرستين | בניית קבוצות משותפות:</strong>
+      تظهر هنا أسماء الطلاب والصف والفريق فقط (بدون أرقام الهوية) للحفاظ على الخصوصية الكاملة. يمكنك التقسيم <strong>تلقائياً</strong> أو <strong>يدوياً</strong> وتعديل أي مجموعة لاحقاً.
+    </div>
+
+    <div class="groups-builder-grid">
+      <!-- Option 1: Automatic Balanced Grouping -->
+      <div class="groups-builder-card auto-card">
+        <h4 style="color:var(--navy-900); margin:0 0 8px;">⚡ 1. التقسيم التلقائي الذكي | חלוקה אוטומטית</h4>
+        <p style="font-size:0.86rem; color:var(--text-muted); margin:0 0 12px;">
+          يوزع النظام طلاب <strong>${escapeHtml(school.name_ar)}</strong> (${myStudents.length} طالب) وطلاب <strong>${escapeHtml(partner.name_ar)}</strong> (${partnerStudents.length} طالب) في مجموعات متوازنة.
+        </p>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:0.86rem;">عدد الطلاب من كل مدرسة في المجموعة الواحدة:</label>
+          <select id="autoGroupPerSchoolCount">
+            <option value="1">1 من كل مدرسة (أزواج ثنائية | 2 طلاب)</option>
+            <option value="2" selected>2 من كل مدرسة (مجموعة رباعية | 4 طلاب)</option>
+            <option value="3">3 من كل مدرسة (مجموعة من 6 طلاب)</option>
+            <option value="4">4 من كل مدرسة (مجموعة من 8 طلاب)</option>
+            <option value="5">5 من كل مدرسة (مجموعة من 10 طلاب)</option>
+          </select>
+        </div>
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; margin-bottom:14px; cursor:pointer;">
+          <input type="checkbox" id="autoGroupMatchByTeam" checked />
+          <span>مطابقة الطلاب ذوي الفريق/المجال المتشابه معاً أولاً</span>
+        </label>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-blue" onclick="autoGenerateJointGroups(${room.id})">
+            ⚡ إنشاء المجموعات تلقائياً | צור אוטומטית
+          </button>
+          ${
+            groups.length > 0
+              ? `<button type="button" class="btn btn-sm" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;" onclick="clearAllJointGroups(${room.id})">🗑️ مسح الكل</button>`
+              : ''
+          }
+        </div>
+      </div>
+
+      <!-- Option 2: Manual Grouping -->
+      <div class="groups-builder-card">
+        <h4 style="color:var(--navy-900); margin:0 0 8px;">✍️ 2. بناء مجموعة يدوياً | בניית קבוצה ידנית</h4>
+        <div class="form-grid-2" style="gap:10px; margin-bottom:10px;">
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:0.84rem;">اسم المجموعة | שם הקבוצה *</label>
+            <input type="text" id="manualGroupNameInput" placeholder="مثلاً: مجموعة 1 – جودة المياه" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:0.84rem;">موضوع / مهمة المجموعة | נושא (اختياري)</label>
+            <input type="text" id="manualGroupTopicInput" placeholder="مثلاً: فحص عينات الينابيع" />
+          </div>
+        </div>
+        <div class="manual-group-picker-grid">
+          <div>
+            <div style="font-size:0.82rem; font-weight:700; color:var(--navy-900); margin-bottom:4px;">🏫 ${escapeHtml(school.name_ar)}</div>
+            <div class="student-picker-box">${renderPickerList(myStudents, school)}</div>
+          </div>
+          <div>
+            <div style="font-size:0.82rem; font-weight:700; color:var(--green-800); margin-bottom:4px;">🏫 ${escapeHtml(partner.name_ar)}</div>
+            <div class="student-picker-box">${renderPickerList(partnerStudents, partner)}</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-green" onclick="createManualJointGroup(${room.id})">
+          ➕ اعتماد المجموعة اليدوية | צור קבוצה ידנית
+        </button>
+      </div>
+    </div>
+
+    <h4 style="color:var(--navy-900); margin:0 0 12px;">
+      📋 المجموعات المشتركة المعتمدة (${groups.length}) | הקבוצות המשותפות (${groups.length})
+    </h4>
+    ${
+      groups.length === 0
+        ? `<div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:12px; padding:18px; text-align:center; color:var(--text-muted);">
+             لم يتم إنشاء مجموعات مشتركة بعد. استخدم <strong>التقسيم التلقائي</strong> أو <strong>البناء اليدوي</strong> أعلاه.
+           </div>`
+        : `<div class="joint-groups-list">
+             ${groups
+               .map((grp) => {
+                 const membersA = (grp.members || []).filter((m) => Number(m.school_id) === Number(school.id));
+                 const membersB = (grp.members || []).filter((m) => Number(m.school_id) === Number(partner.id));
+                 const renderMemberChips = (list, ownerId) =>
+                   list.length === 0
+                     ? '<div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">لا يوجد أعضاء بعد</div>'
+                     : list
+                         .map(
+                           (m) => `
+                         <div class="joint-member-chip">
+                           <span><strong>${escapeHtml(m.name)}</strong> <small style="color:var(--text-muted);">(${escapeHtml(m.grade || '-')}${m.team ? ' • ' + escapeHtml(m.team) : ''})</small></span>
+                           <button type="button" title="إزالة من المجموعة" style="background:none; border:none; color:#dc2626; cursor:pointer; font-weight:900; padding:0 4px;" onclick="removeMemberFromJointGroup(${room.id}, '${grp.id}', ${ownerId}, '${m.student_key}')">×</button>
+                         </div>
+                       `
+                         )
+                         .join('');
+
+                 return `
+                   <div class="joint-group-card">
+                     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                       <div>
+                         <div style="font-weight:900; color:var(--navy-900); font-size:1rem;">👥 ${escapeHtml(grp.name)}</div>
+                         ${grp.topic ? `<div style="font-size:0.82rem; color:var(--green-800); margin-top:2px;">🔬 ${escapeHtml(grp.topic)}</div>` : ''}
+                       </div>
+                       <button type="button" class="btn btn-sm" style="background:#fee2e2; color:#991b1b; padding:4px 8px; font-size:0.76rem;" onclick="deleteJointGroup(${room.id}, '${grp.id}')">🗑️ حذف</button>
+                     </div>
+                     <div class="joint-group-columns">
+                       <div class="joint-group-school-col">
+                         <div style="font-size:0.78rem; font-weight:800; color:var(--navy-900);">🏫 ${escapeHtml(school.name_ar)} (${membersA.length})</div>
+                         ${renderMemberChips(membersA, school.id)}
+                       </div>
+                       <div class="joint-group-school-col">
+                         <div style="font-size:0.78rem; font-weight:800; color:var(--green-800);">🏫 ${escapeHtml(partner.name_ar)} (${membersB.length})</div>
+                         ${renderMemberChips(membersB, partner.id)}
+                       </div>
+                     </div>
+                   </div>
+                 `;
+               })
+               .join('')}
+           </div>`
+    }
+  `;
+}
+
+function autoGenerateJointGroups(roomId) {
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room) return;
+
+  const schoolA = store.schools.find((s) => Number(s.id) === Number(room.school_a_id));
+  const schoolB = store.schools.find((s) => Number(s.id) === Number(room.school_b_id));
+  if (!schoolA || !schoolB) return;
+
+  const listA = (schoolA.students || []).map((stu, idx) => ({
+    school_id: schoolA.id,
+    student_key: getStudentSafeKey(stu, idx),
+    name: stu.name,
+    grade: stu.grade || '',
+    team: stu.team || ''
+  }));
+  const listB = (schoolB.students || []).map((stu, idx) => ({
+    school_id: schoolB.id,
+    student_key: getStudentSafeKey(stu, idx),
+    name: stu.name,
+    grade: stu.grade || '',
+    team: stu.team || ''
+  }));
+
+  if (listA.length === 0 || listB.length === 0) {
+    showToast('⚠️ يجب أن تُدخل كلتا المدرستين أسماء طلابها أولاً قبل التقسيم التلقائي.');
+    return;
+  }
+
+  const perSchool = Math.max(1, Math.min(5, Number(document.getElementById('autoGroupPerSchoolCount')?.value || 2)));
+  const matchByTeam = Boolean(document.getElementById('autoGroupMatchByTeam')?.checked);
+
+  const poolA = [...listA];
+  const poolB = [...listB];
+
+  if (matchByTeam) {
+    poolA.sort((x, y) => normalizeTeamLabel(x.team).localeCompare(normalizeTeamLabel(y.team)));
+    poolB.sort((x, y) => normalizeTeamLabel(x.team).localeCompare(normalizeTeamLabel(y.team)));
+  }
+
+  const totalGroups = Math.max(
+    1,
+    Math.ceil(Math.max(poolA.length, poolB.length) / perSchool)
+  );
+
+  const newGroups = Array.from({ length: totalGroups }, (_, idx) => ({
+    id: `grp_${Date.now()}_${idx + 1}`,
+    name: `المجموعة المشتركة ${idx + 1} | קבוצה משותפת ${idx + 1}`,
+    topic: room.research_topic_ar || '',
+    created_by_school_id: activeDashboardSchool ? activeDashboardSchool.id : schoolA.id,
+    created_at: new Date().toISOString(),
+    members: []
+  }));
+
+  // First pass: if matching by team, place students with matching team labels into the same group when possible
+  if (matchByTeam) {
+    const usedB = new Set();
+    let groupCursor = 0;
+    for (let i = poolA.length - 1; i >= 0; i--) {
+      const stuA = poolA[i];
+      const normA = normalizeTeamLabel(stuA.team);
+      if (!normA) continue;
+      const matchIdx = poolB.findIndex((stuB, bIdx) => {
+        if (usedB.has(bIdx)) return false;
+        const normB = normalizeTeamLabel(stuB.team);
+        return normB && (normA === normB || normA.includes(normB) || normB.includes(normA));
+      });
+      if (matchIdx !== -1) {
+        const targetGrp = newGroups[groupCursor % totalGroups];
+        targetGrp.members.push(stuA, poolB[matchIdx]);
+        if (stuA.team && !targetGrp.name.includes('—')) {
+          targetGrp.topic = `${stuA.team}`;
+        }
+        poolA.splice(i, 1);
+        usedB.add(matchIdx);
+        groupCursor++;
+      }
+    }
+    const remainingB = poolB.filter((_, idx) => !usedB.has(idx));
+    poolB.length = 0;
+    poolB.push(...remainingB);
+  }
+
+  // Second pass: round-robin distribute all remaining students from both schools evenly
+  poolA.forEach((stuA, idx) => {
+    const target = newGroups.reduce((minG, g) => {
+      const countG = g.members.filter((m) => Number(m.school_id) === Number(schoolA.id)).length;
+      const countMin = minG.members.filter((m) => Number(m.school_id) === Number(schoolA.id)).length;
+      return countG < countMin ? g : minG;
+    }, newGroups[idx % totalGroups]);
+    target.members.push(stuA);
+  });
+
+  poolB.forEach((stuB, idx) => {
+    const target = newGroups.reduce((minG, g) => {
+      const countG = g.members.filter((m) => Number(m.school_id) === Number(schoolB.id)).length;
+      const countMin = minG.members.filter((m) => Number(m.school_id) === Number(schoolB.id)).length;
+      return countG < countMin ? g : minG;
+    }, newGroups[idx % totalGroups]);
+    target.members.push(stuB);
+  });
+
+  room.joint_groups = newGroups.filter((g) => g.members.length > 0);
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast(`⚡ تم إنشاء ${room.joint_groups.length} مجموعات مشتركة تلقائياً وبشكل متوازن!`);
+}
+
+function createManualJointGroup(roomId) {
+  const name = (document.getElementById('manualGroupNameInput')?.value || '').trim();
+  const topic = (document.getElementById('manualGroupTopicInput')?.value || '').trim();
+  const checkedBoxes = Array.from(document.querySelectorAll('.manual-group-stu-cb:checked'));
+
+  if (!name) {
+    showToast('⚠️ يُرجى كتابة اسم المجموعة أولاً.');
+    return;
+  }
+  if (checkedBoxes.length === 0) {
+    showToast('⚠️ اختر طالباً واحداً على الأقل من المدرستين.');
+    return;
+  }
+
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room) return;
+
+  if (!Array.isArray(room.joint_groups)) room.joint_groups = [];
+
+  const members = checkedBoxes.map((cb) => ({
+    school_id: Number(cb.dataset.schoolId),
+    student_key: cb.dataset.studentKey,
+    name: cb.dataset.studentName,
+    grade: cb.dataset.studentGrade,
+    team: cb.dataset.studentTeam
+  }));
+
+  room.joint_groups.push({
+    id: `grp_${Date.now()}`,
+    name,
+    topic,
+    created_by_school_id: activeDashboardSchool ? activeDashboardSchool.id : room.school_a_id,
+    created_at: new Date().toISOString(),
+    members
+  });
+
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast(`✅ تم إنشاء المجموعة اليدوية "${name}" (${members.length} طلاب).`);
+}
+
+function removeMemberFromJointGroup(roomId, groupId, schoolId, studentKey) {
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room || !Array.isArray(room.joint_groups)) return;
+
+  const grp = room.joint_groups.find((g) => g.id === groupId);
+  if (!grp) return;
+
+  grp.members = (grp.members || []).filter(
+    (m) => !(Number(m.school_id) === Number(schoolId) && String(m.student_key) === String(studentKey))
+  );
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast('🗑️ تم إزالة الطالب من المجموعة.');
+}
+
+function deleteJointGroup(roomId, groupId) {
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room || !Array.isArray(room.joint_groups)) return;
+
+  room.joint_groups = room.joint_groups.filter((g) => g.id !== groupId);
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast('🗑️ تم حذف المجموعة.');
+}
+
+function clearAllJointGroups(roomId) {
+  const store = getLocalStore();
+  const room = store.classrooms.find((c) => Number(c.id) === Number(roomId));
+  if (!room) return;
+  room.joint_groups = [];
+  saveLocalStore(store);
+  renderSchoolPartnershipHub();
+  showToast('🗑️ تم مسح جميع المجموعات المشتركة.');
+}
+
+function renderStudentMyGroupBanner(classroom) {
+  const banner = document.getElementById('studentMyGroupBanner');
+  if (!banner || !activeStudentSession) return;
+
+  const groups = Array.isArray(classroom.joint_groups) ? classroom.joint_groups : [];
+  const stuSchoolId = Number(activeStudentSession.school_id);
+  const stuName = String(activeStudentSession.name || '').trim();
+
+  const myGroup = groups.find((g) =>
+    (g.members || []).some(
+      (m) => Number(m.school_id) === stuSchoolId && String(m.name || '').trim() === stuName
+    )
+  );
+
+  if (!myGroup) {
+    banner.innerHTML = groups.length
+      ? `<div class="student-my-group-banner">👥 لم يتم ضمّك لمجموعة مشتركة بعد — يمكنك المشاركة في الساحة العامة ريثما يوزّعك مركّز المدرسة.</div>`
+      : '';
+    return;
+  }
+
+  const store = getLocalStore();
+  const membersHtml = (myGroup.members || [])
+    .map((m) => {
+      const sch = store.schools.find((s) => Number(s.id) === Number(m.school_id));
+      const schName = sch ? (currentLang === 'ar' ? sch.name_ar : sch.name_he) : '';
+      return `<span style="background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:999px; font-size:0.82rem;">🧑‍🎓 ${escapeHtml(m.name)} (${escapeHtml(schName)})</span>`;
+    })
+    .join(' ');
+
+  banner.innerHTML = `
+    <div class="student-my-group-banner">
+      <div style="font-weight:900; margin-bottom:6px;">
+        👥 مجموعتك المشتركة | הקבוצה המשותפת שלך: ${escapeHtml(myGroup.name)}
+        ${myGroup.topic ? `<span style="font-weight:500; opacity:0.92;"> — 🔬 ${escapeHtml(myGroup.topic)}</span>` : ''}
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">${membersHtml}</div>
+    </div>
+  `;
 }
 
 function addSchoolStudent(e) {
