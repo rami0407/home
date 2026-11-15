@@ -44,6 +44,8 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -53,6 +55,7 @@ body {
   line-height: 1.7;
   font-size: 16px;
   overflow-x: hidden;
+  max-width: 100%;
   position: relative;
 }
 
@@ -3075,5 +3078,267 @@ textarea:focus {
     grid-column: span 1;
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* ==========================================================
+   MOBILE & SMARTPHONE RESPONSIVE OPTIMIZATIONS (<= 768px)
+   ========================================================== */
+.admin-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 14px;
+  }
+
+  /* Compact Sticky Header + Swipeable Single-Row Nav */
+  .header-inner {
+    padding: 8px 0;
+    gap: 8px;
+    min-height: auto;
+    justify-content: space-between;
+  }
+
+  .brand-logo {
+    order: 1;
+    gap: 8px;
+  }
+
+  .site-logo-img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .brand-title {
+    font-size: 1.2rem;
+  }
+
+  .brand-ar {
+    font-size: 1.35rem;
+  }
+
+  .brand-he {
+    font-size: 1.2rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.68rem;
+  }
+
+  .header-actions {
+    order: 2;
+  }
+
+  .lang-switch-btn {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 5px;
+    gap: 6px;
+    scrollbar-width: none;
+  }
+
+  .main-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    padding: 7px 12px;
+  }
+
+  /* Top Welcome Bar */
+  .top-welcome-inner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .welcome-school-greeting {
+    justify-content: center;
+    font-size: 0.84rem;
+  }
+
+  .welcome-school-actions {
+    justify-content: center;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    padding: 24px 0 34px;
+  }
+
+  .hero-grid {
+    gap: 22px;
+  }
+
+  .hero-brand-highlight {
+    font-size: 1.95rem;
+  }
+
+  .hero-quote-text {
+    font-size: 1.2rem;
+    line-height: 1.45;
+  }
+
+  .hero-lead {
+    font-size: 0.96rem;
+  }
+
+  .hero-quick-highlights {
+    gap: 8px;
+  }
+
+  .mini-pill {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  .house-showcase-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .hero-main-logo {
+    width: 120px;
+    height: 120px;
+  }
+
+  .hero-news-feed {
+    max-height: 260px;
+  }
+
+  /* Sections, Cards & Forms */
+  .section-block,
+  .section-padding {
+    padding: 28px 0;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .student-login-card,
+  .form-card,
+  .school-hub-card,
+  .admin-panel-card,
+  .matching-controls-card,
+  .composer-card,
+  .current-school-card,
+  .match-card {
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+
+  .portal-hero-bar {
+    padding: 24px 0;
+  }
+
+  .portal-hero-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .portal-mode-tabs,
+  .school-hub-tabs,
+  .workspace-tabs,
+  .admin-subtabs-bar {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .portal-tab-btn,
+  .school-hub-tab,
+  .ws-tab,
+  .admin-subtab {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    min-height: 44px;
+  }
+
+  .inline-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inline-inputs > * {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Prevent iOS auto-zoom on form inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .btn-lg {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 16px;
+    font-size: 0.96rem;
+  }
+
+  .checkbox-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .active-school-bar,
+  .classroom-banner-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .classroom-partnership-title {
+    font-size: 1.3rem;
+  }
+
+  .admin-schools-table {
+    min-width: 560px;
+  }
+
+  .toast-notification {
+    left: 12px;
+    right: 12px;
+    bottom: 14px;
+    text-align: center;
+    font-size: 0.86rem;
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand-subtitle {
+    display: none;
+  }
+
+  .stats-grid {
+    gap: 12px;
+  }
+
+  .stat-value {
+    font-size: 1.9rem;
   }
 }
